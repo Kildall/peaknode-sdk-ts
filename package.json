@@ -1,0 +1,36 @@
+{
+  "name": "@kildall/peaknode-sdk-ts",
+  "version": "0.1.0",
+  "description": "TypeScript client for the Peaknode Proof of Reserves API (generated from the OpenAPI spec).",
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@10.11.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "VERSION"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "generate": "openapi-ts"
+  },
+  "devDependencies": {
+    "@hey-api/client-fetch": "0.13.1",
+    "@hey-api/openapi-ts": "0.97.3",
+    "prettier": "^3.0.0",
+    "typescript": "~5.6.0"
+  }
+}
