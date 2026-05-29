@@ -1,6 +1,6 @@
 {
   "name": "@kildall/peaknode-sdk-ts",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TypeScript client for the Peaknode Proof of Reserves API (generated from the OpenAPI spec).",
   "license": "MIT",
   "type": "module",
