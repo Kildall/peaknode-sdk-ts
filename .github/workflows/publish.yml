@@ -1,0 +1,40 @@
+name: Publish
+
+# Publishes @kildall/peaknode-sdk-ts to npm on a version tag via npm trusted
+# publishing (OIDC) — no NPM_TOKEN. Provenance is generated automatically
+# (public repo + public package).
+#
+# PREREQUISITE (one-time): the package must exist on npm AND a trusted
+# publisher must be configured at npmjs.com for this repo
+# (Kildall/peaknode-sdk-ts) + workflow file `publish.yml`. The first release is
+# published manually (npm login + npm publish); configure the trusted publisher
+# afterwards, then tag-driven releases run here token-free.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # required for OIDC trusted publishing
+
+jobs:
+  publish:
+    name: Publish to npm (OIDC)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Upgrade npm to an OIDC-capable version (>= 11.5.1)
+        run: npm install -g npm@latest
+      - name: Install
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Publish
+        run: npm publish
