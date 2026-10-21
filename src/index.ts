@@ -7,8 +7,8 @@
 // The ./generated tree is produced from the OpenAPI spec — never hand-edit it.
 
 // All SDK functions + request/response types.
-export * from './generated';
+export * from './generated/index.js';
 
 // The configurable runtime client instance. Consumers that configure the
 // client (baseUrl, interceptors, etc.) import it from here.
-export { client } from './generated/client.gen';
+export { client } from './generated/client.gen.js';

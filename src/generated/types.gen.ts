@@ -15,24 +15,25 @@ export type AcceptedMessage = {
   message?: string;
 };
 
-export type AddAssetRequest = {
-  address?: string;
-  asset_type?: string;
-  balance?: string;
-  blockchain?: string;
-  chain_id?: string;
-  proofID?: string;
-  symbol?: string;
-  token_id?: string;
-  usd_value?: string;
-};
-
 export type AddCommentBody = {
   comment?: string;
 };
 
+export type AnchorResponse = {
+  block_time?: string;
+  chain_id?: string;
+  error?: string;
+  hash?: string;
+  number?: number;
+  provider_id?: string;
+  rule?: string;
+  status?: 'anchored' | 'failed';
+};
+
 export type ApiKeyListItem = {
+  allowed_ips?: Array<string>;
   created_at?: string;
+  created_by_user_id?: string;
   expires_at?: string;
   id?: string;
   key_kind?: string;
@@ -41,6 +42,7 @@ export type ApiKeyListItem = {
   name?: string;
   organization_id?: string;
   prefix?: string;
+  purpose?: string;
   revoked_at?: string;
   role_id?: string;
   service_user_id?: string;
@@ -57,6 +59,11 @@ export type AppError = {
    * Client-facing message
    */
   public?: string;
+};
+
+export type AppliedEquivalence = {
+  canonical_catalog_entry_id?: string;
+  member_catalog_entry_id?: string;
 };
 
 export type ApprovalClient = {
@@ -78,22 +85,686 @@ export type ApprovalUser = {
   email?: string;
 };
 
-export type AssetResponse = {
-  address?: string;
-  asset_type?: string;
+export type ArtifactResponse = {
+  name?: string;
+  sha256?: string;
+  size?: number;
+  url?: string;
+};
+
+export type AssetCandidateResponse = {
+  catalog_entry_id?: string;
+  chain_name?: string;
+  contract?: string;
+  decimals?: number;
+  name?: string;
+  native_chain_id?: string;
+};
+
+export type AssetPlan = {
+  catalog_entry_id?: string;
+  coarse?: boolean;
+  sources?: Array<SourcePlan>;
+  symbol?: string;
+};
+
+export type AssetPointResponse = {
+  as_of?: string;
   balance?: string;
-  block_height?: number;
-  blockchain?: string;
-  chain_id?: string;
-  created_at?: string;
-  error_msg?: string;
-  id?: string;
-  last_updated?: string;
+  failed_count?: number;
+  price_usd?: string;
   proof_of_funds_id?: string;
   status?: string;
+  value_usd?: string;
+};
+
+export type AssetPriceResponse = {
+  catalog_entry_id?: string;
+  conversion_currency?: string;
+  conversion_rate?: string;
+  dispersion?: string;
+  fixed_by_policy?: boolean;
+  price_usd?: string;
+  quorum_met?: boolean;
+  quotes?: Array<PriceQuoteResponse>;
+  reasons?: Array<Reason>;
+  sources_included?: number;
+  sources_stale?: number;
+  steps?: Array<Step>;
   symbol?: string;
-  token_id?: string;
-  usd_value?: string;
+};
+
+export type AssetResolutionResponse = {
+  /**
+   * Candidates lists what a conflict can resolve to. Only a read of one set fills it, and
+   * only for a conflict row.
+   */
+  candidates?: Array<AssetCandidateResponse>;
+  catalog_entry_id?: string;
+  created_at?: string;
+  decimals?: number;
+  id?: string;
+  liability_set_id?: string;
+  native_chain_id?: string;
+  status?: string;
+  symbol?: string;
+  updated_at?: string;
+};
+
+export type AssetTotalResponse = {
+  balance?: string;
+  catalog_entry_id?: string;
+  chain_id?: string;
+  contract_address?: string;
+  decimals?: number;
+  failed_count?: number;
+  holding_count?: number;
+  name?: string;
+  price_usd?: string;
+  symbol?: string;
+  token_type?: string;
+  value_usd?: string;
+  wallets_holding?: number;
+};
+
+export type AssignRoleRequest = {
+  role_id: string;
+  userID?: string;
+};
+
+export type AssignRoleResponse = {
+  message?: string;
+};
+
+export type AssignSignerInput = {
+  email?: string;
+  expected_address?: string;
+  user_id?: string;
+};
+
+export type AssignSignersRequest = {
+  /**
+   * min=1: at least one signer must be supplied (supersedes the old manual
+   * len==0 guard). Per-element address shape is normalized + checked in the
+   * handler (isEOAAddress), so no dive/eth_addr tag here — the handler trims
+   * and lowercases before validating, which a struct-tag rule cannot do.
+   */
+  signers?: Array<AssignSignerInput>;
+};
+
+export type AssignedSignerResponse = {
+  created_at?: string;
+  /**
+   * SIGN-01
+   */
+  decline_reason?: string;
+  /**
+   * SIGN-01
+   */
+  declined_at?: string;
+  email?: string;
+  expected_address?: string;
+  id?: string;
+  notified_at?: string;
+  organization_id?: string;
+  proof_of_ownership_id?: string;
+  reminded_at?: string;
+  /**
+   * Gap C: when the matching owner key signed
+   */
+  signed_at?: string;
+  /**
+   * Gap D: who submitted the signature
+   */
+  signed_by_user_id?: string;
+  status?: string;
+  updated_at?: string;
+  user_id?: string;
+  wallet_id?: string;
+};
+
+export type AttestationDetailResponse = {
+  kind?: string;
+  pillar?: PillarDetailResponse;
+  reserves?: ReservesDetailResponse;
+};
+
+export type AttestationResponse = {
+  /**
+   * AssetCount is the number of asset partitions in a liabilities commitment;
+   * omitted for the other sources.
+   */
+  asset_count?: number;
+  chains?: Array<string>;
+  created_at?: string;
+  /**
+   * Holdings / Liabilities are decimal string values (never floats); nil for the
+   * sources that do not carry that figure.
+   */
+  holdings?: string;
+  id?: string;
+  liabilities?: string;
+  organization_id?: string;
+  /**
+   * OrganizationName is the tenant display name. nil for a soft-deleted
+   * org, the row still appears (LEFT JOIN tolerance), rendered "(deleted org)".
+   */
+  organization_name?: string;
+  status?: string;
+  type?: string;
+  /**
+   * ValuationID is the valuation behind the row's USD figures: set on reserves
+   * and funds rows, omitted for ownership and liabilities rows.
+   */
+  valuation_id?: string;
+  /**
+   * Verdict is present only on reserves rows; the three pillar types are
+   * verdict-less (RES-06).
+   */
+  verdict?: string;
+};
+
+export type AuditActorResponse = {
+  id?: string | null;
+  kind?: 'user' | 'api_key' | 'oauth_client' | 'support' | 'system';
+  name?: string;
+  via?: string;
+};
+
+export type AuditAuditLogResponse = {
+  action?: string;
+  actor?: AuditActorResponse;
+  actor_type?: string;
+  after_state?: {
+    [key: string]: unknown;
+  };
+  api_key_id?: string | null;
+  before_state?: {
+    [key: string]: unknown;
+  };
+  created_at?: string;
+  details?: {
+    [key: string]: unknown;
+  } | null;
+  id?: string;
+  ip_address?: string;
+  is_platform_admin_bypass?: boolean;
+  oauth_client_id?: string | null;
+  organization_id?: string;
+  request_id?: string;
+  resource?: string;
+  resource_id?: string;
+  target_user_id?: string;
+  user_agent?: string;
+  user_id?: string;
+};
+
+export type AuditAuditLogSummaryResponse = {
+  action?: string;
+  actor?: AuditActorResponse;
+  actor_type?: string;
+  api_key_id?: string | null;
+  created_at?: string;
+  details?: {
+    [key: string]: unknown;
+  } | null;
+  id?: string;
+  ip_address?: string;
+  is_platform_admin_bypass?: boolean;
+  oauth_client_id?: string | null;
+  organization_id?: string;
+  request_id?: string;
+  resource?: string;
+  resource_id?: string;
+  target_user_id?: string;
+  user_id?: string;
+};
+
+export type AuditEntryResponse = {
+  at?: string;
+  detail?: string;
+  kind?: string;
+  label?: string;
+  tone?: string;
+};
+
+export type AuditLogResponse = {
+  action?: string;
+  actor?: AuditActorResponse;
+  actor_type?: string;
+  after_state?: {
+    [key: string]: unknown;
+  };
+  api_key_id?: string | null;
+  before_state?: {
+    [key: string]: unknown;
+  };
+  created_at?: string;
+  details?: {
+    [key: string]: unknown;
+  } | null;
+  id?: string;
+  ip_address?: string;
+  is_platform_admin_bypass?: boolean;
+  oauth_client_id?: string | null;
+  organization_id?: string;
+  request_id?: string;
+  resource?: string;
+  resource_id?: string;
+  target_user_id?: string;
+  user_agent?: string;
+  user_id?: string;
+};
+
+export type AuditLogSummaryResponse = {
+  action?: string;
+  actor?: AuditActorResponse;
+  actor_type?: string;
+  api_key_id?: string | null;
+  created_at?: string;
+  details?: {
+    [key: string]: unknown;
+  } | null;
+  id?: string;
+  ip_address?: string;
+  is_platform_admin_bypass?: boolean;
+  oauth_client_id?: string | null;
+  organization_id?: string;
+  request_id?: string;
+  resource?: string;
+  resource_id?: string;
+  target_user_id?: string;
+  user_id?: string;
+};
+
+export type AuthMeResponse = {
+  email?: string;
+  /**
+   * Profile fields: display name and MFA status.
+   */
+  first_name?: string;
+  /**
+   * Active permission grants in the active organization; never null.
+   */
+  grants?: Array<MeGrant>;
+  is_platform_admin?: boolean;
+  last_name?: string;
+  mfa_enabled?: boolean;
+  /**
+   * MFARequired is true when the user may not turn MFA off: a platform admin,
+   * or a member of an active organization that requires it.
+   */
+  mfa_required?: boolean;
+  /**
+   * nil if user has no active org
+   */
+  organization?: OrganizationRef;
+  /**
+   * legacy: kept for back-compat
+   */
+  organization_id?: string;
+  /**
+   * Permissions granted to the authenticated user.
+   */
+  permissions?: Array<string>;
+  /**
+   * Role held in the active organization; null without one.
+   */
+  role?: MeRole | null;
+  status?: string;
+  user_id?: string;
+};
+
+export type AuthorizeSessionRequest = {
+  query: string;
+};
+
+export type AuthorizeSessionResponse = {
+  consent_id?: string;
+  redirect_to?: string;
+  switch_organization?: ConsentOrgOption;
+};
+
+export type BalanceCheckAsset = {
+  balance?: string;
+  catalog_entry_id?: string;
+  reason?: string;
+  symbol?: string;
+  valid?: boolean;
+};
+
+export type BalanceCheckRequest = {
+  bundles?: Array<Bundle>;
+};
+
+export type BalanceCheckResponse = {
+  assets?: Array<BalanceCheckAsset>;
+};
+
+export type BalanceFailedAsset = {
+  catalog_entry_id?: string;
+  symbol?: string;
+};
+
+export type BalanceFailedResponse = {
+  failed?: Array<BalanceFailedAsset>;
+  status?: 'failed';
+};
+
+export type BalanceRequest = {
+  nonce?: string;
+};
+
+export type BalanceResponse = {
+  bundles?: Array<{
+    [key: string]: unknown;
+  }>;
+  manifest_hash?: string;
+  status?: 'ready' | 'generating';
+};
+
+export type BatchItemResponse = {
+  /**
+   * ExcludeReason is why this wallet was excluded from the batch — an operator
+   * exclusion (SIGN-04) or a per-wallet issuance-validation skip (MSQA-16, the
+   * reason carries the wallet's label). Present only when status == "excluded".
+   */
+  exclude_reason?: string;
+  /**
+   * distinct valid signers this ceremony
+   */
+  got?: number;
+  /**
+   * required threshold (M)
+   */
+  need?: number;
+  proof_id?: string;
+  signers?: Array<BatchSignerStateResponse>;
+  status?: string;
+  threshold_met?: boolean;
+  wallet_id?: string;
+};
+
+export type BatchResponse = {
+  batch_id?: string;
+  items?: Array<BatchItemResponse>;
+  job_id?: string;
+  status?: string;
+  total_items?: number;
+  verified_items?: number;
+};
+
+export type BatchSignerStateResponse = {
+  decline_reason?: string;
+  expected_address?: string;
+  /**
+   * RemindedAt is the last time this signer was reminded (U-22/U-52), rehydrated so
+   * the batch UI derives the disabled "Reminded" state from server truth rather than
+   * session-local state. nil until the first successful reminder.
+   */
+  reminded_at?: string;
+  status?: string;
+};
+
+export type BatchVerifyBlockedResponse = {
+  /**
+   * Batch is the same live projection GET /ownership/batch/{id} returns, so the
+   * blocker UI can render per-wallet detail without a second request.
+   */
+  batch?: BatchResponse;
+  batch_id?: string;
+  excluded_items?: number;
+  message?: string;
+  met_items?: number;
+  pending_items?: number;
+  status?: string;
+  total_items?: number;
+};
+
+export type BlockedChallengeResponse = {
+  code?: string;
+  message?: string;
+  renewal_opens_at?: string;
+  valid_until?: string;
+};
+
+export type BulkAssignRoleRequest = {
+  id?: string;
+  user_ids?: Array<string>;
+};
+
+export type BulkAssignRoleResponse = {
+  message?: string;
+};
+
+export type BulkOnboardRequest = {
+  catalog_ids: Array<string>;
+};
+
+export type Bundle = {
+  asset?: BundleAsset;
+  balance?: string;
+  balance_minor?: string;
+  circuit_version?: number;
+  format_version?: number;
+  identity_commitment?: string;
+  leaf_ordinal?: number;
+  manifest_hash?: string;
+  proof?: string;
+  public_inputs?: PublicInputs;
+  srs_id?: string;
+};
+
+export type BundleAsset = {
+  catalog_entry_id?: string;
+  decimals?: number;
+  symbol?: string;
+};
+
+export type CaptureRefusedResponse = {
+  message?: string;
+  plan?: Plan;
+  reasons?: Array<Reason>;
+};
+
+export type CaptureScheduleRequest = {
+  /**
+   * ChainIDs narrow each capture to these chains. Each must hold one of the
+   * organization's active wallets, as its primary chain or as a network
+   * included in runs.
+   */
+  chain_ids?: Array<string>;
+  /**
+   * Cron is a five-field standard cron (minute, hour, day of month, month,
+   * day of week) read in Timezone. Runs must be at least 5 minutes apart.
+   */
+  cron?: string;
+  /**
+   * Enabled pauses the schedule when false.
+   */
+  enabled?: boolean;
+  /**
+   * KeepLast is how many of the schedule's newest captures are kept, 1 to
+   * 1000; 0 or absent takes 30.
+   */
+  keep_last?: number;
+  /**
+   * Timezone is an IANA timezone name.
+   */
+  timezone?: string;
+  /**
+   * TokenIDs narrow each capture to these tokens. Each must be a token of
+   * the organization on a chain the capture reads.
+   */
+  token_ids?: Array<string>;
+};
+
+export type CaptureScheduleResponse = {
+  /**
+   * CatchupLimitedBy is the chain and provider that shorten the window below
+   * an hour, null when nothing does.
+   */
+  catchup_limited_by?: CatchupLimitResponse | null;
+  /**
+   * CatchupWindowSeconds is the catch-up window in seconds.
+   */
+  catchup_window_seconds?: number;
+  chain_ids?: Array<string>;
+  created_at?: string;
+  /**
+   * CreatedBy is the user who created the schedule.
+   */
+  created_by?: string;
+  /**
+   * CreatedByAPIKeyID is the API key that created the schedule.
+   */
+  created_by_api_key_id?: string;
+  cron?: string;
+  enabled?: boolean;
+  id?: string;
+  keep_last?: number;
+  next_runs?: Array<string>;
+  timezone?: string;
+  token_ids?: Array<string>;
+  updated_at?: string;
+};
+
+export type CaptureStartedResponse = {
+  job_id?: string;
+  proof_of_funds_id?: string;
+};
+
+export type CaptureWindowResponse = {
+  earliest_as_of?: string;
+  items?: Array<WindowItemResponse>;
+  limiting?: WindowItemResponse;
+};
+
+export type CatalogEntryBrowseResponse = {
+  chain_id?: string;
+  /**
+   * ChainName is the chain's display name, or its name when it has none.
+   */
+  chain_name?: string;
+  contract_address?: string;
+  created_at?: string;
+  decimals?: number;
+  id?: string;
+  info_providers?: {
+    [key: string]: unknown;
+  };
+  logo_url?: string;
+  name?: string;
+  pricing?: TokenPricing;
+  symbol?: string;
+  token_type?: string;
+  /**
+   * Tracked reports whether the organization already tracks the entry.
+   */
+  tracked?: boolean;
+  updated_at?: string;
+};
+
+export type CatalogEntryResponse = {
+  chain_id?: string;
+  contract_address?: string;
+  created_at?: string;
+  /**
+   * CreatedByOrganizationID is the organization whose custom registration
+   * created the entry, absent for a curated entry.
+   */
+  created_by_organization_id?: string;
+  created_by_organization_name?: string;
+  decimals?: number;
+  /**
+   * Feeds is the entry's feed_mappings rows, the same rows GET
+   * /panel/pricing/feed-mappings returns (the panel's Map-feeds editor reads
+   * that endpoint) and PUT /panel/pricing/feed-mappings/{catalogEntryId}
+   * replaces wholesale. It is never omitted: an unmapped token sends an empty
+   * list, and a failed read fails the request rather than sending one.
+   */
+  feeds?: Array<FeedMappingResponse>;
+  id?: string;
+  info_providers?: {
+    [key: string]: unknown;
+  };
+  /**
+   * Listing is "listed" when every organization can see the entry, or
+   * "unlisted" when only the organizations tracking it can.
+   */
+  listing?: 'listed' | 'unlisted';
+  logo_url?: string;
+  name?: string;
+  /**
+   * Peg is the fiat currency this asset is pegged to (currently only "USD"),
+   * empty when the asset floats.
+   */
+  peg?: string;
+  symbol?: string;
+  /**
+   * TokenType is "native" or "contract". ContractAddress is empty for a native
+   * entry, which has no contract to address.
+   */
+  token_type?: string;
+  /**
+   * TrackingOrganizations is how many organizations have a live token bound
+   * to the entry.
+   */
+  tracking_organizations?: number;
+  updated_at?: string;
+};
+
+export type CatalogListingRequest = {
+  note?: string;
+};
+
+export type CatchupLimitResponse = {
+  chain_id?: string;
+  chain_name?: string;
+  /**
+   * Provider is empty when the chain has no provider that can read past
+   * balances.
+   */
+  provider?: string;
+};
+
+export type ChainHead = {
+  chain?: string;
+  /**
+   * Height and ObservedAt are null when the adapter has no reading for this
+   * chain (no adapter registered, the read failed, or it timed out) -- the
+   * normal failure signal for this route, never a 5xx.
+   */
+  height?: number | null;
+  observed_at?: string | null;
+  state?: 'operational' | 'degraded' | 'down' | 'unknown';
+};
+
+export type ChainLinkResponse = {
+  detail?: string;
+  /**
+   * Key is one of: networks | providers | catalog | pricing | scan_runs.
+   */
+  key?: string;
+  label?: string;
+  /**
+   * Route is the panel route the link deep-links to.
+   */
+  route?: string;
+  /**
+   * Severity is one of: ok | warn | err | unknown.
+   */
+  severity?: string;
+};
+
+export type ChainPlan = {
+  anchor_rule?: string;
+  at_or_before?: string;
+  chain_id?: string;
+  confirmations?: number;
+  provider_id?: string;
+  provider_reason?: string;
+  snapshot_granularity_seconds?: number;
 };
 
 export type ChainResponse = {
@@ -101,6 +772,7 @@ export type ChainResponse = {
   catalog_entry_count?: number;
   created_at?: string;
   display_name?: string;
+  environment?: string;
   id?: string;
   metadata?: {
     [key: string]: unknown;
@@ -110,22 +782,274 @@ export type ChainResponse = {
   protocol_type?: string;
   provider_count?: number;
   status?: string;
+  symbol?: string;
   updated_at?: string;
 };
 
-export type ChangePasswordRequest = {
-  current_password?: string;
-  new_password?: string;
+export type ChallengeResponse = {
+  created_at?: string;
+  expires_at?: string;
+  id?: string;
+  message?: string;
+  proof_of_ownership_id?: string;
+  /**
+   * SignerAddress is the Safe owner the challenge is scoped to; null for a single-key proof.
+   */
+  signer_address?: string;
 };
 
-export type CheckProofResponse = {
+export type ChangePasswordRequest = {
+  client_type?: string;
+  current_password: string;
+  new_password: string;
+  refresh_token?: string;
+};
+
+export type ChangeServiceUserRoleRequest = {
+  role_id: string;
+};
+
+export type ChangeSignerSetRequest = {
+  owners: Array<OwnerInput>;
+};
+
+export type ChangeSignerSetResponse = {
+  /**
+   * Address is the wallet's on-chain address.
+   */
+  address?: string;
+  /**
+   * Balance is the wallet's last-synced native balance.
+   */
+  balance?: string;
+  /**
+   * ChainID is the blockchain the wallet's address is registered on.
+   */
+  chain_id?: string;
+  /**
+   * Changed is true when the re-read found different owners or a different
+   * threshold than the stored set (or no stored set). A change resets the
+   * wallet's verification.
+   */
+  changed?: boolean;
+  /**
+   * Coverage is the wallet's ownership coverage as evaluated at request time:
+   * proven, expired, unproven or retired. Omitted when no coverage reader was
+   * available to evaluate it.
+   */
+  coverage?: 'proven' | 'expired' | 'unproven' | 'retired';
+  /**
+   * CoverageProofID is the newest proof currently proving the wallet. Set
+   * only when Coverage is "proven".
+   */
+  coverage_proof_id?: string;
+  /**
+   * CreatedAt is when the wallet was registered.
+   */
+  created_at?: string;
+  /**
+   * Description is a free-text note about the wallet's purpose.
+   */
+  description?: string;
+  /**
+   * Holdings is the per-wallet token holdings projection from the latest funds
+   * scan snapshot — always present, defaults to [] (never null) for
+   * an unscanned wallet so the client renders an em-dash. The domain type is
+   * reused to avoid minting a second DTO struct; it is a flat array of the
+   * two-scalar {symbol, amount} object (no new named component schema). Since this flat field is the PRIMARY chain's holdings; the
+   * per-network breakdown lives in Networks below.
+   */
+  holdings?: Array<WalletHolding>;
+  /**
+   * ID is the wallet's unique identifier.
+   */
+  id?: string;
+  /**
+   * IsActive is false once the wallet has been soft-deleted.
+   */
+  is_active?: boolean;
+  /**
+   * IsWatched marks a wallet tracked for informational purposes only.
+   */
+  is_watched?: boolean;
+  /**
+   * LastSyncAt is when the wallet's balance was last refreshed. Nil if it has
+   * never been synced.
+   */
+  last_sync_at?: string;
+  /**
+   * Name is the wallet's display name.
+   */
+  name?: string;
+  /**
+   * Networks is the per-network view of the wallet.
+   * A wallet is an ADDRESS carrying a set of registered networks; each entry
+   * exposes that network's chain identity, its inclusion flag, and the holdings
+   * joined from the latest funds snapshot on that chain. ALWAYS present, never
+   * null (defaults to []); a registered-but-never-scanned network renders with
+   * an empty holdings array.
+   */
+  networks?: Array<WalletNetworkResponse>;
+  /**
+   * OnchainOwnerCount is the number of owners (n) in the same read as
+   * onchain_threshold. Omitted when the owner set has never been read.
+   */
+  onchain_owner_count?: number;
+  /**
+   * OnchainOwners are the Safe's owners (lowercased addresses) in the same
+   * read. Omitted when the owner set has never been read.
+   */
+  onchain_owners?: Array<string>;
+  /**
+   * OnchainThreshold is the number of signatures (m) the Safe's contract
+   * requires, read on chain at pinned_block. At least 1 when present; omitted
+   * when the wallet's owner set has never been read.
+   */
+  onchain_threshold?: number;
+  /**
+   * OrganizationID is the owning organization.
+   */
+  organization_id?: string;
+  /**
+   * Owners are the owner contact hints: the FULL list including owners with NO
+   * key-holder, so the frontend can render the routing plan + the Settings
+   * signers section BEFORE any challenge is issued. ALWAYS present, never null
+   * (defaults to []). Each entry carries the owner address, its assigned
+   * key-holder (user_id/email) when given, and an `assigned` flag (true = a
+   * key-holder is set → routed; false = signed directly). Projected straight
+   * from the wallet's Signers JSONB — no extra query.
+   */
+  owners?: Array<OwnerResponse>;
+  /**
+   * PinnedBlock is the finalized block the owner set was read at. Omitted
+   * when the owner set has never been read.
+   */
+  pinned_block?: number;
+  /**
+   * PublicKey is the wallet's public key, when known.
+   */
+  public_key?: string;
+  /**
+   * RetiredAt is when the wallet was retired. A retired wallet is no longer
+   * scanned for funds or included in batch attestation, but its proofs and
+   * history are kept. Omitted for an active wallet.
+   */
+  retired_at?: string;
+  /**
+   * SignerSetReadAt is when the current owner set was read. A re-read that
+   * finds the same set leaves it unchanged. Omitted when the owner set has
+   * never been read.
+   */
+  signer_set_read_at?: string;
+  /**
+   * Status is the derived wallet lifecycle state (QC-17b): "retired" when
+   * RetiredAt is set, else "active". ALWAYS present on both the LIST and the
+   * detail DTO so the UI can render the retired state without null-probing
+   * retired_at. Flat scalar — no new named component schema.
+   */
+  status?: string;
+  /**
+   * UpdatedAt is when the wallet was last modified.
+   */
+  updated_at?: string;
+  /**
+   * Venue is the exchange or custodian the wallet is held at.
+   */
+  venue?: string;
+  /**
+   * VerificationResetAt is the last re-registration or signer-set change.
+   * Each ownership proof a reset invalidated records that reset's instant
+   * itself, and coverage reads the proofs, so an earlier reset this one
+   * replaced still counts. Omitted when the wallet was never reset.
+   */
+  verification_reset_at?: string;
+  /**
+   * WalletType is single_key or safe.
+   */
+  wallet_type?: string;
+};
+
+export type CheckRequest = {
+  bundles?: Array<Bundle>;
+};
+
+export type CheckResponse = {
   circuit_version?: number;
-  inclusion_verified?: boolean;
-  range_proof_valid?: boolean;
-  user_identifier?: string;
+  format_version?: number;
+  manifest_hash?: string;
+  results?: Array<CheckResult>;
+  srs_id?: string;
+};
+
+export type CheckResult = {
+  balance?: string;
+  balance_minor?: string;
+  catalog_entry_id?: string;
+  reason?: string;
+  symbol?: string;
   valid?: boolean;
-  verified_at?: string;
-  verified_root?: string;
+};
+
+export type CheckResultResponse = {
+  detail?: string;
+  name?: string;
+  pass?: boolean;
+  skipped?: boolean;
+};
+
+export type CloneRoleRequest = {
+  /**
+   * AcknowledgeConflicts approves the conflicting pairs the source role
+   * holds. It is required when the source holds one, and is honored only
+   * from a caller holding org:invite:admin.
+   */
+  acknowledge_conflicts?: boolean;
+  id?: string;
+  name: string;
+};
+
+export type CommitStartedResponse = {
+  job_id?: string;
+  liability_set_id?: string;
+};
+
+export type CommitmentPartitionResponse = {
+  catalog_entry_id?: string;
+  decimals?: number;
+  leaf_count?: number;
+  position?: number;
+  root?: string;
+  symbol?: string;
+  total?: string;
+  total_minor?: string;
+};
+
+export type CommitmentV1Response = {
+  attestation_key_id?: string;
+  circuit_version?: number;
+  committed_at?: string;
+  cutoff_at?: string;
+  format_version?: number;
+  id?: string;
+  job_id?: string;
+  liability_set_id?: string;
+  manifest_hash?: string;
+  partitions?: Array<CommitmentPartitionResponse>;
+  signature?: string;
+  srs_id?: string;
+};
+
+export type ConnectionClient = {
+  client_id?: string;
+  name?: string;
+  status?: string;
+};
+
+export type ConnectionResponse = {
+  client?: ConnectionClient;
+  granted_at?: string;
+  organization?: ConsentOrgOption;
+  scopes?: Array<ConsentScope>;
 };
 
 export type ConsentClientInfo = {
@@ -136,14 +1060,12 @@ export type ConsentClientInfo = {
 
 export type ConsentDecisionRequest = {
   consent_id: string;
-  csrf_token: string;
   decision: 'allow' | 'deny';
   granted_scopes?: Array<string>;
-  org_id: string;
 };
 
 export type ConsentDecisionResponse = {
-  redirect_uri?: string;
+  redirect_to?: string;
 };
 
 export type ConsentOrgOption = {
@@ -154,12 +1076,9 @@ export type ConsentOrgOption = {
 export type ConsentResponse = {
   client?: ConsentClientInfo;
   consent_id?: string;
-  /**
-   * base64url raw bytes
-   */
-  csrf_token?: string;
   expires_at?: string;
   org_options?: Array<ConsentOrgOption>;
+  redirect_uri?: string;
   requested_scopes?: Array<ConsentScope>;
   resource?: string;
   user?: ConsentUserInfo;
@@ -175,85 +1094,256 @@ export type ConsentUserInfo = {
   email?: string;
 };
 
+export type CoverageCountsResponse = {
+  expired?: number;
+  proven?: number;
+  retired?: number;
+  simulated?: number;
+  unproven?: number;
+};
+
+export type CreateCaptureRequest = {
+  as_of?: string;
+  mode: 'now' | 'reconstruct';
+  scope?: ScanScopeRequest;
+};
+
 export type CreateCatalogRequest = {
-  chain_id?: string;
+  chain_id: string;
+  /**
+   * Required for a contract entry, which is also what an omitted token_type means.
+   * Must be absent for a native entry.
+   */
   contract_address?: string;
-  decimals?: number;
+  /**
+   * Decimals scales every balance read for the asset, and is REQUIRED. It is a pointer so an omitted value is distinguishable from an explicit 0.
+   * It used to be a bare uint8 with validate:"gt=0": an omitted decimals bound
+   * to 0 and was refused with a gt-0 message, which swag cannot express as a
+   * required field -- so the OpenAPI spec and both generated SDKs typed the
+   * field optional while every request that omitted it failed. required on a
+   * pointer is expressible, so the spec now says what the server does. 0 is a legal value, not a sentinel: 0-decimal ERC-20s exist. It is accepted
+   * exactly when it can be VERIFIED -- a contract entry whose decimals() reports
+   * 0. It is refused for a native entry (a chain declaring no native_decimals is
+   * indistinguishable from one declaring 0, so there is nothing to compare
+   * against) and when skip_verification suppresses the contract read.
+   */
+  decimals: number;
   info_providers?: {
     [key: string]: unknown;
   };
   logo_url?: string;
   name?: string;
+  /**
+   * Peg is the fiat currency this asset is pegged to, when it is a
+   * stablecoin. The only value the database's CHECK allows is "USD"; omitted
+   * or null means the asset floats.
+   */
+  peg?: 'USD';
   skip_verification?: boolean;
-  symbol?: string;
+  /**
+   * Symbol is a display label (prices come from feed mappings per catalog
+   * entry and source), so an entry without one cannot be shown. Required, matching
+   * ValidateCatalogEntryRequest so the dry run and the save agree on it.
+   */
+  symbol: string;
+  token_type?: 'native' | 'contract';
 };
 
 export type CreateChainRequest = {
+  /**
+   * AnchorKind is the unit this chain's providers anchor a read to. See
+   * chains_anchor_kind_chk for the allowed values. Optional: omitted or empty
+   * leaves it unset.
+   */
+  anchor_kind?: string;
   display_name?: string;
+  /**
+   * Environment is "mainnet" or "testnet". Optional: blank defaults to mainnet.
+   */
+  environment?: 'mainnet' | 'testnet';
+  /**
+   * L2AnchorPreference is which finality tag ("safe" or "finalized") a reserve
+   * read should prefer on this chain. Optional: omitted or empty leaves it unset.
+   */
+  l2_anchor_preference?: string;
   metadata?: {
     [key: string]: unknown;
   };
-  name?: string;
+  name: string;
   native_currency?: string;
-  protocol_type?: string;
+  protocol_type: 'evm' | 'utxo' | 'solana';
+  /**
+   * SignatureSchemes lists the ownership-proof signature schemes this chain
+   * supports (e.g. siwe_eip4361, bip322, ed25519). Optional: defaults to empty.
+   */
+  signature_schemes?: Array<string>;
   status?: string;
+  /**
+   * Symbol is the short uppercase badge code (2-6 chars) for the chain glyph.
+   * Optional: when blank the service defaults it to UPPER(native_currency).
+   */
+  symbol?: string;
+};
+
+export type CreateGrantRequest = {
+  /**
+   * AcknowledgeConflicts approves a grant that gives the subject both keys of
+   * a conflicting pair. Only a caller holding org:invite:admin can approve one.
+   */
+  acknowledge_conflicts?: boolean;
+  /**
+   * ExpiresAt, when set, must be in the future.
+   */
+  expires_at?: string;
+  permission: string;
+  reason?: string;
+  scope_id?: string;
+  /**
+   * ScopeType and ScopeID limit the grant to one object: a wallet, a proof of
+   * reserves or a publication. Both or neither.
+   */
+  scope_type?: 'wallet' | 'proof_of_reserves' | 'publication';
+  subject_id: string;
+  subject_type: 'user' | 'service_user';
 };
 
 export type CreateInvitationRequest = {
-  email?: string;
-  role_id?: string;
+  email: string;
+  role_id: string;
+};
+
+export type CreateOrganizationRequest = {
+  jurisdiction: string;
+  mfa_required?: boolean;
+  name: string;
+  owner_email: string;
+  owner_first_name?: string;
+  owner_last_name?: string;
+  slug?: string;
+};
+
+export type CreateOrganizationResponse = {
+  email_sent?: boolean;
+  org_id?: string;
+  owner_account_existed?: boolean;
+  slug?: string;
+  status?: string;
 };
 
 export type CreateOwnershipRequest = {
   address?: string;
-  blockchain?: string;
+  /**
+   * Address is optional with wallet_id and, when present, must match the
+   * wallet. The create-and-link path uses ChainID and Address to create the
+   * wallet; with wallet_id the wallet decides the chain.
+   */
+  chain_id?: string;
+  label?: string;
   message?: string;
-  organization_id?: string;
-  user_id?: string;
+  /**
+   * Owners are contact hints for the create-and-link path: each entry an owner
+   * EOA with an OPTIONAL org key-holder (user_id/email) whose assignment seeds
+   * routed notification. A Safe's owners and threshold are always read from
+   * the chain. Only consumed on the create-and-link path (with
+   * label/venue/wallet_type); ignored when linking an existing wallet_id.
+   */
+  owners?: Array<OwnerInput>;
+  venue?: string;
+  /**
+   * Every proof is bound to a wallet. Supply wallet_id to prove an existing
+   * org-owned wallet (cross-tenant ids collapse to 404), OR supply
+   * label/venue/wallet_type to CREATE a new wallet and prove it. Both paths
+   * only ever run against the caller's own org (from the JWT).
+   */
+  wallet_id?: string;
+  wallet_type?: string;
 };
 
-export type CreateProofOfFundsRequest = {
-  base_currency?: string;
-  description?: string;
-  name?: string;
-  organization_id?: string;
-  user_id?: string;
+export type CreatePriceSourceRequest = {
+  /**
+   * CanaryFeed is the feed the health canary quotes the source with.
+   */
+  canary_feed?: string;
+  /**
+   * Capabilities is the source's declared contract.
+   */
+  capabilities?: SourceCapabilities;
+  config?: PriceSourceConfigInput;
+  /**
+   * IsActive defaults to true.
+   */
+  is_active?: boolean;
+  /**
+   * Kind is how the source produces a price.
+   */
+  kind?: 'index' | 'offchain_oracle' | 'onchain_oracle' | 'venue' | 'dex' | 'fixed';
+  name: string;
+  /**
+   * QuoteCurrency is the currency the source quotes in; USD when omitted.
+   */
+  quote_currency?: 'USD' | 'USDT' | 'USDC' | 'ETH';
 };
 
-export type CreateProofOfLiabilitiesRequest = {
-  currency?: string;
-  description?: string;
-  liability_file_id?: string;
-  name?: string;
-  organization_id?: string;
-  proof_mode?: string;
-  user_id?: string;
+export type CreateProofOfReservesRequest = {
+  funds: FundsSourceRequest;
+  mode: 'per_asset' | 'cross_asset';
+  proof_of_liabilities_id: string;
 };
 
 export type CreateProviderRequest = {
-  chain_id?: string;
+  /**
+   * Capabilities is the provider's declared read contract (chain.ProviderCapabilities),
+   * validated against the chain's protocol adapter when present.
+   */
+  capabilities?: {
+    [key: string]: unknown;
+  };
+  chain_id: string;
   config?: {
     [key: string]: unknown;
   };
   display_name?: string;
   is_active?: boolean;
-  name?: string;
+  name: string;
   priority?: number;
-  provider_type?: string;
+  provider_type: 'rest' | 'jsonrpc' | 'websocket';
   skip_health_check?: boolean;
-  url?: string;
+  url: string;
+};
+
+export type CreateRoleRequest = {
+  /**
+   * AcknowledgeConflicts approves a conflicting pair of keys. Only a caller
+   * holding org:invite:admin can approve one.
+   */
+  acknowledge_conflicts?: boolean;
+  description?: string;
+  /**
+   * Name is mandatory: the service canonicalizes + length-checks it and derives
+   * the slug from it. Description is free-form/optional. PermissionKeys must carry
+   * at least one key (the service rejects an empty set).
+   */
+  name: string;
+  permission_keys: Array<string>;
 };
 
 export type CreateServiceUserRequest = {
-  name?: string;
-  role_id?: string;
+  name: string;
+  role_id: string;
 };
 
 export type CreateSessionRequest = {
+  /**
+   * Mode is optional: an empty value is defaulted to read_only by the handler,
+   * so it is deliberately NOT tagged required/oneof (that would 400 the default).
+   */
   mode?: 'read_only' | 'full_control';
-  organization_id?: string;
+  organization_id: string;
+  /**
+   * Reason is not enforced by the domain service; left optional.
+   */
   reason?: string;
-  target_user_id?: string;
+  target_user_id: string;
 };
 
 export type CreateSpecialRequestBody = {
@@ -262,6 +1352,87 @@ export type CreateSpecialRequestBody = {
   request_type?: string;
   title?: string;
 };
+
+export type CreateWalletRequest = {
+  /**
+   * Address is the wallet's on-chain address.
+   */
+  address: string;
+  /**
+   * ChainID is the blockchain the wallet's address is registered on.
+   */
+  chain_id: string;
+  /**
+   * Description is a free-text note about the wallet's purpose.
+   */
+  description?: string;
+  /**
+   * Name is the wallet's display name.
+   */
+  name: string;
+  /**
+   * Owners are contact hints: each entry is an owner EOA with an OPTIONAL org
+   * key-holder (user_id/email) whose assignment seeds routed notification. A
+   * Safe's owners and threshold are always read from the chain. Empty/omitted
+   * for a single-key wallet (or a single-key wallet may carry one key-holder
+   * entry).
+   */
+  owners?: Array<OwnerInput>;
+  /**
+   * PublicKey is the wallet's public key, when known.
+   */
+  public_key?: string;
+  /**
+   * Venue is the exchange or custodian the wallet is held at.
+   */
+  venue?: string;
+  /**
+   * single_key | safe (default single_key)
+   */
+  wallet_type?: string;
+};
+
+export type DeclineRequest = {
+  reason?: string;
+};
+
+export type DeleteRoleRequest = {
+  id?: string;
+  replacement_role_id?: string;
+};
+
+export type DemoteSelfRequest = {
+  confirm?: boolean;
+  role_id: string;
+};
+
+export type DeniedError = {
+  code?: string;
+  message?: string;
+  permission?: string;
+  reason?:
+    | 'missing_permission'
+    | 'grant_expired'
+    | 'separation_of_duties'
+    | 'four_eyes'
+    | 'limit_reached'
+    | 'org_inactive'
+    | 'mfa_required';
+  request_id?: string;
+};
+
+export type DeniedResponse = {
+  error?: DeniedError;
+};
+
+export type DenyReason =
+  | 'missing_permission'
+  | 'grant_expired'
+  | 'separation_of_duties'
+  | 'four_eyes'
+  | 'limit_reached'
+  | 'org_inactive'
+  | 'mfa_required';
 
 export type DeviceApprovalResponse = {
   client?: ApprovalClient;
@@ -321,11 +1492,20 @@ export type DisableClientRequest = {
 };
 
 export type DisableMfaRequest = {
-  code?: string;
+  code: string;
 };
 
 export type DisableUserRequest = {
   reason: string;
+};
+
+export type Document = {
+  keys?: Array<PublicKey>;
+};
+
+export type DownloadReportUrlResponse = {
+  download_url?: string;
+  expires_in?: number;
 };
 
 export type EnrollMfaStartRequest = {
@@ -338,12 +1518,23 @@ export type EnrollMfaStartResponse = {
 };
 
 export type EnrollMfaVerifyRequest = {
-  code?: string;
+  code: string;
   enrollment_token?: string;
 };
 
 export type EnrollMfaVerifyResponse = {
   recovery_codes?: Array<string>;
+};
+
+export type Envelope = {
+  data?: unknown;
+  meta?: Meta;
+};
+
+export type ErrorBody = {
+  code?: string;
+  message?: string;
+  request_id?: string;
 };
 
 export type ErrorCode =
@@ -355,32 +1546,198 @@ export type ErrorCode =
   | 'INTERNAL_ERROR'
   | 'GONE'
   | 'PRECONDITION_FAILED'
-  | 'SERVICE_UNAVAILABLE';
+  | 'SERVICE_UNAVAILABLE'
+  | 'TOO_MANY_REQUESTS'
+  | 'METHOD_NOT_ALLOWED'
+  | 'UNSUPPORTED_MEDIA_TYPE'
+  | 'UNPROCESSABLE_ENTITY';
 
-export type InclusionPathStep = {
-  direction?: string;
-  sibling_hash?: string;
-  sibling_sum?: string;
+export type ExcludeWalletRequest = {
+  reason?: string;
+  wallet_id: string;
 };
 
-export type InclusionPathStepResponse = {
-  direction?: string;
-  sibling_hash?: string;
-  sibling_sum?: string;
+export type FeedMappingInput = {
+  /**
+   * FeedChainID is the chain the feed lives on. Required for an
+   * aggregator_address feed (it need not be the catalog entry's own chain --
+   * a Chainlink BTC/USD aggregator lives on Ethereum); omitted otherwise.
+   */
+  feed_chain_id?: string;
+  /**
+   * FeedKey is the feed identifier the source is asked to quote.
+   */
+  feed_key: string;
+  /**
+   * FeedKind must be a member of the source's declared capabilities.feed_keys;
+   * a mismatch is rejected. One of id, contract, pair, aggregator_address, symbol.
+   */
+  feed_kind: 'id' | 'contract' | 'pair' | 'aggregator_address' | 'symbol';
+  /**
+   * SourceID identifies the price source this row targets.
+   */
+  source_id: string;
 };
 
-export type InclusionProofResponse = {
+export type FeedMappingResponse = {
+  created_at?: string;
+  feed_chain_id?: string;
+  feed_key?: string;
+  feed_kind?: string;
+  id?: string;
+  source_id?: string;
+  updated_at?: string;
+};
+
+export type FundsAuditResponse = {
+  entries?: Array<AuditEntryResponse>;
+};
+
+export type FundsHoldingResponse = {
+  address?: string;
   balance?: string;
-  currency?: string;
-  leaf_count?: number;
-  leaf_index?: number;
-  merkle_root?: string;
+  balance_minor?: string;
+  block_height?: number;
+  blockchain?: string;
+  catalog_entry_id?: string;
+  created_at?: string;
+  decimals?: number;
+  error?: string;
+  id?: string;
+  status?: 'scanned' | 'failed';
+  symbol?: string;
+};
+
+export type FundsInfraSummaryResponse = {
+  health?: InfraHealthResponse;
+  issues?: Array<InfraIssueResponse>;
+  links?: Array<ChainLinkResponse>;
+};
+
+export type FundsSourceRequest = {
+  proof_of_funds_id?: string;
+  scan?: ReservesScanScopeRequest;
+};
+
+export type GrantResponse = {
+  /**
+   * AcknowledgedConflicts is true when the grant completes a conflicting pair
+   * of permissions that was approved.
+   */
+  acknowledged_conflicts?: boolean;
+  expires_at?: string;
+  granted_at?: string;
+  granted_by?: string;
+  id?: string;
+  permission?: string;
+  reason?: string;
+  revoked_at?: string;
+  revoked_by?: string;
+  scope_id?: string;
+  scope_type?: string;
+  /**
+   * Status is active, expired or revoked, computed when the response is built.
+   */
+  status?: 'active' | 'expired' | 'revoked';
+  subject_id?: string;
+  subject_type?: string;
+};
+
+export type HistoricalWindow = {
+  granularity_seconds?: number;
+  max_age_seconds?: number;
+};
+
+export type HoldingResponse = {
+  address?: string;
+  balance?: string;
+  balance_minor?: string;
+  block_height?: number;
+  catalog_entry_id?: string;
+  chain_id?: string;
+  decimals?: number;
+  error?: string;
+  id?: string;
+  provider_id?: string;
+  rpc_method?: string;
+  status?: 'scanned' | 'failed';
+  symbol?: string;
+  token_id?: string;
+  wallet_id?: string;
+};
+
+export type InclusionFailedAsset = {
+  catalog_entry_id?: string;
+  symbol?: string;
+};
+
+export type InclusionFailedResponse = {
+  circuit_version?: number;
+  failed?: Array<InclusionFailedAsset>;
+  format_version?: number;
+  manifest_hash?: string;
+  retry?: string;
+  srs_id?: string;
+  status?: string;
+};
+
+export type InclusionMissResponse = {
+  circuit_version?: number;
+  format_version?: number;
+  srs_id?: string;
+  status?: string;
+};
+
+export type InclusionPendingResponse = {
+  circuit_version?: number;
+  format_version?: number;
+  manifest_hash?: string;
+  retry_after_seconds?: number;
+  srs_id?: string;
+  status?: string;
+};
+
+export type InclusionRequest = {
   nonce?: string;
-  normalized_balance?: string;
-  path?: Array<InclusionPathStepResponse>;
-  total_liabilities?: string;
-  user_identifier?: string;
-  version?: number;
+  retry?: boolean;
+};
+
+export type InclusionResponse = {
+  bundles?: Array<Bundle>;
+  circuit_version?: number;
+  format_version?: number;
+  manifest_hash?: string;
+  srs_id?: string;
+};
+
+export type InfraAffectedResponse = {
+  orgs?: number;
+  tokens?: number;
+  wallets?: number;
+};
+
+export type InfraHealthResponse = {
+  broken_links?: number;
+  summary_text?: string;
+  /**
+   * Tone is one of: ok | warn | err | unknown.
+   */
+  tone?: string;
+};
+
+export type InfraIssueResponse = {
+  affected?: InfraAffectedResponse;
+  id?: string;
+  route?: string;
+  severity?: string;
+  text?: string;
+};
+
+export type IngestPartResponse = {
+  filename?: string;
+  job_id?: string;
+  part_id?: string;
+  set?: LiabilitySetResponse;
 };
 
 export type InvitationResponse = {
@@ -397,6 +1754,13 @@ export type InvitationResponse = {
   target_email?: string;
 };
 
+export type InvitePreviewResponse = {
+  account_exists?: boolean;
+  inviter_name?: string;
+  organization_name?: string;
+  target_email?: string;
+};
+
 export type Jwk = {
   crv?: string;
   kid?: string;
@@ -409,19 +1773,137 @@ export type Jwks = {
   keys?: Array<Jwk>;
 };
 
-export type LiabilityFileResponse = {
-  content_type?: string;
+export type JobAccepted = {
+  job_id?: string;
+};
+
+export type JobCancelResponse = {
+  job_id?: string;
+  status?: string;
+};
+
+export type JobResponse = {
   created_at?: string;
-  file_hash?: string;
-  file_size?: number;
+  error?: string;
+  error_class?: 'permanent' | 'retryable';
+  finished_at?: string;
   id?: string;
+  parent_job_id?: string;
+  progress?: number;
+  /**
+   * Result is the subject's outcome once the job completes. A proof_of_funds
+   * job carries proof_of_funds_id and valuation_id, a valuation job
+   * valuation_id, and a proof_of_reserves job proof_of_reserves_id and
+   * verdict.
+   */
+  result?: {
+    [key: string]: unknown;
+  };
+  started_at?: string;
+  status?: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  subject_id?: string;
+  subject_type?:
+    | 'ownership_ceremony'
+    | 'proof_of_funds'
+    | 'valuation'
+    | 'liability_set_ingest'
+    | 'liability_set_seal'
+    | 'proof_of_liabilities_commit'
+    | 'proof_of_liabilities_inclusion'
+    | 'proof_of_liabilities_precompute'
+    | 'proof_of_reserves'
+    | 'report'
+    | 'publication'
+    | 'publication_withdrawal';
+};
+
+export type LiabilitiesCommitmentResponse = {
+  asset_count?: number;
+  circuit_version?: number;
+  committed_at?: string;
+  leaf_count?: number;
+  manifest_hash?: string;
+  srs_id?: string;
+};
+
+export type LiabilitySetPartResponse = {
+  created_at?: string;
+  failure?: LiabilityValidationResponse;
+  filename?: string;
+  id?: string;
+  idempotency_key?: string;
+  job_id?: string;
+  row_count?: number;
+  status?: 'accepted' | 'rejected' | 'failed' | 'pending';
+};
+
+export type LiabilitySetResponse = {
+  accepted_parts?: number;
+  asset_resolutions?: Array<AssetResolutionResponse>;
+  committed_at?: string;
+  created_at?: string;
+  cutoff_at?: string;
+  distinct_asset_count?: number;
+  id?: string;
+  job_id?: string;
   name?: string;
+  nonce_export_downloaded_at?: string;
+  nonce_export_status?: 'none' | 'available' | 'reissuable' | 'claimed' | 'retired' | 'lost';
   organization_id?: string;
-  original_name?: string;
-  processed_at?: string;
+  proof_of_liabilities_id?: string;
+  rejected_parts?: number;
+  row_count?: number;
+  sealed_at?: string;
   status?: string;
   updated_at?: string;
   user_id?: string;
+};
+
+export type LiabilityValidationResponse = {
+  asset?: string;
+  code?: string;
+  flagged?: Array<string>;
+  job_id?: string;
+  limit?: string;
+  message?: string;
+  /**
+   * PartID and JobID name a rejected part's record and the failed
+   * liability_set_ingest job that recorded the rejection. Only a part upload sets
+   * them, and only when the rejection was recorded.
+   */
+  part_id?: string;
+  row_end?: number;
+  row_start?: number;
+  rows?: number;
+};
+
+export type LineResponse = {
+  catalog_entry_id?: string;
+  disclosed_unowned?: string;
+  disclosed_unowned_usd?: string;
+  holdings_proven?: string;
+  holdings_proven_usd?: string;
+  holdings_total?: string;
+  holdings_total_usd?: string;
+  liabilities?: string;
+  liabilities_usd?: string;
+  position?: number;
+  priced?: boolean;
+  ratio_proven?: string;
+  symbol?: string;
+};
+
+export type ListEnvelope = {
+  data?: unknown;
+  meta?: Meta;
+};
+
+export type ListOrgMembersDetailedResponse = {
+  members?: Array<OrgMemberDetail>;
+};
+
+export type ListOrgMembersResponse = {
+  members?: Array<OrgMember>;
 };
 
 export type ListSessionsResponse = {
@@ -430,9 +1912,9 @@ export type ListSessionsResponse = {
 
 export type LoginRequest = {
   client_type?: string;
-  email?: string;
+  email: string;
   organization_id?: string;
-  password?: string;
+  password: string;
   remember_me?: boolean;
 };
 
@@ -451,9 +1933,31 @@ export type LoginResponse = {
 };
 
 export type MfaChallengeRequest = {
-  challenge_token?: string;
+  challenge_token: string;
   client_type?: string;
-  code?: string;
+  code: string;
+};
+
+export type MeGrant = {
+  expires_at?: string | null;
+  id?: string;
+  permission?: string;
+  scope_id?: string | null;
+  scope_type?: string | null;
+};
+
+export type MeOrganizationDto = {
+  current?: boolean;
+  id?: string;
+  is_owner?: boolean;
+  last_used?: boolean;
+  name?: string;
+  role?: string;
+  status?: string;
+};
+
+export type MeOrganizationsResponse = {
+  organizations?: Array<MeOrganizationDto>;
 };
 
 export type MeResponse = {
@@ -462,26 +1966,60 @@ export type MeResponse = {
    * Profile fields: display name and MFA status.
    */
   first_name?: string;
+  /**
+   * Active permission grants in the active organization; never null.
+   */
+  grants?: Array<MeGrant>;
   is_platform_admin?: boolean;
   last_name?: string;
   mfa_enabled?: boolean;
+  /**
+   * MFARequired is true when the user may not turn MFA off: a platform admin,
+   * or a member of an active organization that requires it.
+   */
+  mfa_required?: boolean;
   /**
    * nil if user has no active org
    */
   organization?: OrganizationRef;
   /**
-   * legacy — kept for back-compat
+   * legacy: kept for back-compat
    */
   organization_id?: string;
   /**
    * Permissions granted to the authenticated user.
    */
   permissions?: Array<string>;
+  /**
+   * Role held in the active organization; null without one.
+   */
+  role?: MeRole | null;
   status?: string;
   user_id?: string;
 };
 
+export type MeRole = {
+  id?: string;
+  name?: string;
+  slug?: string;
+};
+
+export type MemberRole = {
+  id?: string;
+  name?: string;
+  slug?: string;
+};
+
+export type Meta = {
+  next_cursor?: string;
+  page?: number;
+  per_page?: number;
+  request_id?: string;
+  total?: number;
+};
+
 export type MintKeyResponse = {
+  allowed_ips?: Array<string>;
   created_at?: string;
   expires_at?: string;
   id?: string;
@@ -492,6 +2030,7 @@ export type MintKeyResponse = {
    * stored WITHOUT trailing underscore (W3)
    */
   prefix?: string;
+  purpose?: string;
   /**
    * ONCE-only secret
    */
@@ -499,19 +2038,70 @@ export type MintKeyResponse = {
 };
 
 export type MintPatRequest = {
-  expires_at?: string;
-  name?: string;
-  organization_id?: string;
+  allowed_ips?: Array<string>;
+  expires_in_days?: number;
+  name: string;
+  purpose?: string;
 };
 
 export type MintServiceKeyRequest = {
+  allowed_ips?: Array<string>;
+  expires_in_days?: number;
+  name: string;
+  purpose?: string;
+};
+
+export type Mode = 'scheduled' | 'now' | 'reconstruct';
+
+export type NetworkGridResponse = {
+  columns?: Array<RunColumnResponse>;
+  network_id?: string;
+  network_name?: string;
+  rows?: Array<RunWalletRowResponse>;
+};
+
+export type NetworkResponse = {
+  api_version?: string;
+  chains?: Array<ChainHead>;
+  status?: NetworkStatus;
+};
+
+export type NetworkStatus = {
+  source?: 'kuma' | 'none';
+  state?: 'operational' | 'degraded' | 'down' | 'unknown';
+};
+
+export type NonceExportResponse = {
   expires_at?: string;
-  name?: string;
+  format?: string;
+  key?: string;
+  sha256?: string;
+  url?: string;
+};
+
+export type NotificationResponse = {
+  channel?: string;
+  created_at?: string;
+  error_message?: string;
+  id?: string;
+  max_retries?: number;
+  message?: string;
+  metadata?: {
+    [key: string]: unknown;
+  };
+  priority?: string;
+  retry_count?: number;
+  sent_at?: string;
+  status?: string;
+  title?: string;
+  type?: string;
+  updated_at?: string;
 };
 
 export type OAuthClientListItem = {
   approved_at?: string;
   approved_by_user_id?: string;
+  availability?: 'owner_org' | 'any_org';
   client_id_public?: string;
   created_at?: string;
   created_by_user_id?: string;
@@ -534,37 +2124,727 @@ export type OAuthErrorBody = {
   error_description?: string;
 };
 
+export type ObjectsResponse = {
+  /**
+   * All is true when the permission covers every object of the type.
+   */
+  all?: boolean;
+  object_ids?: Array<string>;
+};
+
+export type OpenLiabilitySetRequest = {
+  cutoff_at: string;
+  name?: string;
+};
+
+export type OrgDetailResponse = {
+  contact_email?: string | null;
+  /**
+   * RFC3339
+   */
+  created_at?: string;
+  description?: string;
+  four_eyes_publish?: boolean;
+  id?: string;
+  /**
+   * RFC3339
+   */
+  invite_created_at?: string;
+  /**
+   * RFC3339
+   */
+  invite_expires_at?: string;
+  is_demo?: boolean;
+  jurisdiction?: string;
+  member_count?: number;
+  member_limit?: number | null;
+  mfa_required?: boolean;
+  name?: string;
+  onboarding_status?: string;
+  public_display_name?: string | null;
+  public_slug?: string | null;
+  slug?: string;
+  status?: string;
+  /**
+   * RFC3339
+   */
+  updated_at?: string;
+};
+
+export type OrgMember = {
+  email?: string;
+  name?: string;
+  user_id?: string;
+};
+
+export type OrgMemberDetail = {
+  email?: string;
+  joined_at?: string;
+  last_active_at?: string;
+  mfa_enrolled?: boolean;
+  name?: string;
+  role?: MemberRole;
+  user_id?: string;
+};
+
 export type OrgOption = {
   id?: string;
   name?: string;
 };
 
+export type OrgSecurityResponse = {
+  four_eyes_publish?: boolean;
+  mfa_required?: boolean;
+  org_id?: string;
+};
+
+export type OrgWidePolicyDto = {
+  ambient_refresh_seconds?: number;
+  ambient_retention_days?: number;
+  conversion_entries?: {
+    [key: string]: string;
+  };
+  cutoff_mismatch_blocks?: boolean;
+  cutoff_tolerance_seconds?: number;
+  valuation_max_age_seconds?: number;
+};
+
 export type OrganizationRef = {
+  id?: string;
+  name?: string;
+  slug?: string;
+  /**
+   * Status is the org lifecycle status (pending/active/suspended/archived). PREREQ-3: sourced from the already-fetched Organization
+   * row; drives the dashboard owner first-run trigger. Fail-open: empty
+   * string on repo error.
+   */
+  status?: string;
+};
+
+export type OrganizationResponse = {
+  contact_email?: string | null;
+  created_at?: string;
   id?: string;
   name?: string;
 };
 
-export type OwnershipResponse = {
-  address?: string;
-  blockchain?: string;
-  created_at?: string;
-  id?: string;
-  message?: string;
-  organization_id?: string;
-  signatures?: Array<SignatureResponse>;
-  status?: string;
-  updated_at?: string;
-  user_id?: string;
-  verified_at?: string;
+export type OverrideDto = {
+  allow_coarse_historical?: boolean;
+  catalog_entry_id?: string;
+  confident_sources?: number;
+  fixed_price?: string;
+  fixed_price_set_by?: string;
+  max_dispersion?: string;
+  peg_band?: string;
+  staleness_seconds?: number;
+  under_quorum_blocks?: boolean;
 };
 
-export type Permission = {
-  action?: string;
+export type OverviewResponse = {
+  /**
+   * ExcludedNoUSDCount: OVERLAY over Solvent+Insolvent latest runs whose
+   * holdings_usd IS NULL (excluded from Σ/ratio). NOT a mutually-exclusive bucket.
+   */
+  excluded_no_usd_count?: number;
+  incomplete_count?: number;
+  insolvent_count?: number;
+  /**
+   * NoFullPoRCount: tenants with pillar activity but zero reserves runs.
+   */
+  no_full_por_count?: number;
+  platform_ratio?: string;
+  solvent_count?: number;
+  sum_holdings_usd?: string;
+  sum_liabilities_usd?: string;
+};
+
+export type OwnerInput = {
+  address?: string;
+  email?: string;
+  user_id?: string;
+};
+
+export type OwnerResponse = {
+  address?: string;
+  assigned?: boolean;
+  email?: string;
+  user_id?: string;
+};
+
+export type OwnershipBatchItemResponse = {
+  /**
+   * ExcludeReason is why this wallet was excluded from the batch — an operator
+   * exclusion (SIGN-04) or a per-wallet issuance-validation skip (MSQA-16, the
+   * reason carries the wallet's label). Present only when status == "excluded".
+   */
+  exclude_reason?: string;
+  /**
+   * distinct valid signers this ceremony
+   */
+  got?: number;
+  /**
+   * required threshold (M)
+   */
+  need?: number;
+  proof_id?: string;
+  signers?: Array<BatchSignerStateResponse>;
+  status?: string;
+  threshold_met?: boolean;
+  wallet_id?: string;
+};
+
+export type OwnershipBatchResponse = {
+  batch_id?: string;
+  items?: Array<OwnershipBatchItemResponse>;
+  job_id?: string;
+  status?: string;
+  total_items?: number;
+  verified_items?: number;
+};
+
+export type OwnershipBatchVerifyBlockedResponse = {
+  /**
+   * Batch is the same live projection GET /ownership/batch/{id} returns, so the
+   * blocker UI can render per-wallet detail without a second request.
+   */
+  batch?: OwnershipBatchResponse;
+  batch_id?: string;
+  excluded_items?: number;
+  message?: string;
+  met_items?: number;
+  pending_items?: number;
+  status?: string;
+  total_items?: number;
+};
+
+export type OwnershipPolicyResponse = {
+  /**
+   * BatchCollectionWindowSeconds is the org-attestation batch collection window — everything the frontend needs is fetchable (POLICY-01).
+   */
+  batch_collection_window_seconds?: number;
+  /**
+   * ChallengeTTLSeconds is how long an issued signature challenge stays valid.
+   */
+  challenge_ttl_seconds?: number;
+  /**
+   * ExpiryWarningLeadSeconds is the default "warn N before expiry" lead.
+   */
+  expiry_warning_lead_seconds?: number;
+  /**
+   * ProofValiditySeconds is the proof-validity / re-attest window.
+   */
+  proof_validity_seconds?: number;
+  /**
+   * ReAttestLeadSeconds is how long before expiry the renewal window opens.
+   */
+  re_attest_lead_seconds?: number;
+};
+
+export type OwnershipResponse = {
+  address?: string;
+  chain_id?: string;
   created_at?: string;
+  /**
+   * lifecycle timestamps (LIFE-04), echoed straight from the model so
+   * UIs can render "proven 2h ago / re-attest due / expired 2d ago". Both are
+   * nullable: a pending proof has neither, and a verified proof always has
+   * ExpiresAt. No new endpoints — re-prove uses the existing challenge+verify
+   * routes.
+   */
+  expires_at?: string;
+  id?: string;
+  invalidated_at?: string;
+  /**
+   * JobID is the ceremony's job; absent until a job runs the ceremony.
+   */
+  job_id?: string;
+  label?: string;
+  message?: string;
+  organization_id?: string;
+  re_attest_due_at?: string;
+  signatures?: Array<SignatureResponse>;
+  signer_count?: number;
+  /**
+   * per-signer collection progress (MSIG-02, spec §4). Present only for
+   * multisig proofs; nil for single-key. Carries the distinct valid-signer count
+   * and WHICH owner addresses have signed (addresses only — no signer identities
+   * this phase; T-29-I01). The partially_signed status flows through Status above.
+   */
+  signer_progress?: SignerProgress;
+  status?: string;
+  /**
+   * The m-of-n threshold (design: "Safe · m of n").
+   * SignersRequired is the required signer count (m) and SignerCount the total
+   * on-chain owners (n), from the Safe's pinned signer set. Both are omitted (0)
+   * for single-key proofs — only `safe`-type multisig proofs surface a threshold.
+   */
+  threshold?: number;
+  updated_at?: string;
+  user_id?: string;
+  venue?: string;
+  verified_at?: string;
+  /**
+   * registry identity (REG-03), projected from the linked wallet.
+   * label ← wallet.Name (A2: no redundant label column on the wallet model).
+   */
+  wallet_id?: string;
+  wallet_type?: string;
+};
+
+export type OwnershipSignatureResponse = {
+  algorithm?: string;
+  created_at?: string;
+  id?: string;
+  is_valid?: boolean;
+  public_key?: string;
+  scheme?: string;
+  signature?: string;
+};
+
+export type PanelApiKey = {
+  allowed_ips?: Array<string>;
+  created_at?: string;
+  expires_at?: string;
+  id?: string;
+  key_kind?: string;
+  last4?: string;
+  last_used_at?: string;
+  name?: string;
+  owner_email?: string;
+  prefix?: string;
+  purpose?: string;
+  revoked_at?: string;
+  service_user_name?: string;
+};
+
+export type PanelAssetPriceResponse = {
+  catalog_entry_id?: string;
+  conversion_currency?: string;
+  conversion_rate?: string;
+  dispersion?: string;
+  fixed_by_policy?: boolean;
+  price_usd?: string;
+  quorum_met?: boolean;
+  quotes?: Array<PanelPriceQuoteResponse>;
+  reasons?: Array<Reason>;
+  sources_included?: number;
+  sources_stale?: number;
+  steps?: Array<Step>;
+  symbol?: string;
+};
+
+export type PanelAssignedSigner = {
+  expected_address?: string;
+  status?: string;
+};
+
+export type PanelCaptureScheduleResponse = {
+  /**
+   * CatchupLimitedBy is the chain and provider that shorten the window below
+   * an hour, null when nothing does.
+   */
+  catchup_limited_by?: CatchupLimitResponse | null;
+  /**
+   * CatchupWindowSeconds is the catch-up window in seconds.
+   */
+  catchup_window_seconds?: number;
+  chain_ids?: Array<string>;
+  created_at?: string;
+  /**
+   * CreatedBy is the user who created the schedule.
+   */
+  created_by?: string;
+  /**
+   * CreatedByAPIKeyID is the API key that created the schedule.
+   */
+  created_by_api_key_id?: string;
+  cron?: string;
+  enabled?: boolean;
+  id?: string;
+  keep_last?: number;
+  next_runs?: Array<string>;
+  temporal_schedule_id?: string;
+  timezone?: string;
+  token_ids?: Array<string>;
+  updated_at?: string;
+};
+
+export type PanelCaptureWindowResponse = {
+  earliest_as_of?: string;
+  items?: Array<WindowItemResponse>;
+  limiting?: WindowItemResponse;
+};
+
+export type PanelGrant = {
+  expires_at?: string;
+  granted_at?: string;
+  granted_by_email?: string;
+  id?: string;
+  permission?: string;
+  permission_display_name?: string;
+  revoked_at?: string;
+  scope_id?: string;
+  scope_type?: string;
+  status?: string;
+  subject_email?: string;
+  subject_id?: string;
+  subject_type?: string;
+};
+
+export type PanelInvitation = {
+  consumed_at?: string;
+  created_at?: string;
+  expires_at?: string;
+  id?: string;
+  inviter_email?: string;
+  revoked_at?: string;
+  role_id?: string;
+  role_name?: string;
+  status?: string;
+  target_email?: string;
+};
+
+export type PanelLoginRequest = {
+  client_type?: string;
+  email?: string;
+  password?: string;
+  remember_me?: boolean;
+};
+
+export type PanelLoginResponse = {
+  access_token?: string;
+  challenge_token?: string;
+  enrollment_token?: string;
+  expires_in?: number;
+  mfa_enrollment_required?: boolean;
+  mfa_required?: boolean;
+  refresh_token?: string;
+  token_type?: string;
+};
+
+export type PanelLogoutRequest = {
+  refresh_token?: string;
+};
+
+export type PanelMfaEnrollStartRequest = {
+  enrollment_token?: string;
+};
+
+export type PanelMfaEnrollStartResponse = {
+  provisioning_uri?: string;
+  secret?: string;
+};
+
+export type PanelMfaEnrollVerifyRequest = {
+  code?: string;
+  enrollment_token?: string;
+};
+
+export type PanelMfaEnrollVerifyResponse = {
+  recovery_codes?: Array<string>;
+};
+
+export type PanelMfaVerifyRequest = {
+  challenge_token?: string;
+  client_type?: string;
+  code?: string;
+};
+
+export type PanelMember = {
+  email?: string;
+  joined_at?: string;
+  last_active_at?: string;
+  mfa_enrolled?: boolean;
+  name?: string;
+  role_id?: string;
+  role_name?: string;
+  user_id?: string;
+};
+
+export type PanelOwnershipPolicyResponse = {
+  batch_collection_window_seconds?: number;
+  challenge_ttl_seconds?: number;
+  expiry_warning_lead_seconds?: number;
+  proof_validity_seconds?: number;
+  re_attest_lead_seconds?: number;
+};
+
+export type PanelPriceQuoteResponse = {
+  error?: string;
+  excluded_reason?:
+    | 'stale'
+    | 'outlier'
+    | 'out_of_range'
+    | 'unauthenticated'
+    | 'conversion_unavailable'
+    | 'quote_currency_mismatch'
+    | 'error';
+  feed_key?: string;
+  granularity_seconds?: number;
+  included?: boolean;
+  observed_at?: string;
+  price?: string;
+  quote_currency?: string;
+  raw_ref?: string;
+  source_id?: string;
+  source_name?: string;
+};
+
+export type PanelRefreshRequest = {
+  refresh_token?: string;
+};
+
+export type PanelRefreshResponse = {
+  access_token?: string;
+  expires_in?: number;
+  refresh_token?: string;
+  token_type?: string;
+};
+
+export type PanelReportResponse = {
+  artifact_id?: string;
+  artifact_kind?: 'reserves_bundle' | 'liabilities_manifest';
+  artifact_ref?: string;
+  artifact_sha256?: string | null;
+  created_at?: string;
+  detail_level?: 'summary' | 'full';
+  error_message?: string;
+  file_size?: number;
+  format?: 'pdf' | 'csv';
+  generated_at?: string;
+  id?: string;
+  job_id?: string;
+  jurisdiction?: 'generic' | 'eu' | 'us';
+  organization_id?: string;
+  publication?: ReportPublicationResponse | null;
+  requested_by?: string;
+  requested_by_api_key?: boolean;
+  status?: 'pending' | 'generating' | 'completed' | 'failed';
+  updated_at?: string;
+};
+
+export type PanelRole = {
+  conflicts_acknowledged?: boolean;
   description?: string;
   id?: string;
+  is_system?: boolean;
+  member_count?: number;
+  name?: string;
+  permissions?: Array<PanelRolePermission>;
+  slug?: string;
+};
+
+export type PanelRolePermission = {
+  display_name?: string;
+  group?: string;
   key?: string;
-  resource?: string;
+};
+
+export type PanelServiceUser = {
+  active_key_count?: number;
+  created_at?: string;
+  disabled_at?: string;
+  id?: string;
+  name?: string;
+  role_name?: string;
+};
+
+export type PanelValuationResponse = {
+  as_of?: string;
+  asset_prices?: Array<PanelAssetPriceResponse>;
+  completed_at?: string;
+  created_at?: string;
+  id?: string;
+  job_id?: string;
+  kind?: 'proof' | 'ambient';
+  organization_id?: string;
+  plan?: {
+    [key: string]: unknown;
+  };
+  policy_version?: number;
+  proof_of_funds_id?: string;
+  resolved_policy?: {
+    [key: string]: unknown;
+  };
+  status?: 'pending' | 'running' | 'completed' | 'failed';
+};
+
+export type PanelValuationSummaryResponse = {
+  as_of?: string;
+  completed_at?: string;
+  created_at?: string;
+  id?: string;
+  job_id?: string;
+  kind?: 'proof' | 'ambient';
+  organization_id?: string;
+  policy_version?: number;
+  proof_of_funds_id?: string;
+  status?: 'pending' | 'running' | 'completed' | 'failed';
+};
+
+export type PanelWalletResponse = {
+  /**
+   * Address is the wallet's on-chain address.
+   */
+  address?: string;
+  assigned_signers?: Array<PanelAssignedSigner>;
+  /**
+   * Balance is the wallet's last-synced native balance.
+   */
+  balance?: string;
+  /**
+   * ChainID is the blockchain the wallet's address is registered on.
+   */
+  chain_id?: string;
+  /**
+   * Coverage is the wallet's ownership coverage as evaluated at request time:
+   * proven, expired, unproven or retired. Omitted when no coverage reader was
+   * available to evaluate it.
+   */
+  coverage?: 'proven' | 'expired' | 'unproven' | 'retired';
+  /**
+   * CoverageProofID is the newest proof currently proving the wallet. Set
+   * only when Coverage is "proven".
+   */
+  coverage_proof_id?: string;
+  /**
+   * CreatedAt is when the wallet was registered.
+   */
+  created_at?: string;
+  /**
+   * Description is a free-text note about the wallet's purpose.
+   */
+  description?: string;
+  /**
+   * Holdings is the per-wallet token holdings projection from the latest funds
+   * scan snapshot — always present, defaults to [] (never null) for
+   * an unscanned wallet so the client renders an em-dash. The domain type is
+   * reused to avoid minting a second DTO struct; it is a flat array of the
+   * two-scalar {symbol, amount} object (no new named component schema). Since this flat field is the PRIMARY chain's holdings; the
+   * per-network breakdown lives in Networks below.
+   */
+  holdings?: Array<WalletHolding>;
+  /**
+   * ID is the wallet's unique identifier.
+   */
+  id?: string;
+  /**
+   * IsActive is false once the wallet has been soft-deleted.
+   */
+  is_active?: boolean;
+  /**
+   * IsWatched marks a wallet tracked for informational purposes only.
+   */
+  is_watched?: boolean;
+  /**
+   * LastSyncAt is when the wallet's balance was last refreshed. Nil if it has
+   * never been synced.
+   */
+  last_sync_at?: string;
+  /**
+   * Name is the wallet's display name.
+   */
+  name?: string;
+  /**
+   * Networks is the per-network view of the wallet.
+   * A wallet is an ADDRESS carrying a set of registered networks; each entry
+   * exposes that network's chain identity, its inclusion flag, and the holdings
+   * joined from the latest funds snapshot on that chain. ALWAYS present, never
+   * null (defaults to []); a registered-but-never-scanned network renders with
+   * an empty holdings array.
+   */
+  networks?: Array<WalletNetworkResponse>;
+  /**
+   * OnchainOwnerCount is the number of owners (n) in the same read as
+   * onchain_threshold. Omitted when the owner set has never been read.
+   */
+  onchain_owner_count?: number;
+  /**
+   * OnchainOwners are the Safe's owners (lowercased addresses) in the same
+   * read. Omitted when the owner set has never been read.
+   */
+  onchain_owners?: Array<string>;
+  /**
+   * OnchainThreshold is the number of signatures (m) the Safe's contract
+   * requires, read on chain at pinned_block. At least 1 when present; omitted
+   * when the wallet's owner set has never been read.
+   */
+  onchain_threshold?: number;
+  /**
+   * OrganizationID is the owning organization.
+   */
+  organization_id?: string;
+  /**
+   * Owners are the owner contact hints: the FULL list including owners with NO
+   * key-holder, so the frontend can render the routing plan + the Settings
+   * signers section BEFORE any challenge is issued. ALWAYS present, never null
+   * (defaults to []). Each entry carries the owner address, its assigned
+   * key-holder (user_id/email) when given, and an `assigned` flag (true = a
+   * key-holder is set → routed; false = signed directly). Projected straight
+   * from the wallet's Signers JSONB — no extra query.
+   */
+  owners?: Array<OwnerResponse>;
+  /**
+   * PinnedBlock is the finalized block the owner set was read at. Omitted
+   * when the owner set has never been read.
+   */
+  pinned_block?: number;
+  /**
+   * PublicKey is the wallet's public key, when known.
+   */
+  public_key?: string;
+  /**
+   * RetiredAt is when the wallet was retired. A retired wallet is no longer
+   * scanned for funds or included in batch attestation, but its proofs and
+   * history are kept. Omitted for an active wallet.
+   */
+  retired_at?: string;
+  /**
+   * SignerSetReadAt is when the current owner set was read. A re-read that
+   * finds the same set leaves it unchanged. Omitted when the owner set has
+   * never been read.
+   */
+  signer_set_read_at?: string;
+  /**
+   * Status is the derived wallet lifecycle state (QC-17b): "retired" when
+   * RetiredAt is set, else "active". ALWAYS present on both the LIST and the
+   * detail DTO so the UI can render the retired state without null-probing
+   * retired_at. Flat scalar — no new named component schema.
+   */
+  status?: string;
+  /**
+   * UpdatedAt is when the wallet was last modified.
+   */
+  updated_at?: string;
+  /**
+   * Venue is the exchange or custodian the wallet is held at.
+   */
+  venue?: string;
+  /**
+   * VerificationResetAt is the last re-registration or signer-set change.
+   * Each ownership proof a reset invalidated records that reset's instant
+   * itself, and coverage reads the proofs, so an earlier reset this one
+   * replaced still counts. Omitted when the wallet was never reset.
+   */
+  verification_reset_at?: string;
+  /**
+   * WalletType is single_key or safe.
+   */
+  wallet_type?: string;
+};
+
+export type PatchPublicationRequest = {
+  balance_lookups_enabled: boolean;
+};
+
+export type PermissionCatalogEntry = {
+  admin_only?: boolean;
+  conflicts_with?: Array<string>;
+  description?: string;
+  display_name?: string;
+  group?: 'operations' | 'signing' | 'attestation' | 'team' | 'settings' | 'audit';
+  key?: string;
+  level?: 'read' | 'manage' | 'assigned';
 };
 
 export type PermissionResponse = {
@@ -575,49 +2855,391 @@ export type PermissionResponse = {
   resource?: string;
 };
 
-export type ProofOfFundsResponse = {
-  base_currency?: string;
-  block_heights?: {
-    [key: string]: unknown;
-  };
+export type PillarDetailResponse = {
+  /**
+   * Ownership-only enrichment (M1-P2, G-15/16/17). Omitted for funds/liabilities.
+   */
+  address?: string;
+  /**
+   * Funds-only enrichment: holding rows for the funds pillar table. Omitted
+   * for ownership/liabilities.
+   */
+  assets?: Array<FundsHoldingResponse>;
+  chains?: Array<string>;
+  /**
+   * Liabilities-only enrichment: the commitment summary. Omitted for
+   * ownership/funds.
+   */
+  commitment?: LiabilitiesCommitmentResponse;
   created_at?: string;
-  description?: string;
+  holdings?: string;
   id?: string;
-  job_id?: string;
-  last_scan_at?: string;
-  name?: string;
+  liabilities?: string;
+  message?: string;
   organization_id?: string;
-  scan_duration_ms?: number;
-  scan_filters?: {
-    [key: string]: unknown;
-  };
-  scan_type?: string;
+  signatures?: Array<OwnershipSignatureResponse>;
   status?: string;
-  total_value?: string;
+  type?: string;
   updated_at?: string;
-  user_id?: string;
+  /**
+   * ValuationID is the proof of funds' valuation; omitted for the other pillars.
+   */
+  valuation_id?: string;
+  verified_at?: string;
 };
 
-export type ProofOfLiabilitiesResponse = {
-  created_at?: string;
-  currency?: string;
-  data_hash?: string;
-  description?: string;
+export type Plan = {
+  assets?: Array<AssetPlan>;
+  chains?: Array<ChainPlan>;
+  mode?: Mode;
+  refusals?: Array<Reason>;
+  staleness_seconds?: number;
+  target_as_of?: string;
+  warnings?: Array<Reason>;
+};
+
+export type PlanTestRequest = {
+  as_of?: string;
+  catalog_entry_id?: string;
+};
+
+export type PlanTestResponse = {
+  as_of?: string;
+  asset_plan?: AssetPlan;
+  catalog_entry_id?: string;
+  mode?: 'now' | 'reconstruct';
+  refusals?: Array<Reason>;
+  result?: PanelAssetPriceResponse;
+};
+
+export type PolicyPatchRequest = {
+  allow_coarse_historical?: boolean;
+  ambient_refresh_seconds?: number;
+  ambient_retention_days?: number;
+  clear_fixed_price?: boolean;
+  confident_sources?: number;
+  conversion_entries?: {
+    [key: string]: string;
+  };
+  cutoff_mismatch_blocks?: boolean;
+  cutoff_tolerance_seconds?: number;
+  expected_version: number;
+  fixed_price?: string;
+  max_dispersion?: string;
+  peg_band?: string;
+  staleness_seconds?: number;
+  under_quorum_blocks?: boolean;
+  valuation_max_age_seconds?: number;
+};
+
+export type PolicyValuesDto = {
+  allow_coarse_historical?: boolean;
+  confident_sources?: number;
+  fixed_price?: string;
+  fixed_price_set_by?: string;
+  max_dispersion?: string;
+  peg_band?: string;
+  staleness_seconds?: number;
+  under_quorum_blocks?: boolean;
+};
+
+export type PrecomputeStartedResponse = {
+  job_id?: string;
+};
+
+export type PriceQuoteResponse = {
+  excluded_reason?:
+    | 'stale'
+    | 'outlier'
+    | 'out_of_range'
+    | 'unauthenticated'
+    | 'conversion_unavailable'
+    | 'quote_currency_mismatch'
+    | 'error';
+  feed_key?: string;
+  granularity_seconds?: number;
+  included?: boolean;
+  observed_at?: string;
+  price?: string;
+  quote_currency?: string;
+  raw_ref?: string;
+  source_id?: string;
+  source_name?: string;
+};
+
+export type PriceSourceConfigInput = {
+  /**
+   * BaseURL is the endpoint the source's adapter calls: an absolute http or
+   * https URL with no userinfo, query or fragment. Set a key with the key
+   * rotation route, which stores it encrypted and sends it in a header; do
+   * not put one in the path.
+   */
+  base_url?: string;
+  /**
+   * TimeoutMs is the per-request timeout, from 1 to 60000 milliseconds.
+   */
+  timeout_ms?: number;
+};
+
+export type PriceSourceHealthResponse = {
+  /**
+   * CanaryFeed is the feed the health canary quotes the source with; absent
+   * when none is declared, which leaves the source down.
+   */
+  canary_feed?: string;
+  /**
+   * Capabilities is the source's declared contract.
+   */
+  capabilities?: {
+    [key: string]: unknown;
+  };
+  /**
+   * Error is a short reason the canary quote was not up, present only when
+   * Status is "degraded" or "down".
+   */
+  error?: string;
+  /**
+   * Freq is the refresh cadence label (e.g. "per heartbeat", "every 30s").
+   */
+  freq?: string;
+  /**
+   * HasKey reports whether an (encrypted) API key is configured. The key itself
+   * is never serialized.
+   */
+  has_key?: boolean;
   id?: string;
-  latest_version?: number;
-  liability_file_id?: string;
-  merkle_root_sha256?: string;
+  is_active?: boolean;
+  /**
+   * KeyExpiry is the display date/label for the API key's expiry (empty when the
+   * source is keyless or has no expiry).
+   */
+  key_expiry?: string;
+  /**
+   * Kind is the source's declared kind: index, offchain_oracle,
+   * onchain_oracle, venue, dex or fixed.
+   */
+  kind?: string;
+  /**
+   * KindLabel is the operator's display label for the source class (e.g.
+   * "On-chain oracle", "Market data API").
+   */
+  kind_label?: string;
   name?: string;
-  organization_id?: string;
-  processed_at?: string;
-  proof_mode?: string;
+  /**
+   * Note is an operator annotation.
+   */
+  note?: string;
+  /**
+   * Probe is the last canary run's finding for the source; absent while it
+   * is not probed or off.
+   */
+  probe?: PriceSourceProbeResponse;
+  /**
+   * QuotaPct is the percentage of the source's request quota consumed, when the
+   * source reports one (nil == no quota information, distinct from 0%).
+   */
+  quota_pct?: number;
+  /**
+   * QuoteCurrency is the currency the source's quotes are denominated in.
+   */
+  quote_currency?: string;
+  /**
+   * Status is "up", "degraded" or "down" from the last canary run, "off" for
+   * an inactive source, or "not_probed" when no run has recorded the source
+   * yet.
+   */
   status?: string;
-  total_amount?: string;
+};
+
+export type PriceSourceProbeResponse = {
+  detail?: string;
+  observed_at?: string;
+  probed_at?: string;
+  status?: string;
+  valuation_id?: string;
+};
+
+export type PricingFeedMappingResponse = {
+  catalog_entry_id?: string;
+  created_at?: string;
+  feed_chain_id?: string;
+  feed_key?: string;
+  feed_kind?: string;
+  id?: string;
+  source_id?: string;
+  source_name?: string;
   updated_at?: string;
-  user_id?: string;
+};
+
+export type PricingPolicyResponse = {
+  global?: PolicyValuesDto;
+  org_wide?: OrgWidePolicyDto;
+  overrides?: Array<OverrideDto>;
+  version?: number;
+};
+
+export type ProofOfFundsResponse = {
+  anchors?: Array<AnchorResponse>;
+  as_of?: string;
+  capture_mode?: 'scheduled' | 'now' | 'reconstruct';
+  chain_count?: number;
+  completed_at?: string;
+  created_at?: string;
+  failed_count?: number;
+  holding_count?: number;
+  id?: string;
+  job_id?: string;
+  late_by_seconds?: number;
+  plan?: {
+    [key: string]: unknown;
+  };
+  reasons?: Array<Reason>;
+  requested_as_of?: string;
+  scheduled_at?: string;
+  scope?: {
+    [key: string]: unknown;
+  };
+  started_at?: string;
+  status?:
+    | 'pending'
+    | 'planning'
+    | 'scanning'
+    | 'valuing'
+    | 'completed'
+    | 'incomplete'
+    | 'failed'
+    | 'cancelled';
+  totals?: ProofTotalsResponse;
+  used_by_count?: number;
+  valuation_id?: string;
+  wallet_count?: number;
+  wallets_read?: number;
+};
+
+export type ProofOfReservesCounts = {
+  status?: {
+    [key: string]: number;
+  };
+  verdict?: {
+    [key: string]: number;
+  };
+};
+
+export type ProofOfReservesListMeta = {
+  counts?: ProofOfReservesCounts;
+  page?: number;
+  per_page?: number;
+  request_id?: string;
+  total?: number;
+};
+
+export type ProofOfReservesListResponse = {
+  data?: Array<ProofOfReservesSummary>;
+  meta?: ProofOfReservesListMeta;
+};
+
+export type ProofOfReservesResponse = {
+  applied_equivalences?: Array<AppliedEquivalence>;
+  as_of?: string;
+  attestation_key_id?: string;
+  completed_at?: string;
+  coverage?: Array<WalletCoverageResponse>;
+  coverage_counts?: CoverageCountsResponse;
+  created_at?: string;
+  cutoff_at?: string;
+  disclosed_unowned_usd?: string;
+  /**
+   * FourEyesBlocksYou is true when the four-eyes rule is why the caller may
+   * not publish this proof: they hold reserves:publish on it but started it,
+   * directly or through their personal token, or committed the liability set
+   * it reads.
+   */
+  four_eyes_blocks_you?: boolean;
+  /**
+   * FourEyesPublish is the organization's current four-eyes publish policy.
+   */
+  four_eyes_publish?: boolean;
+  holdings_proven_usd?: string;
+  holdings_total_usd?: string;
+  id?: string;
+  job_id?: string;
+  /**
+   * LiabilitiesCommittedBy is the user who committed the liability set the
+   * proof reads, absent when the set names nobody.
+   */
+  liabilities_committed_by?: string;
+  liabilities_usd?: string;
+  lines?: Array<LineResponse>;
+  manifest_hash?: string;
+  mode?: 'per_asset' | 'cross_asset';
+  proof_of_funds_id?: string;
+  proof_of_liabilities_id?: string;
+  ratio_proven?: string;
+  ratio_total?: string;
+  reason_count?: number;
+  reasons?: Array<Reason>;
+  signature?: string;
+  started_by?: string;
+  started_by_api_key_id?: string;
+  status?: 'pending' | 'running' | 'signing' | 'completed' | 'failed' | 'cancelled';
+  valuation_id?: string;
+  verdict?: 'solvent' | 'insolvent' | 'incomplete';
+};
+
+export type ProofOfReservesStartedResponse = {
+  funds_job_id?: string;
+  job_id?: string;
+  proof_of_reserves_id?: string;
+};
+
+export type ProofOfReservesSummary = {
+  as_of?: string;
+  completed_at?: string;
+  coverage_counts?: CoverageCountsResponse;
+  created_at?: string;
+  cutoff_at?: string;
+  disclosed_unowned_usd?: string;
+  holdings_proven_usd?: string;
+  holdings_total_usd?: string;
+  id?: string;
+  job_id?: string;
+  liabilities_usd?: string;
+  mode?: 'per_asset' | 'cross_asset';
+  proof_of_funds_id?: string;
+  proof_of_liabilities_id?: string;
+  ratio_proven?: string;
+  ratio_total?: string;
+  reason_count?: number;
+  started_by?: string;
+  started_by_api_key_id?: string;
+  status?: 'pending' | 'running' | 'signing' | 'completed' | 'failed' | 'cancelled';
+  valuation_id?: string;
+  verdict?: 'solvent' | 'insolvent' | 'incomplete';
+};
+
+export type ProofTotalsResponse = {
+  priced_usd?: string;
+  unpriced_entries?: number;
+};
+
+export type ProviderCapabilityDriftResponse = {
+  capability?: string;
+  detail?: string;
+  detected_at?: string;
+};
+
+export type ProviderConnectionCheck = {
+  check?: string;
+  detail?: string;
+  status?: string;
 };
 
 export type ProviderResponse = {
+  /**
+   * CapabilityDrift is present while the provider's last health probe found
+   * it serving less than its declared capabilities.
+   */
+  capability_drift?: ProviderCapabilityDriftResponse;
   chain_id?: string;
   config?: {
     [key: string]: unknown;
@@ -630,12 +3252,300 @@ export type ProviderResponse = {
   is_healthy?: boolean;
   last_checked_at?: string;
   last_error?: string;
+  last_error_code?:
+    | 'config'
+    | 'auth'
+    | 'rejected'
+    | 'rate_limited'
+    | 'unavailable'
+    | 'transport'
+    | 'unknown';
   name?: string;
   priority?: number;
   provider_type?: string;
   updated_at?: string;
   url?: string;
 };
+
+export type PublicAnchor = {
+  anchored_at?: string;
+  block?: string;
+  chain?: string;
+  tx_hash?: string;
+};
+
+export type PublicArtifact = {
+  name?: string;
+  sha256?: string;
+  size?: number;
+  url?: string;
+};
+
+export type PublicCommitmentResponse = {
+  attestation_key_id?: string;
+  circuit_version?: number;
+  committed_at?: string;
+  format_version?: number;
+  manifest?: {
+    [key: string]: unknown;
+  };
+  manifest_canonical?: string;
+  manifest_hash?: string;
+  operator_display_name?: string;
+  partitions?: Array<PublicPartition>;
+  signature?: string;
+  srs_id?: string;
+};
+
+export type PublicIdentity = {
+  display_name?: string;
+  slug?: string;
+};
+
+export type PublicInputs = {
+  balance?: string;
+  identity_commitment?: string;
+  nonce_commitment?: string;
+  root?: string;
+  root_sum?: string;
+};
+
+export type PublicKey = {
+  algorithm?: string;
+  key_id?: string;
+  public_key?: string;
+  valid_from?: string;
+  valid_to?: string;
+};
+
+export type PublicPartition = {
+  catalog_entry_id?: string;
+  decimals?: number;
+  leaf_count?: number;
+  root?: string;
+  symbol?: string;
+  total?: string;
+  total_minor?: string;
+};
+
+export type PublicProfile = {
+  current?: PublicPublicationSummary;
+  display_name?: string;
+  past?: Array<PublicPublicationSummary>;
+  slug?: string;
+};
+
+export type PublicProfileRequest = {
+  public_display_name: string;
+  public_slug?: string;
+};
+
+export type PublicProfileResponse = {
+  public_display_name?: string;
+  public_slug?: string;
+};
+
+export type PublicPublicationResponse = {
+  anchor?: PublicAnchor;
+  artifacts?: Array<PublicArtifact>;
+  as_of?: string;
+  attestation_key_id?: string;
+  balance_lookups_enabled?: boolean;
+  bundle_format_version?: number;
+  bundle_hash?: string;
+  code?: string;
+  organization?: PublicIdentity;
+  published_at?: string;
+  status?: 'published' | 'superseded' | 'withdrawn' | 'not_found';
+  superseded_by?: string;
+  verdict?: string;
+  withdrawal_reason?: string;
+  withdrawn_at?: string;
+};
+
+export type PublicPublicationSummary = {
+  anchor?: PublicAnchor;
+  as_of?: string;
+  code?: string;
+  published_at?: string;
+  status?: 'published' | 'superseded' | 'withdrawn';
+  verdict?: 'solvent' | 'insolvent' | 'incomplete';
+};
+
+export type PublicationAnchor = {
+  anchored_at?: string;
+  block?: string;
+  chain?: string;
+  tx_hash?: string;
+};
+
+export type PublicationRefusedResponse = {
+  job_id?: string;
+  message?: string;
+  reason?:
+    | 'proof_not_completed'
+    | 'verdict_acknowledgement_required'
+    | 'public_profile_required'
+    | 'already_published'
+    | 'publish_in_flight'
+    | 'withdraw_in_flight'
+    | 'not_withdrawable'
+    | 'not_cancellable'
+    | 'lookups_not_applicable'
+    | 'public_storage_unavailable'
+    | 'public_slug_taken'
+    | 'public_slug_set_once'
+    | 'older_than_published';
+};
+
+export type PublicationResponse = {
+  /**
+   * Anchor is the on-chain anchoring of the bundle hash, absent until one exists.
+   */
+  anchor?: PublicationAnchor;
+  artifacts?: Array<ArtifactResponse>;
+  as_of?: string;
+  attestation_key_id?: string;
+  balance_lookups_enabled?: boolean;
+  bundle_hash?: string;
+  cancelled_at?: string;
+  code?: string;
+  /**
+   * CommitmentCommittedBy is the user who committed the liabilities the
+   * proof used.
+   */
+  commitment_committed_by?: string;
+  created_at?: string;
+  /**
+   * FourEyesPublish is the organization's four-eyes setting when the publish
+   * was authorized, recorded once the publication is published.
+   */
+  four_eyes_publish?: boolean;
+  id?: string;
+  job_id?: string;
+  organization_id?: string;
+  page_url?: string;
+  precompute_balances?: boolean;
+  proof_of_reserves_id?: string;
+  /**
+   * ProofStartedBy is the user who started the proof, directly or through
+   * one of their API keys. Absent for a service key. This field and the next
+   * two are recorded once the publication is published.
+   */
+  proof_started_by?: string;
+  /**
+   * ProofStartedByAPIKey is true when an API key started the proof.
+   */
+  proof_started_by_api_key?: boolean;
+  published_at?: string;
+  published_by?: string;
+  published_by_api_key?: boolean;
+  status?: 'pending' | 'published' | 'superseded' | 'withdrawn' | 'cancelled';
+  superseded_by?: string;
+  verdict?: 'solvent' | 'insolvent' | 'incomplete';
+  withdrawal_reason?: string;
+  withdrawn_at?: string;
+  withdrawn_by_platform?: boolean;
+};
+
+export type PublicationsPublicationResponse = {
+  /**
+   * Anchor is the on-chain anchoring of the bundle hash, absent until one exists.
+   */
+  anchor?: PublicationAnchor;
+  artifacts?: Array<ArtifactResponse>;
+  as_of?: string;
+  attestation_key_id?: string;
+  balance_lookups_enabled?: boolean;
+  bundle_hash?: string;
+  cancelled_at?: string;
+  code?: string;
+  /**
+   * CommitmentCommittedBy is the user who committed the liabilities the
+   * proof used.
+   */
+  commitment_committed_by?: string;
+  created_at?: string;
+  /**
+   * FourEyesPublish is the organization's four-eyes setting when the publish
+   * was authorized, recorded once the publication is published.
+   */
+  four_eyes_publish?: boolean;
+  id?: string;
+  job_id?: string;
+  organization_id?: string;
+  page_url?: string;
+  precompute_balances?: boolean;
+  proof_of_reserves_id?: string;
+  /**
+   * ProofStartedBy is the user who started the proof, directly or through
+   * one of their API keys. Absent for a service key. This field and the next
+   * two are recorded once the publication is published.
+   */
+  proof_started_by?: string;
+  /**
+   * ProofStartedByAPIKey is true when an API key started the proof.
+   */
+  proof_started_by_api_key?: boolean;
+  published_at?: string;
+  published_by?: string;
+  published_by_api_key?: boolean;
+  status?: 'pending' | 'published' | 'superseded' | 'withdrawn' | 'cancelled';
+  superseded_by?: string;
+  verdict?: 'solvent' | 'insolvent' | 'incomplete';
+  withdrawal_reason?: string;
+  withdrawn_at?: string;
+  withdrawn_by_platform?: boolean;
+};
+
+export type PublishRequest = {
+  /**
+   * AcknowledgeVerdict confirms publishing an insolvent or incomplete proof.
+   */
+  acknowledge_verdict?: boolean;
+  /**
+   * PrecomputeBalances generates every user's inclusion proof ahead of time,
+   * so balance checks answer at once.
+   */
+  precompute_balances?: boolean;
+};
+
+export type PublishResponse = {
+  job_id?: string;
+  publication?: PublicationResponse;
+};
+
+export type Reason = {
+  code?: ReasonCode;
+  severity?: ReasonSeverity;
+  subject?: Subject;
+};
+
+export type ReasonCode =
+  | 'funds_not_completed'
+  | 'liabilities_not_committed'
+  | 'liabilities_resum_mismatch'
+  | 'holding_failed'
+  | 'asset_unpriced'
+  | 'price_under_quorum'
+  | 'price_dispersion'
+  | 'price_stale_source'
+  | 'wallet_unproven'
+  | 'wallet_proof_expired'
+  | 'wallet_retired'
+  | 'wallet_ownership_simulated'
+  | 'liabilities_asset_not_held'
+  | 'valuation_older_than_policy'
+  | 'cutoff_mismatch'
+  | 'capture_late'
+  | 'price_granularity_coarse'
+  | 'price_depeg'
+  | 'price_fixed_by_policy'
+  | 'conversion_unavailable'
+  | 'chain_no_historical_state'
+  | 'provider_capability_drift';
+
+export type ReasonSeverity = 'blocking' | 'warning';
 
 export type RefreshRequest = {
   refresh_token?: string;
@@ -649,7 +3559,7 @@ export type RefreshResponse = {
 };
 
 export type RegenerateRecoveryCodesRequest = {
-  code?: string;
+  code: string;
 };
 
 export type RegenerateRecoveryCodesResponse = {
@@ -657,6 +3567,7 @@ export type RegenerateRecoveryCodesResponse = {
 };
 
 export type RegisterClientRequest = {
+  availability?: 'owner_org' | 'any_org';
   client_name: string;
   grant_types?: Array<string>;
   logo_uri?: string;
@@ -666,6 +3577,7 @@ export type RegisterClientRequest = {
 };
 
 export type RegisterClientResponse = {
+  availability?: 'owner_org' | 'any_org';
   client_id?: string;
   client_name?: string;
   /**
@@ -686,7 +3598,7 @@ export type RegisterClientResponse = {
 };
 
 export type RegisterRequest = {
-  email?: string;
+  email: string;
   first_name?: string;
   /**
    * optional invitation token. When non-empty, the
@@ -699,73 +3611,192 @@ export type RegisterRequest = {
   invitation_token?: string;
   last_name?: string;
   /**
-   * OrganizationID is optional — used by the hybrid resolveLoginOrgID flow at
+   * OrganizationID is optional: used by the hybrid resolveLoginOrgID flow at
    * the service layer (RESEARCH §12).
    */
   organization_id?: string;
-  password?: string;
+  password: string;
 };
 
 export type RegisterResponse = {
   message?: string;
 };
 
-export type ReportResponse = {
+export type RegisterTokenRequest = {
+  chain_id: string;
+  contract_address: string;
+};
+
+export type RegisterTokenResponse = {
+  catalog_entry_id?: string;
+  /**
+   * CatalogRequest is the newest request to list the token's catalog entry,
+   * absent when there has been none.
+   */
+  catalog_request?: TokenCatalogRequestState;
+  chain_id?: string;
+  /**
+   * ChainName is the chain's display name, or its name when it has none.
+   */
+  chain_name?: string;
+  contract_address?: string;
   created_at?: string;
-  detail_level?: string;
+  decimals?: number;
+  id?: string;
+  is_active?: boolean;
+  /**
+   * Listing is the listing state of the token's catalog entry: listed in the
+   * platform catalog, or unlisted and private to the organizations tracking it.
+   */
+  listing?: 'listed' | 'unlisted';
+  logo_url?: string;
+  name?: string;
+  organization_id?: string;
+  pricing?: TokenPricing;
+  symbol?: string;
+  token_type?: string;
+  updated_at?: string;
+  warnings?: Array<TokenWarning>;
+};
+
+export type ReorderProvidersRequest = {
+  provider_ids?: Array<string>;
+};
+
+export type ReportCreatedResponse = {
+  job_id?: string;
+  report?: ReportResponse;
+};
+
+export type ReportPublicationResponse = {
+  bundle_sha256?: string;
+  code?: string;
+  id?: string;
+};
+
+export type ReportRefusedResponse = {
+  job_id?: string;
+  message?: string;
+  reason?: 'artifact_not_ready' | 'report_in_progress' | 'report_not_ready';
+};
+
+export type ReportResponse = {
+  artifact_id?: string;
+  artifact_kind?: 'reserves_bundle' | 'liabilities_manifest';
+  artifact_ref?: string;
+  artifact_sha256?: string | null;
+  created_at?: string;
+  detail_level?: 'summary' | 'full';
   error_message?: string;
-  file_path?: string;
   file_size?: number;
-  format?: string;
+  format?: 'pdf' | 'csv';
   generated_at?: string;
   id?: string;
   job_id?: string;
-  jurisdiction?: string;
-  metadata?: {
-    [key: string]: unknown;
-  };
-  organization_id?: string;
-  proof_id?: string;
-  proof_type?: string;
-  status?: string;
+  jurisdiction?: 'generic' | 'eu' | 'us';
+  publication?: ReportPublicationResponse | null;
+  requested_by?: string;
+  requested_by_api_key?: boolean;
+  status?: 'pending' | 'generating' | 'completed' | 'failed';
   updated_at?: string;
-  user_id?: string;
 };
 
 export type RequestPasswordResetRequest = {
-  email?: string;
+  email: string;
+};
+
+export type RequestReportRequest = {
+  artifact_ref: string;
+  detail_level?: 'summary' | 'full';
+  format: 'pdf' | 'csv';
+  jurisdiction?: 'generic' | 'eu' | 'us';
 };
 
 export type RequestVerifyRequest = {
   email?: string;
 };
 
-export type ResetPasswordRequest = {
-  new_password?: string;
+export type ReservesDetailResponse = {
+  applied_equivalences?: Array<{
+    [key: string]: unknown;
+  }>;
+  as_of?: string;
+  completed_at?: string;
+  coverage_counts?: CoverageCountsResponse;
+  created_at?: string;
+  cutoff_at?: string;
+  /**
+   * nil (JSON null) means "not computed", never "0".
+   */
+  holdings_proven_usd?: string;
+  holdings_total_usd?: string;
+  id?: string;
+  job_id?: string;
+  liabilities_usd?: string;
+  mode?: 'per_asset' | 'cross_asset';
+  organization_id?: string;
+  proof_of_funds_id?: string;
+  proof_of_liabilities_id?: string;
+  ratio_proven?: string;
+  ratio_total?: string;
+  reasons?: Array<Reason>;
+  started_by?: string;
+  started_by_api_key_id?: string;
+  status?: 'pending' | 'running' | 'signing' | 'completed' | 'failed' | 'cancelled';
+  updated_at?: string;
+  valuation_id?: string;
+  verdict?: 'solvent' | 'insolvent' | 'incomplete';
 };
 
-export type Role = {
-  created_at?: string;
-  default_source?: string;
-  description?: string;
-  id?: string;
-  is_admin?: boolean;
-  is_immutable?: boolean;
-  is_system?: boolean;
-  name?: string;
-  organization_id?: string;
-  permissions?: Array<Permission>;
-  slug?: string;
-  updated_at?: string;
+export type ReservesScanScopeRequest = {
+  chain_ids?: Array<string>;
+  token_ids?: Array<string>;
+};
+
+export type ResetPasswordRequest = {
+  new_password: string;
+};
+
+export type ResolveAssetRequest = {
+  catalog_entry_id?: string;
+  native_chain_id?: string;
+  register_new_chain_id?: string;
+  register_new_contract?: string;
+  register_new_decimals?: number;
+  register_new_name?: string;
+};
+
+export type ResolvedPolicyResponse = {
+  catalog_entry_id?: string;
+  values?: PolicyValuesDto;
+  version?: number;
+};
+
+export type RevokeGrantBody = {
+  reason?: string;
 };
 
 export type RoleResponse = {
+  /**
+   * ConflictsAcknowledged is true when the role holds a conflicting pair of
+   * permissions that was approved; built-in roles count as approved.
+   */
+  conflicts_acknowledged?: boolean;
   created_at?: string;
   description?: string;
   id?: string;
+  is_immutable?: boolean;
+  /**
+   * IsSystem and IsImmutable mark a built-in role, which can only be cloned.
+   */
   is_system?: boolean;
+  /**
+   * MemberCount is how many members of the organization hold the role.
+   */
+  member_count?: number;
   name?: string;
   organization_id?: string;
+  permission_keys?: Array<string>;
   permissions?: Array<PermissionResponse>;
   slug?: string;
   updated_at?: string;
@@ -780,21 +3811,195 @@ export type RotateSecretResponse = {
   client_secret_last4?: string;
 };
 
-export type ScanJobResponse = {
-  completed_at?: string;
-  created_at?: string;
-  error?: string;
+export type RotateSourceKeyRequest = {
+  /**
+   * APIKey is the new plaintext key. Required, min length 8. It is encrypted at
+   * rest and NEVER returned in any response.
+   */
+  api_key: string;
+  /**
+   * KeyExpiry is an optional display date/label for the new key's expiry. When
+   * present it replaces the stored key_expiry; when omitted the stored value is
+   * left untouched.
+   */
+  key_expiry?: string;
+};
+
+export type RunAnchorResponse = {
+  block_time?: string;
+  chain_id?: string;
+  chain_name?: string;
+  hash?: string;
+  number?: number;
+  provider_id?: string;
+  rule?: string;
+  status?: string;
+};
+
+export type RunCellCtaResponse = {
+  label?: string;
+  /**
+   * RouteHint is one of: network | pricing | catalog.
+   */
+  route_hint?: string;
+};
+
+export type RunCellResponse = {
+  balance?: string;
+  column_key?: string;
+  cta?: RunCellCtaResponse;
+  /**
+   * RootCause is the platform-side explanation, empty when the cell is ok.
+   */
+  root_cause?: string;
+  state?: string;
+  usd?: string;
+};
+
+export type RunColumnResponse = {
+  is_native_gap?: boolean;
+  key?: string;
+  label?: string;
+};
+
+export type RunDetailResponse = {
+  anchors?: Array<RunAnchorResponse>;
+  duration_ms?: number;
+  grids?: Array<NetworkGridResponse>;
+  has_prices?: boolean;
   id?: string;
+  org_name?: string;
   organization_id?: string;
-  progress?: number;
-  resource_id?: string;
-  result?: {
-    [key: string]: unknown;
-  };
+  queries_ok?: number;
+  raw_status?: string;
+  reasons?: Array<Reason>;
+  reported_total_usd?: string;
   started_at?: string;
   status?: string;
-  type?: string;
-  updated_at?: string;
+  /**
+   * Trigger is how the run was captured: its capture mode (now, scheduled or
+   * reconstruct).
+   */
+  trigger?: string;
+  /**
+   * ValuationID is the run's valuation; omitted until the run is priced.
+   */
+  valuation_id?: string;
+  warnings?: RunWarningsResponse;
+};
+
+export type RunWalletRowResponse = {
+  address?: string;
+  cells?: Array<RunCellResponse>;
+  label?: string;
+  wallet_id?: string;
+};
+
+export type RunWarningsResponse = {
+  failed_queries?: number;
+  native_gap?: boolean;
+  single_source?: number;
+  unpriced?: number;
+  withheld?: number;
+};
+
+export type ScanRunListResponse = {
+  metrics?: ScanRunMetricsResponse;
+  runs?: Array<ScanRunSummaryResponse>;
+};
+
+export type ScanRunMetricsResponse = {
+  incomplete?: number;
+  median_duration_ms?: number;
+  runs_24h?: number;
+  with_warnings?: number;
+};
+
+export type ScanRunSummaryResponse = {
+  duration_ms?: number;
+  has_prices?: boolean;
+  id?: string;
+  network_count?: number;
+  org_name?: string;
+  organization_id?: string;
+  /**
+   * RawStatus is the raw persisted proof status: valuing | completed |
+   * incomplete | failed | cancelled.
+   */
+  raw_status?: string;
+  /**
+   * ReportedTotalUsd is the run's total valued USD as a decimal string, or "" when
+   * the run produced no prices (never "0", which would read as proven-zero).
+   */
+  reported_total_usd?: string;
+  started_at?: string;
+  /**
+   * Status is the design-facing derived verdict: complete | warnings | incomplete.
+   */
+  status?: string;
+  wallet_count?: number;
+  warnings?: RunWarningsResponse;
+};
+
+export type ScanScopeRequest = {
+  chain_ids?: Array<string>;
+  price_catalog_entry_ids?: Array<string>;
+  token_ids?: Array<string>;
+  wallet_ids?: Array<string>;
+};
+
+export type ScheduleRefusal = {
+  code?: string;
+  details?: ScheduleRefusalDetails;
+  message?: string;
+  request_id?: string;
+};
+
+export type ScheduleRefusalDetails = {
+  chain_id?: string;
+  field?: 'cron' | 'timezone' | 'keep_last' | 'chain_ids' | 'token_ids' | 'organization';
+  reason?: string;
+};
+
+export type ScheduleRefusalResponse = {
+  error?: ScheduleRefusal;
+};
+
+export type SealStartedResponse = {
+  job_id?: string;
+  set?: LiabilitySetResponse;
+};
+
+export type SearchHitResponse = {
+  /**
+   * CreatedAt is when the record was created.
+   */
+  created_at?: string;
+  /**
+   * Detail is a short secondary line for the record.
+   */
+  detail?: string;
+  /**
+   * Exact is true when the whole value matched, not just a prefix or part.
+   */
+  exact?: boolean;
+  /**
+   * ID is the record's identifier.
+   */
+  id?: string;
+  /**
+   * Label is the record's display name.
+   */
+  label?: string;
+  /**
+   * Matched is the field that matched best: id, manifest_hash, name or address.
+   */
+  matched?: 'id' | 'manifest_hash' | 'name' | 'address';
+  /**
+   * Type is the kind of record: wallet, ownership_proof, proof_of_funds,
+   * proof_of_reserves or commitment.
+   */
+  type?: 'wallet' | 'ownership_proof' | 'proof_of_funds' | 'proof_of_reserves' | 'commitment';
 };
 
 export type SendTestNotificationRequest = {
@@ -806,6 +4011,10 @@ export type SendTestNotificationRequest = {
 
 export type ServiceUserResponse = {
   created_at?: string;
+  /**
+   * DisabledAt is set while the service user is disabled and null otherwise.
+   */
+  disabled_at?: string;
   id?: string;
   name?: string;
   organization_id?: string;
@@ -822,81 +4031,610 @@ export type SessionInfoDto = {
   user_agent?: string;
 };
 
+export type SetFeedMappingsRequest = {
+  /**
+   * Feeds replaces every existing feed_mappings row for this catalog entry. An
+   * empty or absent list clears all mappings (so no `required`).
+   */
+  feeds?: Array<FeedMappingInput>;
+};
+
+export type SetMemberLimitRequest = {
+  member_limit?: number | null;
+};
+
+export type SetOrgDemoRequest = {
+  is_demo: boolean;
+};
+
 export type SignatureResponse = {
   algorithm?: string;
+  /**
+   * ChallengeID is the challenge the signature was produced over; null on legacy rows.
+   */
+  challenge_id?: string;
   created_at?: string;
   id?: string;
   is_valid?: boolean;
   proof_of_ownership_id?: string;
   public_key?: string;
+  scheme?: string;
   signature?: string;
+  /**
+   * SubmittedByUserID is the authenticated caller who submitted the signature; null on legacy rows.
+   */
+  submitted_by_user_id?: string;
+};
+
+export type SignerProgress = {
+  distinct_valid_count?: number;
+  signed_owners?: Array<string>;
+};
+
+export type SignerQueueItemResponse = {
+  /**
+   * ChainSymbol is the badge symbol of the proof's chain, so the signing portal
+   * needs no chain catalog (a signer-only user cannot read it). Omitted when the
+   * row has no proof or its chain does not resolve.
+   */
+  chain_symbol?: string;
+  /**
+   * ChallengeExpiresAt is when the assigned signer's active challenge expires, or
+   * null when no challenge is currently active for the proof (never issued, already
+   * consumed, or expired).
+   */
+  challenge_expires_at?: string;
+  created_at?: string;
+  /**
+   * SIGN-01
+   */
+  decline_reason?: string;
+  /**
+   * SIGN-01
+   */
+  declined_at?: string;
+  email?: string;
+  expected_address?: string;
+  id?: string;
+  notified_at?: string;
+  organization_id?: string;
+  proof_of_ownership_id?: string;
+  reminded_at?: string;
+  /**
+   * Gap C: when the matching owner key signed
+   */
+  signed_at?: string;
+  /**
+   * Gap D: who submitted the signature
+   */
+  signed_by_user_id?: string;
+  status?: string;
+  updated_at?: string;
+  user_id?: string;
+  wallet_id?: string;
+};
+
+export type SignerRequestQueueEntry = {
+  challenge_expires_at?: string;
+  created_at?: string;
+  /**
+   * SIGN-01
+   */
+  decline_reason?: string;
+  /**
+   * SIGN-01
+   */
+  declined_at?: string;
+  email?: string;
+  expected_address?: string;
+  id?: string;
+  notified_at?: string;
+  organization_id?: string;
+  proof_of_ownership_id?: string;
+  reminded_at?: string;
+  /**
+   * Gap C: when the matching owner key signed
+   */
+  signed_at?: string;
+  /**
+   * Gap D: who submitted the signature
+   */
+  signed_by_user_id?: string;
+  status?: string;
+  updated_at?: string;
+  user_id?: string;
+  wallet_id?: string;
+};
+
+export type SnapshotGrantResponse = {
+  expires_at?: string;
+  granted_at?: string;
+  granted_by?: string;
+  id?: string;
+  permission?: string;
+  scope_id?: string;
+  scope_type?: string;
+  /**
+   * Status is active, or expired when the expiry had passed by the snapshot time.
+   */
+  status?: 'active' | 'expired';
+};
+
+export type SnapshotResponse = {
+  as_of?: string;
+  subjects?: Array<SnapshotSubjectResponse>;
+};
+
+export type SnapshotRoleResponse = {
+  id?: string;
+  name?: string;
+  slug?: string;
+};
+
+export type SnapshotSubjectResponse = {
+  email?: string;
+  grants?: Array<SnapshotGrantResponse>;
+  name?: string;
+  permissions?: Array<string>;
+  role?: SnapshotRoleResponse;
+  subject_id?: string;
+  subject_type?: 'user' | 'service_user';
+};
+
+export type SourceCapabilities = {
+  auth?: string;
+  cost_tier?: string;
+  feed_keys?: Array<string>;
+  historical?: Array<HistoricalWindow>;
+  point_semantics?: string;
+  rate_limit?: string;
+  reproducible?: string;
+};
+
+export type SourcePlan = {
+  granularity_seconds?: number;
+  skip_reason?: string;
+  source_id?: string;
+  source_name?: string;
+  status?: string;
+};
+
+export type SpecialRequestCommentResponse = {
+  comment?: string;
+  created_at?: string;
+  id?: string;
+  is_internal?: boolean;
+  user_id?: string;
+};
+
+export type SpecialRequestResponse = {
+  assigned_to?: string;
+  /**
+   * Comments is every comment on the request, internal ones included, oldest
+   * first. Only GET /panel/special-requests/{id} sends it.
+   */
+  comments?: Array<SpecialRequestCommentResponse>;
+  completed_at?: string;
+  created_at?: string;
+  description?: string;
+  estimated_cost?: string;
+  estimated_hours?: number;
+  id?: string;
+  metadata?: {
+    [key: string]: unknown;
+  };
+  organization_id?: string;
+  /**
+   * OrganizationName is the requesting organization's name.
+   */
+  organization_name?: string;
+  priority?: string;
+  request_type?: string;
+  status?: string;
+  title?: string;
+  updated_at?: string;
+  user_id?: string;
+};
+
+export type SpecialRequestsSpecialRequestResponse = {
+  assigned_to?: string;
+  completed_at?: string;
+  created_at?: string;
+  description?: string;
+  estimated_cost?: string;
+  estimated_hours?: number;
+  id?: string;
+  metadata?: {
+    [key: string]: unknown;
+  };
+  organization_id?: string;
+  priority?: string;
+  request_type?: string;
+  status?: string;
+  title?: string;
+  updated_at?: string;
+  user_id?: string;
+};
+
+export type StartBatchRequest = {
+  [key: string]: unknown;
 };
 
 export type Status = 'pending' | 'accepted' | 'revoked' | 'expired';
 
-export type SwitchOrgRequest = {
-  organization_id?: string;
+export type StatusState = 'operational' | 'degraded' | 'down' | 'unknown';
+
+export type Step = {
+  excluded?: Array<string>;
+  name?: string;
+  values?: {
+    [key: string]: string;
+  };
 };
 
-export type Token = {
+export type Subject = {
+  capability?: string;
   catalog_entry_id?: string;
   chain_id?: string;
+  delay_seconds?: number;
+  provider_id?: string;
+  source_id?: string;
+  source_names?: Array<string>;
+  symbol?: string;
+  wallet_id?: string;
+};
+
+export type SubjectAccessResponse = {
+  grant_id?: string;
+  subject_id?: string;
+  subject_type?: 'user' | 'service_user';
+  via?: 'role' | 'grant';
+};
+
+export type SubjectType =
+  | 'ownership_ceremony'
+  | 'proof_of_funds'
+  | 'valuation'
+  | 'liability_set_ingest'
+  | 'liability_set_seal'
+  | 'proof_of_liabilities_commit'
+  | 'proof_of_liabilities_inclusion'
+  | 'proof_of_liabilities_precompute'
+  | 'proof_of_reserves'
+  | 'report'
+  | 'publication'
+  | 'publication_withdrawal';
+
+export type SupportedChainResponse = {
+  /**
+   * ChainIDNum is the EVM chain's EIP-155 numeric id (from chain metadata), so a
+   * client can match an injected wallet's active network (MetaMask's eth_chainId)
+   * to this registered chain. Absent for non-EVM chains (UTXO/Solana carry no
+   * EIP-155 id) — never fabricated.
+   */
+  chain_id_num?: number;
+  /**
+   * DisplayName is what to put in front of a human.
+   */
+  display_name?: string;
+  id?: string;
+  /**
+   * Name is the stable slug ("ethereum", "bitcoin") the rest of the API keys on.
+   */
+  name?: string;
+  /**
+   * NativeCurrency is the chain's own asset ("ETH", "BTC").
+   */
+  native_currency?: string;
+  /**
+   * ProtocolType decides the shape of an address and of an ownership proof
+   * ("evm" or "utxo"), so a client needs it to validate input before submitting.
+   */
+  protocol_type?: string;
+  /**
+   * Symbol is the short uppercase badge code for the chain glyph, DISTINCT from
+   * NativeCurrency so an ETH-native L2 (Arbitrum → ARB, Base → BASE) reads its own
+   * network identity instead of "ETH". Falls back to NativeCurrency when empty.
+   */
+  symbol?: string;
+};
+
+export type SwitchOrgRequest = {
+  organization_id: string;
+};
+
+export type TenantSummaryResponse = {
+  attestation_count?: number;
+  id?: string;
+  /**
+   * InviteCreatedAt / InviteExpiresAt are RFC3339 timestamps of that owner-admin
+   * invite; nil/omitted when no owner-admin invite exists.
+   */
+  invite_created_at?: string;
+  invite_expires_at?: string;
+  /**
+   * RFC3339 or nil
+   */
+  latest_run_at?: string;
+  latest_verdict?: string;
+  name?: string;
+  /**
+   * OnboardingStatus is the derived owner-admin invite state (pending | accepted |
+   * expired | revoked); nil/omitted when the org has no owner-admin invite.
+   */
+  onboarding_status?: string;
+  /**
+   * Status is the org lifecycle state (pending | active | suspended | archived),
+   * projected from organizations.status (LIFE-06). NOTE (17.1 correction): 16-02
+   * added this to the DOMAIN row but NOT to the wire DTO/mapper, 17.1 adds it
+   * here so can read lifecycle status.
+   */
+  status?: string;
+};
+
+export type TestProviderConnectionRequest = {
+  chain_id: string;
+  config?: {
+    [key: string]: unknown;
+  };
+  url: string;
+};
+
+export type TestProviderConnectionResponse = {
+  checks?: Array<ProviderConnectionCheck>;
+  /**
+   * HeadBlock is the chain head the candidate reported (absent for a
+   * non-EVM or unreachable endpoint).
+   */
+  head_block?: number;
+  /**
+   * HeadLagBlocks is how many blocks the candidate trails the best peer,
+   * floored at zero (absent when there was nothing to compare).
+   */
+  head_lag_blocks?: number;
+  host?: string;
+  /**
+   * LatencyMs is the head-probe round trip in milliseconds (absent when no
+   * sample was taken).
+   */
+  latency_ms?: number;
+  /**
+   * Passed is true when no BLOCKING check failed. dns_tls, credentials,
+   * head_probe, and latency block; head_lag does not, because a node trailing
+   * the fleet is a transient signal about the network worth showing an operator
+   * rather than a defect in the endpoint being registered. A skipped check never
+   * blocks either, and always states why it was skipped.
+   */
+  passed?: boolean;
+  /**
+   * PeerHeadBlock is the highest head reported by the chain's other active
+   * providers (absent when none answered).
+   */
+  peer_head_block?: number;
+};
+
+export type TokenCatalogRequestState = {
+  id?: string;
+  reason?: string;
+  status?: string;
+};
+
+export type TokenCoverageResponse = {
+  catalog_entry_id?: string;
+  chain_name?: string;
+  /**
+   * ConfidentSources is the policy minimum in effect.
+   */
+  confident_sources?: number;
+  /**
+   * DeadSources are mapped sources that are not currently healthy.
+   */
+  dead_sources?: Array<string>;
+  /**
+   * HealthyMapped is the number of mapped sources currently healthy.
+   */
+  healthy_mapped?: number;
+  /**
+   * Mapped is the number of sources explicitly mapped for this token.
+   */
+  mapped?: number;
+  name?: string;
+  /**
+   * State is one of: priced, single, unpriced, testnet, inactive.
+   */
+  state?: string;
+  symbol?: string;
+};
+
+export type TokenPricing = {
+  blocking?: boolean;
+  state?: 'priced' | 'single' | 'unpriced' | 'testnet' | 'inactive';
+};
+
+export type TokenRefusedResponse = {
+  message?: string;
+  reason?: 'native_token_required' | 'catalog_request_open' | 'catalog_entry_listed';
+};
+
+export type TokenResponse = {
+  catalog_entry_id?: string;
+  /**
+   * CatalogRequest is the newest request to list the token's catalog entry,
+   * absent when there has been none.
+   */
+  catalog_request?: TokenCatalogRequestState;
+  chain_id?: string;
+  /**
+   * ChainName is the chain's display name, or its name when it has none.
+   */
+  chain_name?: string;
   contract_address?: string;
   created_at?: string;
   decimals?: number;
   id?: string;
   is_active?: boolean;
+  /**
+   * Listing is the listing state of the token's catalog entry: listed in the
+   * platform catalog, or unlisted and private to the organizations tracking it.
+   */
+  listing?: 'listed' | 'unlisted';
   logo_url?: string;
   name?: string;
   organization_id?: string;
+  pricing?: TokenPricing;
   symbol?: string;
   token_type?: string;
   updated_at?: string;
 };
 
-export type TokenCatalogEntry = {
-  chain_id?: string;
-  contract_address?: string;
-  created_at?: string;
-  decimals?: number;
-  id?: string;
-  info_providers?: {
-    [key: string]: unknown;
-  };
-  logo_url?: string;
-  name?: string;
-  symbol?: string;
-  updated_at?: string;
+export type TokenValidationCheck = {
+  check?: string;
+  detail?: string;
+  status?: string;
+};
+
+export type TokenWarning = {
+  code?: 'unpriced' | 'unlisted' | 'symbol_collision';
+  entries?: Array<CatalogEntryBrowseResponse>;
+  message?: string;
 };
 
 export type UpdateCatalogRequest = {
+  /**
+   * Decimals corrects a wrong stored scale, which nothing else could do: a
+   * delete-and-re-add is refused with a 409 whenever an organization holds the
+   * token, which is precisely when a decimal alert exists. Omit it to leave the
+   * stored value untouched. When sent it must be greater than zero and must
+   * agree with the chain, which is checked before anything is written: the
+   * contract's decimals() reading for a contract entry, the chain record's
+   * native_decimals for a native one. A value the chain contradicts is rejected
+   * with 422 and no part of the update is applied. An accepted correction is
+   * also applied to every organization token linked to this entry, so it changes
+   * how their balances are scaled.
+   */
+  decimals?: number;
   info_providers?: {
     [key: string]: unknown;
   };
+  /**
+   * Listing lists an entry for every organization ("listed") or makes it
+   * private to the organizations tracking it ("unlisted"). Listing an entry
+   * completes its open token listing requests in the same transaction;
+   * unlisting leaves requests alone.
+   */
+  listing?: 'listed' | 'unlisted';
   logo_url?: string;
   name?: string;
+  /**
+   * Peg corrects or clears the fiat currency this asset is pegged to. Unlike
+   * every other field here, its "leave alone" state is not the zero value: nil
+   * is also what an explicit `"peg": null` decodes to, and null is how a
+   * caller clears an existing peg back to floating. PegField's UnmarshalJSON
+   * only runs when the wire object carries a "peg" key at all, so Set
+   * distinguishes "the key was present" (write Value, nil or "USD") from "the
+   * key was absent" (leave the stored peg untouched).
+   */
+  peg?: string;
   symbol?: string;
 };
 
 export type UpdateChainRequest = {
+  /**
+   * AnchorKind is the unit this chain's providers anchor a read to; omitted
+   * leaves it unchanged, an empty string clears it. See chains_anchor_kind_chk
+   * for the allowed values.
+   */
+  anchor_kind?: string;
   display_name?: string;
+  /**
+   * Environment is "mainnet" or "testnet"; omitted leaves it unchanged.
+   */
+  environment?: 'mainnet' | 'testnet';
+  /**
+   * L2AnchorPreference is which finality tag ("safe" or "finalized") a reserve
+   * read should prefer on this chain; omitted leaves it unchanged, an empty
+   * string clears it.
+   */
+  l2_anchor_preference?: string;
   metadata?: {
     [key: string]: unknown;
   };
   native_currency?: string;
+  /**
+   * SignatureSchemes replaces the chain's supported signature schemes; omitted
+   * (nil) leaves it unchanged, an explicit empty list clears it.
+   */
+  signature_schemes?: Array<string>;
   status?: string;
+  /**
+   * Symbol is the short uppercase badge code (2-6 chars). A non-nil empty string
+   * resets it to UPPER(native_currency); omitted leaves it unchanged.
+   */
+  symbol?: string;
+};
+
+export type UpdateLiabilitySetRequest = {
+  cutoff_at?: string;
+  name?: string;
 };
 
 export type UpdateOrgSecurityRequest = {
+  four_eyes_publish?: boolean;
   mfa_required?: boolean;
 };
 
-export type UpdateOrgSecurityResponse = {
-  mfa_required?: boolean;
-  org_id?: string;
+export type UpdateOrgStatusRequest = {
+  status: string;
+};
+
+export type UpdateOrganizationRequest = {
+  contact_email?: string | null;
+  name?: string;
+};
+
+export type UpdateOwnershipPolicyRequest = {
+  /**
+   * BatchCollectionWindowSeconds: the org-attestation batch collection window — StartBatch computes ExpiresAt from it. Must be in
+   * [3600, 31536000].
+   */
+  batch_collection_window_seconds?: number;
+  /**
+   * ChallengeTTLSeconds: how long an issued signature challenge stays valid.
+   * Must be in [60, 86400].
+   */
+  challenge_ttl_seconds?: number;
+  /**
+   * ExpiryWarningLeadSeconds: the default "warn N before expiry" lead. Must be
+   * in [0, 31536000].
+   */
+  expiry_warning_lead_seconds?: number;
+  /**
+   * ProofValiditySeconds: the proof-validity / re-attest window. Must be in
+   * [3600, 63072000] and strictly greater than re_attest_lead_seconds.
+   */
+  proof_validity_seconds?: number;
+  /**
+   * ReAttestLeadSeconds: how long before expiry the renewal window opens. Must
+   * be in [0, 31536000] and strictly less than proof_validity_seconds.
+   */
+  re_attest_lead_seconds?: number;
+};
+
+export type UpdatePriceSourceRequest = {
+  canary_feed?: string;
+  capabilities?: SourceCapabilities;
+  config?: PriceSourceConfigInput;
+  is_active?: boolean;
 };
 
 export type UpdateProviderRequest = {
+  /**
+   * Capabilities is the provider's declared read contract, re-validated against
+   * the chain's protocol adapter when present; omitted leaves it unchanged.
+   */
+  capabilities?: {
+    [key: string]: unknown;
+  };
   config?: {
     [key: string]: unknown;
   };
@@ -908,6 +4646,18 @@ export type UpdateProviderRequest = {
   url?: string;
 };
 
+export type UpdateRoleRequest = {
+  /**
+   * AcknowledgeConflicts approves a conflicting pair of keys. Only a caller
+   * holding org:invite:admin can approve one.
+   */
+  acknowledge_conflicts?: boolean;
+  description?: string;
+  id?: string;
+  name?: string;
+  permission_keys?: Array<string>;
+};
+
 export type UpdateSpecialRequestEstimateRequest = {
   estimated_cost?: string;
   estimated_hours?: number;
@@ -917,39 +4667,390 @@ export type UpdateSpecialRequestEstimateRequest = {
 export type UpdateSpecialRequestStatusRequest = {
   assigned_to?: string;
   id?: string;
+  /**
+   * Reason explains a rejection to the organization. With status "rejected"
+   * it is added as a comment the organization can read; with any other status
+   * it is ignored.
+   */
+  reason?: string;
   status: string;
 };
 
-export type VerifyRequest = {
-  balance?: string;
-  currency?: string;
-  leaf_index?: number;
-  nonce?: string;
-  normalized_balance?: string;
-  path?: Array<InclusionPathStep>;
-  /**
-   * ZKP-mode fields (optional, present when verifying a ZKP proof).
-   */
-  proof_hex?: string;
-  public_inputs_hex?: string;
-  user_identifier?: string;
-  version?: number;
-};
-
-export type Wallet = {
-  address?: string;
-  balance?: string;
-  chain_id?: string;
-  created_at?: string;
+export type UpdateWalletRequest = {
   description?: string;
-  id?: string;
   is_active?: boolean;
   is_watched?: boolean;
-  last_sync_at?: string;
   name?: string;
+  owners?: Array<OwnerInput>;
+};
+
+export type ValidateCatalogEntryRequest = {
+  chain_id: string;
+  /**
+   * Required for a contract entry, which is also what an omitted token_type
+   * means. Must be absent for a native entry.
+   */
+  contract_address?: string;
+  /**
+   * Decimals mirrors CreateCatalogRequest EXACTLY, and must keep mirroring it.
+   * This endpoint's only job is to predict what the save will do, so any field
+   * rule the two do not share is a dry run that lies. A pointer with validate:"required" rather than uint8 with gt=0, for the two
+   * reasons the create carries: an omitted value must be distinguishable from an
+   * explicit 0 (and swag can express required on a pointer, but not gt=0), and 0
+   * is a legal decimals value because 0-decimal ERC-20s exist. gt=0 here meant a
+   * legitimate 0-decimal token 400'd at the wizard's Test step with "decimals
+   * must be > 0" while the save would have returned 201 -- a dry run
+   * contradicting the save, which is the one failure this endpoint exists to
+   * prevent. Whether a 0 is ACCEPTABLE is decided by the checks, not by a tag: the
+   * decimals check compares it against the contract, so a genuine 0 passes and a
+   * 0 the contract contradicts still fails.
+   */
+  decimals: number;
+  /**
+   * The symbol and decimals the operator typed. Both are required because both
+   * are what the checks compare the chain against; there is nothing to validate
+   * without them.
+   */
+  symbol: string;
+  token_type?: 'native' | 'contract';
+};
+
+export type ValidateCatalogEntryResponse = {
+  checks?: Array<TokenValidationCheck>;
+  /**
+   * IsProxy is the EIP-1967 disclosure, absent when the probe could not run.
+   */
+  is_proxy?: boolean;
+  on_chain_decimals?: number;
+  /**
+   * OnChainName, OnChainSymbol, and OnChainDecimals are what the CONTRACT
+   * reported, not what the request carried, and are absent when the read did not
+   * happen. A client should offer these as the values to save.
+   */
+  on_chain_name?: string;
+  on_chain_symbol?: string;
+  /**
+   * Passed is true when no BLOCKING check failed, and means "a save of this
+   * entry would be accepted". bytecode, symbol, decimals, and balance_read
+   * block; proxy does NOT, because most major tokens are proxies and the row is
+   * a disclosure rather than a defect. A skipped check never blocks either, and
+   * always states why it was skipped. The bytecode row answers "is this a usable ERC-20 at all", so it also fails
+   * on a contract that does not answer name(): name has no check of its own, but
+   * a save verifies it.
+   */
+  passed?: boolean;
+};
+
+export type ValuationResponse = {
+  as_of?: string;
+  asset_prices?: Array<AssetPriceResponse>;
+  completed_at?: string;
+  created_at?: string;
+  id?: string;
+  job_id?: string;
+  kind?: 'proof' | 'ambient';
+  plan?: {
+    [key: string]: unknown;
+  };
+  policy_version?: number;
+  proof_of_funds_id?: string;
+  resolved_policy?: {
+    [key: string]: unknown;
+  };
+  status?: 'pending' | 'running' | 'completed' | 'failed';
+};
+
+export type VerifyResponse = {
+  address?: string;
+  audit_event_id?: string;
+  chain_id?: string;
+  checks?: Array<CheckResultResponse>;
+  created_at?: string;
+  /**
+   * lifecycle timestamps (LIFE-04), echoed straight from the model so
+   * UIs can render "proven 2h ago / re-attest due / expired 2d ago". Both are
+   * nullable: a pending proof has neither, and a verified proof always has
+   * ExpiresAt. No new endpoints — re-prove uses the existing challenge+verify
+   * routes.
+   */
+  expires_at?: string;
+  id?: string;
+  invalidated_at?: string;
+  /**
+   * JobID is the ceremony's job; absent until a job runs the ceremony.
+   */
+  job_id?: string;
+  label?: string;
+  message?: string;
   organization_id?: string;
-  public_key?: string;
+  re_attest_due_at?: string;
+  signatures?: Array<SignatureResponse>;
+  signer_count?: number;
+  /**
+   * per-signer collection progress (MSIG-02, spec §4). Present only for
+   * multisig proofs; nil for single-key. Carries the distinct valid-signer count
+   * and WHICH owner addresses have signed (addresses only — no signer identities
+   * this phase; T-29-I01). The partially_signed status flows through Status above.
+   */
+  signer_progress?: SignerProgress;
+  status?: string;
+  /**
+   * The m-of-n threshold (design: "Safe · m of n").
+   * SignersRequired is the required signer count (m) and SignerCount the total
+   * on-chain owners (n), from the Safe's pinned signer set. Both are omitted (0)
+   * for single-key proofs — only `safe`-type multisig proofs surface a threshold.
+   */
+  threshold?: number;
   updated_at?: string;
+  user_id?: string;
+  venue?: string;
+  verified_at?: string;
+  /**
+   * registry identity (REG-03), projected from the linked wallet.
+   * label ← wallet.Name (A2: no redundant label column on the wallet model).
+   */
+  wallet_id?: string;
+  wallet_type?: string;
+};
+
+export type VerifySignatureRequest = {
+  signature?: string;
+};
+
+export type VerifyTokenRequest = {
+  chain_id: string;
+  contract_address: string;
+};
+
+export type VerifyTokenResponse = {
+  already_tracked?: boolean;
+  decimals?: number;
+  entry?: CatalogEntryBrowseResponse;
+  name?: string;
+  symbol?: string;
+  warnings?: Array<TokenWarning>;
+};
+
+export type VerifyingKeyResponse = {
+  circuit_version?: number;
+  curve?: string;
+  domain?: number;
+  format_version?: number;
+  proving_system?: string;
+  srs_id?: string;
+  srs_url?: string;
+  verifying_key?: string;
+  version?: number;
+  vk_sha256?: string;
+};
+
+export type VersionedErrorResponse = {
+  circuit_version?: number;
+  error?: ErrorBody;
+  format_version?: number;
+  srs_id?: string;
+};
+
+export type WalletCoverageResponse = {
+  address?: string;
+  chain_id?: string;
+  coverage?: 'proven' | 'expired' | 'unproven' | 'retired' | 'simulated';
+  holdings_usd?: string;
+  proof_of_ownership_id?: string;
+  wallet_id?: string;
+};
+
+export type WalletHolding = {
+  amount?: string;
+  /**
+   * always present; false = no price feed
+   */
+  priced?: boolean;
+  symbol?: string;
+  /**
+   * omitted when unpriced
+   */
+  usd_value?: string;
+};
+
+export type WalletNetworkResponse = {
+  chain_id?: string;
+  chain_name?: string;
+  holdings?: Array<WalletHolding>;
+  included_in_runs?: boolean;
+  /**
+   * Symbol is the chain's badge glyph code (DISTINCT from Ticker/native currency,
+   * so an ETH-native L2 shows ARB/BASE, not ETH). Falls back to Ticker when empty.
+   */
+  symbol?: string;
+  ticker?: string;
+  /**
+   * ValuationID is the valuation behind the holdings' USD values; omitted for a
+   * never-scanned network.
+   */
+  valuation_id?: string;
+};
+
+export type WalletResponse = {
+  /**
+   * Address is the wallet's on-chain address.
+   */
+  address?: string;
+  /**
+   * Balance is the wallet's last-synced native balance.
+   */
+  balance?: string;
+  /**
+   * ChainID is the blockchain the wallet's address is registered on.
+   */
+  chain_id?: string;
+  /**
+   * Coverage is the wallet's ownership coverage as evaluated at request time:
+   * proven, expired, unproven or retired. Omitted when no coverage reader was
+   * available to evaluate it.
+   */
+  coverage?: 'proven' | 'expired' | 'unproven' | 'retired';
+  /**
+   * CoverageProofID is the newest proof currently proving the wallet. Set
+   * only when Coverage is "proven".
+   */
+  coverage_proof_id?: string;
+  /**
+   * CreatedAt is when the wallet was registered.
+   */
+  created_at?: string;
+  /**
+   * Description is a free-text note about the wallet's purpose.
+   */
+  description?: string;
+  /**
+   * Holdings is the per-wallet token holdings projection from the latest funds
+   * scan snapshot — always present, defaults to [] (never null) for
+   * an unscanned wallet so the client renders an em-dash. The domain type is
+   * reused to avoid minting a second DTO struct; it is a flat array of the
+   * two-scalar {symbol, amount} object (no new named component schema). Since this flat field is the PRIMARY chain's holdings; the
+   * per-network breakdown lives in Networks below.
+   */
+  holdings?: Array<WalletHolding>;
+  /**
+   * ID is the wallet's unique identifier.
+   */
+  id?: string;
+  /**
+   * IsActive is false once the wallet has been soft-deleted.
+   */
+  is_active?: boolean;
+  /**
+   * IsWatched marks a wallet tracked for informational purposes only.
+   */
+  is_watched?: boolean;
+  /**
+   * LastSyncAt is when the wallet's balance was last refreshed. Nil if it has
+   * never been synced.
+   */
+  last_sync_at?: string;
+  /**
+   * Name is the wallet's display name.
+   */
+  name?: string;
+  /**
+   * Networks is the per-network view of the wallet.
+   * A wallet is an ADDRESS carrying a set of registered networks; each entry
+   * exposes that network's chain identity, its inclusion flag, and the holdings
+   * joined from the latest funds snapshot on that chain. ALWAYS present, never
+   * null (defaults to []); a registered-but-never-scanned network renders with
+   * an empty holdings array.
+   */
+  networks?: Array<WalletNetworkResponse>;
+  /**
+   * OnchainOwnerCount is the number of owners (n) in the same read as
+   * onchain_threshold. Omitted when the owner set has never been read.
+   */
+  onchain_owner_count?: number;
+  /**
+   * OnchainOwners are the Safe's owners (lowercased addresses) in the same
+   * read. Omitted when the owner set has never been read.
+   */
+  onchain_owners?: Array<string>;
+  /**
+   * OnchainThreshold is the number of signatures (m) the Safe's contract
+   * requires, read on chain at pinned_block. At least 1 when present; omitted
+   * when the wallet's owner set has never been read.
+   */
+  onchain_threshold?: number;
+  /**
+   * OrganizationID is the owning organization.
+   */
+  organization_id?: string;
+  /**
+   * Owners are the owner contact hints: the FULL list including owners with NO
+   * key-holder, so the frontend can render the routing plan + the Settings
+   * signers section BEFORE any challenge is issued. ALWAYS present, never null
+   * (defaults to []). Each entry carries the owner address, its assigned
+   * key-holder (user_id/email) when given, and an `assigned` flag (true = a
+   * key-holder is set → routed; false = signed directly). Projected straight
+   * from the wallet's Signers JSONB — no extra query.
+   */
+  owners?: Array<OwnerResponse>;
+  /**
+   * PinnedBlock is the finalized block the owner set was read at. Omitted
+   * when the owner set has never been read.
+   */
+  pinned_block?: number;
+  /**
+   * PublicKey is the wallet's public key, when known.
+   */
+  public_key?: string;
+  /**
+   * RetiredAt is when the wallet was retired. A retired wallet is no longer
+   * scanned for funds or included in batch attestation, but its proofs and
+   * history are kept. Omitted for an active wallet.
+   */
+  retired_at?: string;
+  /**
+   * SignerSetReadAt is when the current owner set was read. A re-read that
+   * finds the same set leaves it unchanged. Omitted when the owner set has
+   * never been read.
+   */
+  signer_set_read_at?: string;
+  /**
+   * Status is the derived wallet lifecycle state (QC-17b): "retired" when
+   * RetiredAt is set, else "active". ALWAYS present on both the LIST and the
+   * detail DTO so the UI can render the retired state without null-probing
+   * retired_at. Flat scalar — no new named component schema.
+   */
+  status?: string;
+  /**
+   * UpdatedAt is when the wallet was last modified.
+   */
+  updated_at?: string;
+  /**
+   * Venue is the exchange or custodian the wallet is held at.
+   */
+  venue?: string;
+  /**
+   * VerificationResetAt is the last re-registration or signer-set change.
+   * Each ownership proof a reset invalidated records that reset's instant
+   * itself, and coverage reads the proofs, so an earlier reset this one
+   * replaced still counts. Omitted when the wallet was never reset.
+   */
+  verification_reset_at?: string;
+  /**
+   * WalletType is single_key or safe.
+   */
+  wallet_type?: string;
+};
+
+export type WindowItemResponse = {
+  earliest_as_of?: string;
+  id?: string;
+  kind?: 'chain' | 'source' | 'asset';
+  limited_by?: string;
+  name?: string;
+};
+
+export type WithdrawRequest = {
+  reason: string;
 };
 
 export type GetWellKnownJwksJsonData = {
@@ -975,7 +5076,9 @@ export type GetWellKnownJwksJsonResponses = {
   /**
    * JWKS response with one or more Ed25519 public keys
    */
-  200: Jwks;
+  200: Envelope & {
+    data?: Jwks;
+  };
 };
 
 export type GetWellKnownJwksJsonResponse =
@@ -1036,48 +5139,46 @@ export type GetWellKnownOauthProtectedResourceResponses = {
 export type GetWellKnownOauthProtectedResourceResponse =
   GetWellKnownOauthProtectedResourceResponses[keyof GetWellKnownOauthProtectedResourceResponses];
 
-export type GetApiKeysMineData = {
+export type GetWellKnownPeaknodeAttestationJsonData = {
   body?: never;
   path?: never;
   query?: never;
-  url: '/api-keys/mine';
+  url: '/.well-known/peaknode-attestation.json';
 };
 
-export type GetApiKeysMineErrors = {
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type GetApiKeysMineError = GetApiKeysMineErrors[keyof GetApiKeysMineErrors];
-
-export type GetApiKeysMineResponses = {
+export type GetWellKnownPeaknodeAttestationJsonResponses = {
   /**
    * OK
    */
-  200: Array<ApiKeyListItem>;
+  200: Document;
 };
 
-export type GetApiKeysMineResponse = GetApiKeysMineResponses[keyof GetApiKeysMineResponses];
+export type GetWellKnownPeaknodeAttestationJsonResponse =
+  GetWellKnownPeaknodeAttestationJsonResponses[keyof GetWellKnownPeaknodeAttestationJsonResponses];
 
-export type PostApiKeysPatData = {
-  /**
-   * PAT details (org + label + optional expiry)
-   */
-  body: MintPatRequest;
+export type GetApiAccessObjectsData = {
+  body?: never;
   path?: never;
-  query?: never;
-  url: '/api-keys/pat';
+  query: {
+    /**
+     * Subject, user:<uuid> or service_user:<uuid>
+     */
+    subject: string;
+    /**
+     * Permission key
+     */
+    permission: string;
+    /**
+     * Object type
+     */
+    object_type: 'wallet' | 'proof_of_reserves' | 'publication';
+  };
+  url: '/api/access/objects';
 };
 
-export type PostApiKeysPatErrors = {
+export type GetApiAccessObjectsErrors = {
   /**
-   * Invalid request body
+   * Malformed subject, unknown permission or object type
    */
   400: AppError;
   /**
@@ -1085,27 +5186,209 @@ export type PostApiKeysPatErrors = {
    */
   401: AppError;
   /**
-   * Caller not a member of the requested org, or missing org:api_keys:write_pat
+   * Missing audit:read
    */
-  403: AppError;
+  403: DeniedResponse;
+  /**
+   * Subject not found in the organization
+   */
+  404: AppError;
   /**
    * Internal server error
    */
   500: AppError;
 };
 
-export type PostApiKeysPatError = PostApiKeysPatErrors[keyof PostApiKeysPatErrors];
+export type GetApiAccessObjectsError = GetApiAccessObjectsErrors[keyof GetApiAccessObjectsErrors];
 
-export type PostApiKeysPatResponses = {
+export type GetApiAccessObjectsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ObjectsResponse;
+  };
+};
+
+export type GetApiAccessObjectsResponse =
+  GetApiAccessObjectsResponses[keyof GetApiAccessObjectsResponses];
+
+export type GetApiAccessSnapshotData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Moment to reconstruct (RFC 3339, URL-encoded, not in the future)
+     */
+    as_of?: string;
+  };
+  url: '/api/access/snapshot';
+};
+
+export type GetApiAccessSnapshotErrors = {
+  /**
+   * as_of is malformed or in the future
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing audit:read
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiAccessSnapshotError =
+  GetApiAccessSnapshotErrors[keyof GetApiAccessSnapshotErrors];
+
+export type GetApiAccessSnapshotResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: SnapshotResponse;
+  };
+};
+
+export type GetApiAccessSnapshotResponse =
+  GetApiAccessSnapshotResponses[keyof GetApiAccessSnapshotResponses];
+
+export type GetApiAccessSubjectsData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Object type
+     */
+    object_type: 'wallet' | 'proof_of_reserves' | 'publication';
+    /**
+     * Object ID (UUID)
+     */
+    object_id: string;
+    /**
+     * Permission key
+     */
+    permission: string;
+  };
+  url: '/api/access/subjects';
+};
+
+export type GetApiAccessSubjectsErrors = {
+  /**
+   * Unknown permission or object type
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing audit:read
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiAccessSubjectsError =
+  GetApiAccessSubjectsErrors[keyof GetApiAccessSubjectsErrors];
+
+export type GetApiAccessSubjectsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<SubjectAccessResponse>;
+  };
+};
+
+export type GetApiAccessSubjectsResponse =
+  GetApiAccessSubjectsResponses[keyof GetApiAccessSubjectsResponses];
+
+export type GetApiApiKeysMineData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/api/api-keys/mine';
+};
+
+export type GetApiApiKeysMineErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiApiKeysMineError = GetApiApiKeysMineErrors[keyof GetApiApiKeysMineErrors];
+
+export type GetApiApiKeysMineResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<ApiKeyListItem>;
+  };
+};
+
+export type GetApiApiKeysMineResponse =
+  GetApiApiKeysMineResponses[keyof GetApiApiKeysMineResponses];
+
+export type PostApiApiKeysPatData = {
+  /**
+   * PAT details (label, purpose, expiry in days, allowed IPs)
+   */
+  body: MintPatRequest;
+  path?: never;
+  query?: never;
+  url: '/api/api-keys/pat';
+};
+
+export type PostApiApiKeysPatErrors = {
+  /**
+   * Invalid request body, expiry or allowed IPs
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:api-keys:write:pat
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiApiKeysPatError = PostApiApiKeysPatErrors[keyof PostApiApiKeysPatErrors];
+
+export type PostApiApiKeysPatResponses = {
   /**
    * Created
    */
-  201: MintKeyResponse;
+  201: Envelope & {
+    data?: MintKeyResponse;
+  };
 };
 
-export type PostApiKeysPatResponse = PostApiKeysPatResponses[keyof PostApiKeysPatResponses];
+export type PostApiApiKeysPatResponse =
+  PostApiApiKeysPatResponses[keyof PostApiApiKeysPatResponses];
 
-export type DeleteApiKeysByIdData = {
+export type DeleteApiApiKeysByIdData = {
   body?: never;
   path: {
     /**
@@ -1114,10 +5397,10 @@ export type DeleteApiKeysByIdData = {
     id: string;
   };
   query?: never;
-  url: '/api-keys/{id}';
+  url: '/api/api-keys/{id}';
 };
 
-export type DeleteApiKeysByIdErrors = {
+export type DeleteApiApiKeysByIdErrors = {
   /**
    * Invalid api-key ID
    */
@@ -1127,9 +5410,9 @@ export type DeleteApiKeysByIdErrors = {
    */
   401: AppError;
   /**
-   * Not allowed to revoke this key (admin OR self gate failed)
+   * Not allowed to revoke this key: neither the key manage permission nor the key's own user
    */
-  403: AppError;
+  403: DeniedResponse;
   /**
    * API key not found
    */
@@ -1140,1526 +5423,18 @@ export type DeleteApiKeysByIdErrors = {
   500: AppError;
 };
 
-export type DeleteApiKeysByIdError = DeleteApiKeysByIdErrors[keyof DeleteApiKeysByIdErrors];
+export type DeleteApiApiKeysByIdError =
+  DeleteApiApiKeysByIdErrors[keyof DeleteApiApiKeysByIdErrors];
 
-export type DeleteApiKeysByIdResponses = {
+export type DeleteApiApiKeysByIdResponses = {
   /**
    * No content
    */
   204: string;
 };
 
-export type DeleteApiKeysByIdResponse =
-  DeleteApiKeysByIdResponses[keyof DeleteApiKeysByIdResponses];
-
-export type GetApiAdminChainsData = {
-  body?: never;
-  path?: never;
-  query?: {
-    /**
-     * Filter by chain status
-     */
-    status?: 'active' | 'inactive';
-    /**
-     * Filter by protocol type
-     */
-    protocol_type?: 'evm' | 'utxo';
-  };
-  url: '/api/admin/chains';
-};
-
-export type GetApiAdminChainsErrors = {
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminChainsError = GetApiAdminChainsErrors[keyof GetApiAdminChainsErrors];
-
-export type GetApiAdminChainsResponses = {
-  /**
-   * List of chains
-   */
-  200: Array<ChainResponse>;
-};
-
-export type GetApiAdminChainsResponse =
-  GetApiAdminChainsResponses[keyof GetApiAdminChainsResponses];
-
-export type PostApiAdminChainsData = {
-  /**
-   * Chain creation parameters
-   */
-  body: CreateChainRequest;
-  path?: never;
-  query?: never;
-  url: '/api/admin/chains';
-};
-
-export type PostApiAdminChainsErrors = {
-  /**
-   * Invalid request body
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Chain with same name already exists
-   */
-  409: {
-    [key: string]: unknown;
-  };
-  /**
-   * Validation error
-   */
-  422: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type PostApiAdminChainsError = PostApiAdminChainsErrors[keyof PostApiAdminChainsErrors];
-
-export type PostApiAdminChainsResponses = {
-  /**
-   * Created chain
-   */
-  201: ChainResponse;
-};
-
-export type PostApiAdminChainsResponse =
-  PostApiAdminChainsResponses[keyof PostApiAdminChainsResponses];
-
-export type DeleteApiAdminChainsByIdData = {
-  body?: never;
-  path: {
-    /**
-     * Chain ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/chains/{id}';
-};
-
-export type DeleteApiAdminChainsByIdErrors = {
-  /**
-   * Invalid chain ID
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Chain not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Chain has active dependencies
-   */
-  409: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type DeleteApiAdminChainsByIdError =
-  DeleteApiAdminChainsByIdErrors[keyof DeleteApiAdminChainsByIdErrors];
-
-export type DeleteApiAdminChainsByIdResponses = {
-  /**
-   * Chain deleted
-   */
-  204: void;
-};
-
-export type DeleteApiAdminChainsByIdResponse =
-  DeleteApiAdminChainsByIdResponses[keyof DeleteApiAdminChainsByIdResponses];
-
-export type GetApiAdminChainsByIdData = {
-  body?: never;
-  path: {
-    /**
-     * Chain ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/chains/{id}';
-};
-
-export type GetApiAdminChainsByIdErrors = {
-  /**
-   * Invalid chain ID
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Chain not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminChainsByIdError =
-  GetApiAdminChainsByIdErrors[keyof GetApiAdminChainsByIdErrors];
-
-export type GetApiAdminChainsByIdResponses = {
-  /**
-   * Chain details
-   */
-  200: ChainResponse;
-};
-
-export type GetApiAdminChainsByIdResponse =
-  GetApiAdminChainsByIdResponses[keyof GetApiAdminChainsByIdResponses];
-
-export type PutApiAdminChainsByIdData = {
-  /**
-   * Chain update parameters
-   */
-  body: UpdateChainRequest;
-  path: {
-    /**
-     * Chain ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/chains/{id}';
-};
-
-export type PutApiAdminChainsByIdErrors = {
-  /**
-   * Invalid chain ID or request body
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Chain not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type PutApiAdminChainsByIdError =
-  PutApiAdminChainsByIdErrors[keyof PutApiAdminChainsByIdErrors];
-
-export type PutApiAdminChainsByIdResponses = {
-  /**
-   * Updated chain
-   */
-  200: ChainResponse;
-};
-
-export type PutApiAdminChainsByIdResponse =
-  PutApiAdminChainsByIdResponses[keyof PutApiAdminChainsByIdResponses];
-
-export type GetApiAdminChainsByIdProvidersData = {
-  body?: never;
-  path: {
-    /**
-     * Chain ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/chains/{id}/providers';
-};
-
-export type GetApiAdminChainsByIdProvidersErrors = {
-  /**
-   * Invalid chain ID
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminChainsByIdProvidersError =
-  GetApiAdminChainsByIdProvidersErrors[keyof GetApiAdminChainsByIdProvidersErrors];
-
-export type GetApiAdminChainsByIdProvidersResponses = {
-  /**
-   * List of providers
-   */
-  200: Array<ProviderResponse>;
-};
-
-export type GetApiAdminChainsByIdProvidersResponse =
-  GetApiAdminChainsByIdProvidersResponses[keyof GetApiAdminChainsByIdProvidersResponses];
-
-export type GetApiAdminDashboardData = {
-  body?: never;
-  path?: never;
-  query?: never;
-  url: '/api/admin/dashboard';
-};
-
-export type GetApiAdminDashboardErrors = {
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminDashboardError =
-  GetApiAdminDashboardErrors[keyof GetApiAdminDashboardErrors];
-
-export type GetApiAdminDashboardResponses = {
-  /**
-   * Dashboard statistics
-   */
-  200: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminDashboardResponse =
-  GetApiAdminDashboardResponses[keyof GetApiAdminDashboardResponses];
-
-export type GetApiAdminFilesOrganizationByOrgIdData = {
-  body?: never;
-  path: {
-    /**
-     * Organization ID (UUID)
-     */
-    orgId: string;
-  };
-  query?: {
-    /**
-     * Page number
-     */
-    page?: number;
-    /**
-     * Items per page
-     */
-    limit?: number;
-  };
-  url: '/api/admin/files/organization/{orgId}';
-};
-
-export type GetApiAdminFilesOrganizationByOrgIdErrors = {
-  /**
-   * Invalid organization ID
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminFilesOrganizationByOrgIdError =
-  GetApiAdminFilesOrganizationByOrgIdErrors[keyof GetApiAdminFilesOrganizationByOrgIdErrors];
-
-export type GetApiAdminFilesOrganizationByOrgIdResponses = {
-  /**
-   * Paginated list of organization files
-   */
-  200: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminFilesOrganizationByOrgIdResponse =
-  GetApiAdminFilesOrganizationByOrgIdResponses[keyof GetApiAdminFilesOrganizationByOrgIdResponses];
-
-export type GetApiAdminHealthData = {
-  body?: never;
-  path?: never;
-  query?: never;
-  url: '/api/admin/health';
-};
-
-export type GetApiAdminHealthErrors = {
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminHealthError = GetApiAdminHealthErrors[keyof GetApiAdminHealthErrors];
-
-export type GetApiAdminHealthResponses = {
-  /**
-   * System health status
-   */
-  200: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminHealthResponse =
-  GetApiAdminHealthResponses[keyof GetApiAdminHealthResponses];
-
-export type GetApiAdminNotificationsData = {
-  body?: never;
-  path?: never;
-  query?: {
-    /**
-     * Page number
-     */
-    page?: number;
-    /**
-     * Items per page
-     */
-    limit?: number;
-  };
-  url: '/api/admin/notifications';
-};
-
-export type GetApiAdminNotificationsErrors = {
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminNotificationsError =
-  GetApiAdminNotificationsErrors[keyof GetApiAdminNotificationsErrors];
-
-export type GetApiAdminNotificationsResponses = {
-  /**
-   * Paginated notification history
-   */
-  200: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminNotificationsResponse =
-  GetApiAdminNotificationsResponses[keyof GetApiAdminNotificationsResponses];
-
-export type PostApiAdminNotificationsRetryFailedData = {
-  body?: never;
-  path?: never;
-  query?: never;
-  url: '/api/admin/notifications/retry-failed';
-};
-
-export type PostApiAdminNotificationsRetryFailedErrors = {
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type PostApiAdminNotificationsRetryFailedError =
-  PostApiAdminNotificationsRetryFailedErrors[keyof PostApiAdminNotificationsRetryFailedErrors];
-
-export type PostApiAdminNotificationsRetryFailedResponses = {
-  /**
-   * Retry initiated confirmation
-   */
-  200: {
-    [key: string]: string;
-  };
-};
-
-export type PostApiAdminNotificationsRetryFailedResponse =
-  PostApiAdminNotificationsRetryFailedResponses[keyof PostApiAdminNotificationsRetryFailedResponses];
-
-export type PostApiAdminNotificationsTestData = {
-  /**
-   * Notification parameters
-   */
-  body: SendTestNotificationRequest;
-  path?: never;
-  query?: never;
-  url: '/api/admin/notifications/test';
-};
-
-export type PostApiAdminNotificationsTestErrors = {
-  /**
-   * Invalid request body
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type PostApiAdminNotificationsTestError =
-  PostApiAdminNotificationsTestErrors[keyof PostApiAdminNotificationsTestErrors];
-
-export type PostApiAdminNotificationsTestResponses = {
-  /**
-   * Notification sent confirmation
-   */
-  200: {
-    [key: string]: string;
-  };
-};
-
-export type PostApiAdminNotificationsTestResponse =
-  PostApiAdminNotificationsTestResponses[keyof PostApiAdminNotificationsTestResponses];
-
-export type PostApiAdminProvidersData = {
-  /**
-   * Provider creation parameters
-   */
-  body: CreateProviderRequest;
-  path?: never;
-  query?: never;
-  url: '/api/admin/providers';
-};
-
-export type PostApiAdminProvidersErrors = {
-  /**
-   * Invalid request body
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Referenced chain not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Provider with same name already exists
-   */
-  409: {
-    [key: string]: unknown;
-  };
-  /**
-   * Validation error
-   */
-  422: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type PostApiAdminProvidersError =
-  PostApiAdminProvidersErrors[keyof PostApiAdminProvidersErrors];
-
-export type PostApiAdminProvidersResponses = {
-  /**
-   * Created provider
-   */
-  201: ProviderResponse;
-};
-
-export type PostApiAdminProvidersResponse =
-  PostApiAdminProvidersResponses[keyof PostApiAdminProvidersResponses];
-
-export type DeleteApiAdminProvidersByIdData = {
-  body?: never;
-  path: {
-    /**
-     * Provider ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/providers/{id}';
-};
-
-export type DeleteApiAdminProvidersByIdErrors = {
-  /**
-   * Invalid provider ID
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Provider not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type DeleteApiAdminProvidersByIdError =
-  DeleteApiAdminProvidersByIdErrors[keyof DeleteApiAdminProvidersByIdErrors];
-
-export type DeleteApiAdminProvidersByIdResponses = {
-  /**
-   * Deleted provider
-   */
-  200: ProviderResponse;
-};
-
-export type DeleteApiAdminProvidersByIdResponse =
-  DeleteApiAdminProvidersByIdResponses[keyof DeleteApiAdminProvidersByIdResponses];
-
-export type GetApiAdminProvidersByIdData = {
-  body?: never;
-  path: {
-    /**
-     * Provider ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/providers/{id}';
-};
-
-export type GetApiAdminProvidersByIdErrors = {
-  /**
-   * Invalid provider ID
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Provider not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminProvidersByIdError =
-  GetApiAdminProvidersByIdErrors[keyof GetApiAdminProvidersByIdErrors];
-
-export type GetApiAdminProvidersByIdResponses = {
-  /**
-   * Provider details
-   */
-  200: ProviderResponse;
-};
-
-export type GetApiAdminProvidersByIdResponse =
-  GetApiAdminProvidersByIdResponses[keyof GetApiAdminProvidersByIdResponses];
-
-export type PutApiAdminProvidersByIdData = {
-  /**
-   * Provider update parameters
-   */
-  body: UpdateProviderRequest;
-  path: {
-    /**
-     * Provider ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/providers/{id}';
-};
-
-export type PutApiAdminProvidersByIdErrors = {
-  /**
-   * Invalid provider ID or request body
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Provider not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type PutApiAdminProvidersByIdError =
-  PutApiAdminProvidersByIdErrors[keyof PutApiAdminProvidersByIdErrors];
-
-export type PutApiAdminProvidersByIdResponses = {
-  /**
-   * Updated provider
-   */
-  200: ProviderResponse;
-};
-
-export type PutApiAdminProvidersByIdResponse =
-  PutApiAdminProvidersByIdResponses[keyof PutApiAdminProvidersByIdResponses];
-
-export type GetApiAdminProvidersByIdHealthData = {
-  body?: never;
-  path: {
-    /**
-     * Provider ID (UUID)
-     */
-    id: string;
-  };
-  query?: {
-    /**
-     * Number of health events to return
-     */
-    limit?: number;
-  };
-  url: '/api/admin/providers/{id}/health';
-};
-
-export type GetApiAdminProvidersByIdHealthErrors = {
-  /**
-   * Invalid provider ID
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Provider not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminProvidersByIdHealthError =
-  GetApiAdminProvidersByIdHealthErrors[keyof GetApiAdminProvidersByIdHealthErrors];
-
-export type GetApiAdminProvidersByIdHealthResponses = {
-  /**
-   * Provider health events
-   */
-  200: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminProvidersByIdHealthResponse =
-  GetApiAdminProvidersByIdHealthResponses[keyof GetApiAdminProvidersByIdHealthResponses];
-
-export type GetApiAdminSpecialRequestsData = {
-  body?: never;
-  path?: never;
-  query?: {
-    /**
-     * Page number
-     */
-    page?: number;
-    /**
-     * Items per page
-     */
-    limit?: number;
-    /**
-     * Filter by status
-     */
-    status?: string;
-  };
-  url: '/api/admin/special-requests';
-};
-
-export type GetApiAdminSpecialRequestsErrors = {
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminSpecialRequestsError =
-  GetApiAdminSpecialRequestsErrors[keyof GetApiAdminSpecialRequestsErrors];
-
-export type GetApiAdminSpecialRequestsResponses = {
-  /**
-   * Paginated list of special requests
-   */
-  200: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminSpecialRequestsResponse =
-  GetApiAdminSpecialRequestsResponses[keyof GetApiAdminSpecialRequestsResponses];
-
-export type PutApiAdminSpecialRequestsByIdEstimateData = {
-  /**
-   * Estimate parameters
-   */
-  body: UpdateSpecialRequestEstimateRequest;
-  path: {
-    /**
-     * Special request ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/special-requests/{id}/estimate';
-};
-
-export type PutApiAdminSpecialRequestsByIdEstimateErrors = {
-  /**
-   * Invalid request ID or body
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type PutApiAdminSpecialRequestsByIdEstimateError =
-  PutApiAdminSpecialRequestsByIdEstimateErrors[keyof PutApiAdminSpecialRequestsByIdEstimateErrors];
-
-export type PutApiAdminSpecialRequestsByIdEstimateResponses = {
-  /**
-   * Estimate updated confirmation
-   */
-  200: {
-    [key: string]: string;
-  };
-};
-
-export type PutApiAdminSpecialRequestsByIdEstimateResponse =
-  PutApiAdminSpecialRequestsByIdEstimateResponses[keyof PutApiAdminSpecialRequestsByIdEstimateResponses];
-
-export type PutApiAdminSpecialRequestsByIdStatusData = {
-  /**
-   * Status update parameters
-   */
-  body: UpdateSpecialRequestStatusRequest;
-  path: {
-    /**
-     * Special request ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/special-requests/{id}/status';
-};
-
-export type PutApiAdminSpecialRequestsByIdStatusErrors = {
-  /**
-   * Invalid request ID or body
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type PutApiAdminSpecialRequestsByIdStatusError =
-  PutApiAdminSpecialRequestsByIdStatusErrors[keyof PutApiAdminSpecialRequestsByIdStatusErrors];
-
-export type PutApiAdminSpecialRequestsByIdStatusResponses = {
-  /**
-   * Status updated confirmation
-   */
-  200: {
-    [key: string]: string;
-  };
-};
-
-export type PutApiAdminSpecialRequestsByIdStatusResponse =
-  PutApiAdminSpecialRequestsByIdStatusResponses[keyof PutApiAdminSpecialRequestsByIdStatusResponses];
-
-export type GetApiAdminSubscriptionsPlansData = {
-  body?: never;
-  path?: never;
-  query?: never;
-  url: '/api/admin/subscriptions/plans';
-};
-
-export type GetApiAdminSubscriptionsPlansErrors = {
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminSubscriptionsPlansError =
-  GetApiAdminSubscriptionsPlansErrors[keyof GetApiAdminSubscriptionsPlansErrors];
-
-export type GetApiAdminSubscriptionsPlansResponses = {
-  /**
-   * List of subscription plans
-   */
-  200: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminSubscriptionsPlansResponse =
-  GetApiAdminSubscriptionsPlansResponses[keyof GetApiAdminSubscriptionsPlansResponses];
-
-export type GetApiAdminTokenCatalogData = {
-  body?: never;
-  path?: never;
-  query?: {
-    /**
-     * Filter by chain ID (UUID)
-     */
-    chain_id?: string;
-  };
-  url: '/api/admin/token-catalog';
-};
-
-export type GetApiAdminTokenCatalogErrors = {
-  /**
-   * Invalid chain_id
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminTokenCatalogError =
-  GetApiAdminTokenCatalogErrors[keyof GetApiAdminTokenCatalogErrors];
-
-export type GetApiAdminTokenCatalogResponses = {
-  /**
-   * List of catalog entries
-   */
-  200: Array<TokenCatalogEntry>;
-};
-
-export type GetApiAdminTokenCatalogResponse =
-  GetApiAdminTokenCatalogResponses[keyof GetApiAdminTokenCatalogResponses];
-
-export type PostApiAdminTokenCatalogData = {
-  /**
-   * Catalog entry creation parameters
-   */
-  body: CreateCatalogRequest;
-  path?: never;
-  query?: never;
-  url: '/api/admin/token-catalog';
-};
-
-export type PostApiAdminTokenCatalogErrors = {
-  /**
-   * Invalid request body
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Catalog entry already exists for this contract
-   */
-  409: {
-    [key: string]: unknown;
-  };
-  /**
-   * Contract verification failed
-   */
-  422: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type PostApiAdminTokenCatalogError =
-  PostApiAdminTokenCatalogErrors[keyof PostApiAdminTokenCatalogErrors];
-
-export type PostApiAdminTokenCatalogResponses = {
-  /**
-   * Created catalog entry
-   */
-  201: TokenCatalogEntry;
-};
-
-export type PostApiAdminTokenCatalogResponse =
-  PostApiAdminTokenCatalogResponses[keyof PostApiAdminTokenCatalogResponses];
-
-export type DeleteApiAdminTokenCatalogByIdData = {
-  body?: never;
-  path: {
-    /**
-     * Catalog entry ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/token-catalog/{id}';
-};
-
-export type DeleteApiAdminTokenCatalogByIdErrors = {
-  /**
-   * Invalid catalog entry ID
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Catalog entry not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Organization tokens linked to this entry
-   */
-  409: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type DeleteApiAdminTokenCatalogByIdError =
-  DeleteApiAdminTokenCatalogByIdErrors[keyof DeleteApiAdminTokenCatalogByIdErrors];
-
-export type DeleteApiAdminTokenCatalogByIdResponses = {
-  /**
-   * Catalog entry deleted
-   */
-  204: void;
-};
-
-export type DeleteApiAdminTokenCatalogByIdResponse =
-  DeleteApiAdminTokenCatalogByIdResponses[keyof DeleteApiAdminTokenCatalogByIdResponses];
-
-export type GetApiAdminTokenCatalogByIdData = {
-  body?: never;
-  path: {
-    /**
-     * Catalog entry ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/token-catalog/{id}';
-};
-
-export type GetApiAdminTokenCatalogByIdErrors = {
-  /**
-   * Invalid catalog entry ID
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Catalog entry not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiAdminTokenCatalogByIdError =
-  GetApiAdminTokenCatalogByIdErrors[keyof GetApiAdminTokenCatalogByIdErrors];
-
-export type GetApiAdminTokenCatalogByIdResponses = {
-  /**
-   * Catalog entry details
-   */
-  200: TokenCatalogEntry;
-};
-
-export type GetApiAdminTokenCatalogByIdResponse =
-  GetApiAdminTokenCatalogByIdResponses[keyof GetApiAdminTokenCatalogByIdResponses];
-
-export type PutApiAdminTokenCatalogByIdData = {
-  /**
-   * Catalog entry update parameters
-   */
-  body: UpdateCatalogRequest;
-  path: {
-    /**
-     * Catalog entry ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/token-catalog/{id}';
-};
-
-export type PutApiAdminTokenCatalogByIdErrors = {
-  /**
-   * Invalid catalog entry ID or request body
-   */
-  400: {
-    [key: string]: unknown;
-  };
-  /**
-   * Authentication required
-   */
-  401: {
-    [key: string]: unknown;
-  };
-  /**
-   * Insufficient permissions
-   */
-  403: {
-    [key: string]: unknown;
-  };
-  /**
-   * Catalog entry not found
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: unknown;
-  };
-};
-
-export type PutApiAdminTokenCatalogByIdError =
-  PutApiAdminTokenCatalogByIdErrors[keyof PutApiAdminTokenCatalogByIdErrors];
-
-export type PutApiAdminTokenCatalogByIdResponses = {
-  /**
-   * Updated catalog entry
-   */
-  200: TokenCatalogEntry;
-};
-
-export type PutApiAdminTokenCatalogByIdResponse =
-  PutApiAdminTokenCatalogByIdResponses[keyof PutApiAdminTokenCatalogByIdResponses];
-
-export type PostApiAdminUsersByIdDisableData = {
-  /**
-   * Disable reason (required, 1-500 chars, audit-mandatory)
-   */
-  body: DisableUserRequest;
-  path: {
-    /**
-     * Target user ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/admin/users/{id}/disable';
-};
-
-export type PostApiAdminUsersByIdDisableErrors = {
-  /**
-   * Invalid user ID or request body
-   */
-  400: {
-    [key: string]: string;
-  };
-  /**
-   * Insufficient permissions or cross-org disable attempt
-   */
-  403: {
-    [key: string]: string;
-  };
-  /**
-   * Target user not found
-   */
-  404: {
-    [key: string]: string;
-  };
-  /**
-   * Internal server error
-   */
-  500: {
-    [key: string]: string;
-  };
-};
-
-export type PostApiAdminUsersByIdDisableError =
-  PostApiAdminUsersByIdDisableErrors[keyof PostApiAdminUsersByIdDisableErrors];
-
-export type PostApiAdminUsersByIdDisableResponses = {
-  /**
-   * No Content
-   */
-  204: void;
-};
-
-export type PostApiAdminUsersByIdDisableResponse =
-  PostApiAdminUsersByIdDisableResponses[keyof PostApiAdminUsersByIdDisableResponses];
+export type DeleteApiApiKeysByIdResponse =
+  DeleteApiApiKeysByIdResponses[keyof DeleteApiApiKeysByIdResponses];
 
 export type GetApiAuditLogsData = {
   body?: never;
@@ -2681,6 +5456,22 @@ export type GetApiAuditLogsData = {
      * Filter by resource ID (UUID)
      */
     resource_id?: string;
+    /**
+     * Filter by action prefix, for example roles:; repeat to match any of several
+     */
+    action_prefix?: Array<string>;
+    /**
+     * Filter by API key ID (UUID)
+     */
+    api_key_id?: string;
+    /**
+     * Filter by OAuth client ID (UUID)
+     */
+    oauth_client_id?: string;
+    /**
+     * Filter by actor kind
+     */
+    actor_kind?: 'user' | 'api_key' | 'oauth_client' | 'support' | 'system';
     /**
      * Filter by start time (RFC3339)
      */
@@ -2717,9 +5508,7 @@ export type GetApiAuditLogsErrors = {
   /**
    * Insufficient permissions
    */
-  403: {
-    [key: string]: unknown;
-  };
+  403: DeniedResponse;
   /**
    * Internal server error
    */
@@ -2732,10 +5521,10 @@ export type GetApiAuditLogsError = GetApiAuditLogsErrors[keyof GetApiAuditLogsEr
 
 export type GetApiAuditLogsResponses = {
   /**
-   * Paginated audit log entries with next_cursor
+   * Audit log entries; meta.next_cursor pages forward
    */
-  200: {
-    [key: string]: unknown;
+  200: ListEnvelope & {
+    data?: Array<AuditLogSummaryResponse>;
   };
 };
 
@@ -2769,9 +5558,7 @@ export type GetApiAuditLogsByIdErrors = {
   /**
    * Insufficient permissions
    */
-  403: {
-    [key: string]: unknown;
-  };
+  403: DeniedResponse;
   /**
    * Audit log entry not found
    */
@@ -2792,29 +5579,33 @@ export type GetApiAuditLogsByIdResponses = {
   /**
    * Audit log entry details
    */
-  200: {
-    [key: string]: unknown;
+  200: Envelope & {
+    data?: AuditLogResponse;
   };
 };
 
 export type GetApiAuditLogsByIdResponse =
   GetApiAuditLogsByIdResponses[keyof GetApiAuditLogsByIdResponses];
 
-export type GetApiFundsData = {
+export type GetApiCapabilitiesCaptureData = {
   body?: never;
   path?: never;
   query?: {
     /**
-     * Filter by organization ID (UUID)
+     * Comma-separated chain IDs to narrow the scope
      */
-    organization_id?: string;
+    chain_ids?: string;
+    /**
+     * Comma-separated token IDs to narrow the scope
+     */
+    token_ids?: string;
   };
-  url: '/api/funds';
+  url: '/api/capabilities/capture';
 };
 
-export type GetApiFundsErrors = {
+export type GetApiCapabilitiesCaptureErrors = {
   /**
-   * Invalid organization ID
+   * A chain or token ID is not a UUID
    */
   400: AppError;
   /**
@@ -2822,218 +5613,134 @@ export type GetApiFundsErrors = {
    */
   401: AppError;
   /**
+   * Missing funds:read
+   */
+  403: DeniedResponse;
+  /**
    * Internal server error
    */
   500: AppError;
 };
 
-export type GetApiFundsError = GetApiFundsErrors[keyof GetApiFundsErrors];
+export type GetApiCapabilitiesCaptureError =
+  GetApiCapabilitiesCaptureErrors[keyof GetApiCapabilitiesCaptureErrors];
 
-export type GetApiFundsResponses = {
+export type GetApiCapabilitiesCaptureResponses = {
   /**
    * OK
    */
-  200: Array<ProofOfFundsResponse>;
+  200: Envelope & {
+    data?: CaptureWindowResponse;
+  };
 };
 
-export type GetApiFundsResponse = GetApiFundsResponses[keyof GetApiFundsResponses];
+export type GetApiCapabilitiesCaptureResponse =
+  GetApiCapabilitiesCaptureResponses[keyof GetApiCapabilitiesCaptureResponses];
 
-export type PostApiFundsData = {
-  /**
-   * Proof of funds parameters
-   */
-  body: CreateProofOfFundsRequest;
-  path?: never;
-  query?: never;
-  url: '/api/funds';
-};
-
-export type PostApiFundsErrors = {
-  /**
-   * Validation error
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type PostApiFundsError = PostApiFundsErrors[keyof PostApiFundsErrors];
-
-export type PostApiFundsResponses = {
-  /**
-   * Created
-   */
-  201: ProofOfFundsResponse;
-};
-
-export type PostApiFundsResponse = PostApiFundsResponses[keyof PostApiFundsResponses];
-
-export type GetApiFundsTokensData = {
+export type GetApiCaptureSchedulesData = {
   body?: never;
   path?: never;
   query?: never;
-  url: '/api/funds/tokens';
+  url: '/api/capture-schedules';
 };
 
-export type GetApiFundsTokensErrors = {
+export type GetApiCaptureSchedulesErrors = {
   /**
    * Authentication required
    */
   401: AppError;
+  /**
+   * Missing funds:read
+   */
+  403: DeniedResponse;
   /**
    * Internal server error
    */
   500: AppError;
 };
 
-export type GetApiFundsTokensError = GetApiFundsTokensErrors[keyof GetApiFundsTokensErrors];
+export type GetApiCaptureSchedulesError =
+  GetApiCaptureSchedulesErrors[keyof GetApiCaptureSchedulesErrors];
 
-export type GetApiFundsTokensResponses = {
+export type GetApiCaptureSchedulesResponses = {
   /**
    * OK
    */
-  200: Array<Token>;
+  200: Envelope & {
+    data?: Array<CaptureScheduleResponse>;
+  };
 };
 
-export type GetApiFundsTokensResponse =
-  GetApiFundsTokensResponses[keyof GetApiFundsTokensResponses];
+export type GetApiCaptureSchedulesResponse =
+  GetApiCaptureSchedulesResponses[keyof GetApiCaptureSchedulesResponses];
 
-export type PostApiFundsTokensData = {
+export type PostApiCaptureSchedulesData = {
   /**
-   * Token registration parameters
+   * The schedule
    */
-  body: {
-    chain_id?: string;
-    contract_address?: string;
-  };
+  body: CaptureScheduleRequest;
   path?: never;
   query?: never;
-  url: '/api/funds/tokens';
+  url: '/api/capture-schedules';
 };
 
-export type PostApiFundsTokensErrors = {
+export type PostApiCaptureSchedulesErrors = {
   /**
-   * Validation error or invalid contract
+   * A field is invalid, or the organization already has 10 schedules; error.details names the field and the reason
    */
-  400: AppError;
+  400: ScheduleRefusalResponse;
   /**
    * Authentication required
    */
   401: AppError;
   /**
-   * Token already registered for this chain
+   * Missing funds:update
    */
-  409: AppError;
+  403: DeniedResponse;
+  /**
+   * No provider of a chain the captures read can serve a scheduled capture; error.details names chain_ids, the reason and the chain_id
+   */
+  422: ScheduleRefusalResponse;
   /**
    * Internal server error
    */
   500: AppError;
+  /**
+   * The workflow engine could not create the schedule; nothing was kept
+   */
+  503: AppError;
 };
 
-export type PostApiFundsTokensError = PostApiFundsTokensErrors[keyof PostApiFundsTokensErrors];
+export type PostApiCaptureSchedulesError =
+  PostApiCaptureSchedulesErrors[keyof PostApiCaptureSchedulesErrors];
 
-export type PostApiFundsTokensResponses = {
+export type PostApiCaptureSchedulesResponses = {
   /**
    * Created
    */
-  201: Token;
-};
-
-export type PostApiFundsTokensResponse =
-  PostApiFundsTokensResponses[keyof PostApiFundsTokensResponses];
-
-export type PostApiFundsTokensBulkData = {
-  /**
-   * Array of catalog entry UUIDs to onboard
-   */
-  body: {
-    catalog_ids?: Array<string>;
+  201: Envelope & {
+    data?: CaptureScheduleResponse;
   };
-  path?: never;
-  query?: never;
-  url: '/api/funds/tokens/bulk';
 };
 
-export type PostApiFundsTokensBulkErrors = {
-  /**
-   * Validation error or empty catalog_ids
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
+export type PostApiCaptureSchedulesResponse =
+  PostApiCaptureSchedulesResponses[keyof PostApiCaptureSchedulesResponses];
 
-export type PostApiFundsTokensBulkError =
-  PostApiFundsTokensBulkErrors[keyof PostApiFundsTokensBulkErrors];
-
-export type PostApiFundsTokensBulkResponses = {
-  /**
-   * Created
-   */
-  201: Array<Token>;
-};
-
-export type PostApiFundsTokensBulkResponse =
-  PostApiFundsTokensBulkResponses[keyof PostApiFundsTokensBulkResponses];
-
-export type GetApiFundsTokensCatalogData = {
-  body?: never;
-  path?: never;
-  query?: never;
-  url: '/api/funds/tokens/catalog';
-};
-
-export type GetApiFundsTokensCatalogErrors = {
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type GetApiFundsTokensCatalogError =
-  GetApiFundsTokensCatalogErrors[keyof GetApiFundsTokensCatalogErrors];
-
-export type GetApiFundsTokensCatalogResponses = {
-  /**
-   * OK
-   */
-  200: Array<TokenCatalogEntry>;
-};
-
-export type GetApiFundsTokensCatalogResponse =
-  GetApiFundsTokensCatalogResponses[keyof GetApiFundsTokensCatalogResponses];
-
-export type DeleteApiFundsTokensByIdData = {
+export type DeleteApiCaptureSchedulesByIdData = {
   body?: never;
   path: {
     /**
-     * Token ID (UUID)
+     * Capture schedule ID
      */
     id: string;
   };
   query?: never;
-  url: '/api/funds/tokens/{id}';
+  url: '/api/capture-schedules/{id}';
 };
 
-export type DeleteApiFundsTokensByIdErrors = {
+export type DeleteApiCaptureSchedulesByIdErrors = {
   /**
-   * Invalid token ID format
+   * The id is not a UUID
    */
   400: AppError;
   /**
@@ -3041,7 +5748,11 @@ export type DeleteApiFundsTokensByIdErrors = {
    */
   401: AppError;
   /**
-   * Token not found
+   * Missing funds:update
+   */
+  403: DeniedResponse;
+  /**
+   * No such capture schedule in this organization
    */
   404: AppError;
   /**
@@ -3050,34 +5761,34 @@ export type DeleteApiFundsTokensByIdErrors = {
   500: AppError;
 };
 
-export type DeleteApiFundsTokensByIdError =
-  DeleteApiFundsTokensByIdErrors[keyof DeleteApiFundsTokensByIdErrors];
+export type DeleteApiCaptureSchedulesByIdError =
+  DeleteApiCaptureSchedulesByIdErrors[keyof DeleteApiCaptureSchedulesByIdErrors];
 
-export type DeleteApiFundsTokensByIdResponses = {
+export type DeleteApiCaptureSchedulesByIdResponses = {
   /**
-   * Token deleted successfully
+   * Deleted
    */
   204: void;
 };
 
-export type DeleteApiFundsTokensByIdResponse =
-  DeleteApiFundsTokensByIdResponses[keyof DeleteApiFundsTokensByIdResponses];
+export type DeleteApiCaptureSchedulesByIdResponse =
+  DeleteApiCaptureSchedulesByIdResponses[keyof DeleteApiCaptureSchedulesByIdResponses];
 
-export type GetApiFundsByIdData = {
+export type GetApiCaptureSchedulesByIdData = {
   body?: never;
   path: {
     /**
-     * Proof of Funds ID (UUID)
+     * Capture schedule ID
      */
     id: string;
   };
   query?: never;
-  url: '/api/funds/{id}';
+  url: '/api/capture-schedules/{id}';
 };
 
-export type GetApiFundsByIdErrors = {
+export type GetApiCaptureSchedulesByIdErrors = {
   /**
-   * Invalid proof ID
+   * The id is not a UUID
    */
   400: AppError;
   /**
@@ -3085,7 +5796,11 @@ export type GetApiFundsByIdErrors = {
    */
   401: AppError;
   /**
-   * Proof not found
+   * Missing funds:read
+   */
+  403: DeniedResponse;
+  /**
+   * No such capture schedule in this organization
    */
   404: AppError;
   /**
@@ -3094,77 +5809,138 @@ export type GetApiFundsByIdErrors = {
   500: AppError;
 };
 
-export type GetApiFundsByIdError = GetApiFundsByIdErrors[keyof GetApiFundsByIdErrors];
+export type GetApiCaptureSchedulesByIdError =
+  GetApiCaptureSchedulesByIdErrors[keyof GetApiCaptureSchedulesByIdErrors];
 
-export type GetApiFundsByIdResponses = {
+export type GetApiCaptureSchedulesByIdResponses = {
   /**
    * OK
    */
-  200: ProofOfFundsResponse;
+  200: Envelope & {
+    data?: CaptureScheduleResponse;
+  };
 };
 
-export type GetApiFundsByIdResponse = GetApiFundsByIdResponses[keyof GetApiFundsByIdResponses];
+export type GetApiCaptureSchedulesByIdResponse =
+  GetApiCaptureSchedulesByIdResponses[keyof GetApiCaptureSchedulesByIdResponses];
 
-export type GetApiFundsByIdAssetsData = {
-  body?: never;
+export type PutApiCaptureSchedulesByIdData = {
+  /**
+   * The schedule
+   */
+  body: CaptureScheduleRequest;
   path: {
     /**
-     * Proof of Funds ID (UUID)
+     * Capture schedule ID
      */
     id: string;
   };
   query?: never;
-  url: '/api/funds/{id}/assets';
+  url: '/api/capture-schedules/{id}';
 };
 
-export type GetApiFundsByIdAssetsErrors = {
+export type PutApiCaptureSchedulesByIdErrors = {
   /**
-   * Invalid proof ID
+   * A field is invalid; error.details names the field and the reason
    */
-  400: AppError;
+  400: ScheduleRefusalResponse;
   /**
    * Authentication required
    */
   401: AppError;
   /**
-   * Proof not found
+   * Missing funds:update
+   */
+  403: DeniedResponse;
+  /**
+   * No such capture schedule in this organization
    */
   404: AppError;
+  /**
+   * No provider of a chain the captures read can serve a scheduled capture; error.details names chain_ids, the reason and the chain_id
+   */
+  422: ScheduleRefusalResponse;
   /**
    * Internal server error
    */
   500: AppError;
 };
 
-export type GetApiFundsByIdAssetsError =
-  GetApiFundsByIdAssetsErrors[keyof GetApiFundsByIdAssetsErrors];
+export type PutApiCaptureSchedulesByIdError =
+  PutApiCaptureSchedulesByIdErrors[keyof PutApiCaptureSchedulesByIdErrors];
 
-export type GetApiFundsByIdAssetsResponses = {
+export type PutApiCaptureSchedulesByIdResponses = {
   /**
    * OK
    */
-  200: Array<AssetResponse>;
-};
-
-export type GetApiFundsByIdAssetsResponse =
-  GetApiFundsByIdAssetsResponses[keyof GetApiFundsByIdAssetsResponses];
-
-export type PostApiFundsByIdAssetsData = {
-  /**
-   * Asset parameters
-   */
-  body: AddAssetRequest;
-  path: {
-    /**
-     * Proof of Funds ID (UUID)
-     */
-    id: string;
+  200: Envelope & {
+    data?: CaptureScheduleResponse;
   };
-  query?: never;
-  url: '/api/funds/{id}/assets';
 };
 
-export type PostApiFundsByIdAssetsErrors = {
+export type PutApiCaptureSchedulesByIdResponse =
+  PutApiCaptureSchedulesByIdResponses[keyof PutApiCaptureSchedulesByIdResponses];
+
+export type GetApiChainsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/api/chains';
+};
+
+export type GetApiChainsErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetApiChainsError = GetApiChainsErrors[keyof GetApiChainsErrors];
+
+export type GetApiChainsResponses = {
+  /**
+   * Supported chains
+   */
+  200: Envelope & {
+    data?: Array<SupportedChainResponse>;
+  };
+};
+
+export type GetApiChainsResponse = GetApiChainsResponses[keyof GetApiChainsResponses];
+
+export type GetApiGrantsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Only grants of this subject type
+     */
+    subject_type?: 'user' | 'service_user';
+    /**
+     * Only grants of this subject (UUID)
+     */
+    subject_id?: string;
+    /**
+     * Include revoked grants
+     */
+    include_revoked?: boolean;
+  };
+  url: '/api/grants';
+};
+
+export type GetApiGrantsErrors = {
   /**
    * Validation error
    */
@@ -3174,7 +5950,49 @@ export type PostApiFundsByIdAssetsErrors = {
    */
   401: AppError;
   /**
-   * Proof not found
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiGrantsError = GetApiGrantsErrors[keyof GetApiGrantsErrors];
+
+export type GetApiGrantsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<GrantResponse>;
+  };
+};
+
+export type GetApiGrantsResponse = GetApiGrantsResponses[keyof GetApiGrantsResponses];
+
+export type PostApiGrantsData = {
+  /**
+   * Grant parameters
+   */
+  body: CreateGrantRequest;
+  path?: never;
+  query?: never;
+  url: '/api/grants';
+};
+
+export type PostApiGrantsErrors = {
+  /**
+   * Validation error, unknown permission, or a scope the permission does not take
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * A permission the caller cannot grant, an admin-level or platform permission, or an unacknowledged conflicting pair
+   */
+  403: DeniedResponse;
+  /**
+   * Subject or scoped object not found in the organization
    */
   404: AppError;
   /**
@@ -3183,39 +6001,37 @@ export type PostApiFundsByIdAssetsErrors = {
   500: AppError;
 };
 
-export type PostApiFundsByIdAssetsError =
-  PostApiFundsByIdAssetsErrors[keyof PostApiFundsByIdAssetsErrors];
+export type PostApiGrantsError = PostApiGrantsErrors[keyof PostApiGrantsErrors];
 
-export type PostApiFundsByIdAssetsResponses = {
+export type PostApiGrantsResponses = {
   /**
    * Created
    */
-  201: AssetResponse;
+  201: Envelope & {
+    data?: GrantResponse;
+  };
 };
 
-export type PostApiFundsByIdAssetsResponse =
-  PostApiFundsByIdAssetsResponses[keyof PostApiFundsByIdAssetsResponses];
+export type PostApiGrantsResponse = PostApiGrantsResponses[keyof PostApiGrantsResponses];
 
-export type PostApiFundsByIdScanData = {
+export type DeleteApiGrantsByIdData = {
   /**
-   * Optional scan filters (wallet_ids, chain_ids, token_ids)
+   * Why the grant is revoked
    */
-  body?: {
-    [key: string]: unknown;
-  };
+  body?: RevokeGrantBody;
   path: {
     /**
-     * Proof of Funds ID (UUID)
+     * Grant ID (UUID)
      */
     id: string;
   };
   query?: never;
-  url: '/api/funds/{id}/scan';
+  url: '/api/grants/{id}';
 };
 
-export type PostApiFundsByIdScanErrors = {
+export type DeleteApiGrantsByIdErrors = {
   /**
-   * Invalid proof ID
+   * Invalid grant ID
    */
   400: AppError;
   /**
@@ -3223,7 +6039,11 @@ export type PostApiFundsByIdScanErrors = {
    */
   401: AppError;
   /**
-   * Proof not found
+   * A permission the caller cannot grant
+   */
+  403: DeniedResponse;
+  /**
+   * Grant not found, or already revoked
    */
   404: AppError;
   /**
@@ -3232,66 +6052,71 @@ export type PostApiFundsByIdScanErrors = {
   500: AppError;
 };
 
-export type PostApiFundsByIdScanError =
-  PostApiFundsByIdScanErrors[keyof PostApiFundsByIdScanErrors];
+export type DeleteApiGrantsByIdError = DeleteApiGrantsByIdErrors[keyof DeleteApiGrantsByIdErrors];
 
-export type PostApiFundsByIdScanResponses = {
+export type DeleteApiGrantsByIdResponses = {
   /**
-   * Accepted with job_id, proof_id, status
+   * OK
    */
-  202: {
-    [key: string]: unknown;
+  200: Envelope & {
+    data?: GrantResponse;
   };
 };
 
-export type PostApiFundsByIdScanResponse =
-  PostApiFundsByIdScanResponses[keyof PostApiFundsByIdScanResponses];
+export type DeleteApiGrantsByIdResponse =
+  DeleteApiGrantsByIdResponses[keyof DeleteApiGrantsByIdResponses];
 
-export type PostApiFundsByIdScanRetryData = {
+export type GetApiJobsData = {
   body?: never;
-  path: {
+  path?: never;
+  query?: {
     /**
-     * Proof of Funds ID (UUID)
+     * Subject type filter (repeatable)
      */
-    id: string;
+    subject_type?: Array<string>;
+    /**
+     * Subject ID filter (UUID)
+     */
+    subject_id?: string;
+    /**
+     * Parent job ID filter (UUID)
+     */
+    parent_job_id?: string;
+    /**
+     * Page number (default 1)
+     */
+    page?: number;
+    /**
+     * Items per page (default 50, max 100)
+     */
+    per_page?: number;
   };
-  query?: never;
-  url: '/api/funds/{id}/scan/retry';
+  url: '/api/jobs';
 };
 
-export type PostApiFundsByIdScanRetryErrors = {
+export type GetApiJobsErrors = {
   /**
-   * Invalid proof ID or proof not in incomplete status
+   * Invalid query parameter
    */
   400: AppError;
   /**
    * Authentication required
    */
   401: AppError;
-  /**
-   * Proof not found
-   */
-  404: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
 };
 
-export type PostApiFundsByIdScanRetryError =
-  PostApiFundsByIdScanRetryErrors[keyof PostApiFundsByIdScanRetryErrors];
+export type GetApiJobsError = GetApiJobsErrors[keyof GetApiJobsErrors];
 
-export type PostApiFundsByIdScanRetryResponses = {
+export type GetApiJobsResponses = {
   /**
-   * Accepted with job_id, proof_id, status
+   * OK
    */
-  202: {
-    [key: string]: unknown;
+  200: ListEnvelope & {
+    data?: Array<JobResponse>;
   };
 };
 
-export type PostApiFundsByIdScanRetryResponse =
-  PostApiFundsByIdScanRetryResponses[keyof PostApiFundsByIdScanRetryResponses];
+export type GetApiJobsResponse = GetApiJobsResponses[keyof GetApiJobsResponses];
 
 export type GetApiJobsByIdData = {
   body?: never;
@@ -3318,10 +6143,6 @@ export type GetApiJobsByIdErrors = {
    * Job not found
    */
   404: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
 };
 
 export type GetApiJobsByIdError = GetApiJobsByIdErrors[keyof GetApiJobsByIdErrors];
@@ -3330,10 +6151,62 @@ export type GetApiJobsByIdResponses = {
   /**
    * OK
    */
-  200: ScanJobResponse;
+  200: Envelope & {
+    data?: JobResponse;
+  };
 };
 
 export type GetApiJobsByIdResponse = GetApiJobsByIdResponses[keyof GetApiJobsByIdResponses];
+
+export type PostApiJobsByIdCancelData = {
+  body?: never;
+  path: {
+    /**
+     * Job ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/jobs/{id}/cancel';
+};
+
+export type PostApiJobsByIdCancelErrors = {
+  /**
+   * Invalid job ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Job not found
+   */
+  404: AppError;
+  /**
+   * Job already finished, cannot be cancelled, or not started yet
+   */
+  409: AppError;
+  /**
+   * Workflow engine temporarily unavailable
+   */
+  503: AppError;
+};
+
+export type PostApiJobsByIdCancelError =
+  PostApiJobsByIdCancelErrors[keyof PostApiJobsByIdCancelErrors];
+
+export type PostApiJobsByIdCancelResponses = {
+  /**
+   * Accepted
+   */
+  202: Envelope & {
+    data?: JobCancelResponse;
+  };
+};
+
+export type PostApiJobsByIdCancelResponse =
+  PostApiJobsByIdCancelResponses[keyof PostApiJobsByIdCancelResponses];
 
 export type GetApiJobsByIdStreamData = {
   body?: never;
@@ -3367,7 +6240,7 @@ export type GetApiJobsByIdStreamError =
 
 export type GetApiJobsByIdStreamResponses = {
   /**
-   * SSE event stream
+   * SSE event stream: progress, live, done
    */
   200: string;
 };
@@ -3375,21 +6248,47 @@ export type GetApiJobsByIdStreamResponses = {
 export type GetApiJobsByIdStreamResponse =
   GetApiJobsByIdStreamResponses[keyof GetApiJobsByIdStreamResponses];
 
-export type GetApiLiabilitiesData = {
+export type GetApiLiabilitySetsData = {
   body?: never;
   path?: never;
   query?: {
     /**
-     * Filter by organization ID (UUID)
+     * Page (1-based)
      */
-    organization_id?: string;
+    page?: number;
+    /**
+     * Page size
+     */
+    limit?: number;
   };
-  url: '/api/liabilities';
+  url: '/api/liability-sets';
 };
 
-export type GetApiLiabilitiesErrors = {
+export type GetApiLiabilitySetsResponses = {
   /**
-   * Invalid organization ID
+   * OK
+   */
+  200: ListEnvelope & {
+    data?: Array<LiabilitySetResponse>;
+  };
+};
+
+export type GetApiLiabilitySetsResponse =
+  GetApiLiabilitySetsResponses[keyof GetApiLiabilitySetsResponses];
+
+export type PostApiLiabilitySetsData = {
+  /**
+   * Cutoff and optional set name
+   */
+  body: OpenLiabilitySetRequest;
+  path?: never;
+  query?: never;
+  url: '/api/liability-sets';
+};
+
+export type PostApiLiabilitySetsErrors = {
+  /**
+   * Validation error, including a missing cutoff_at, one more than 1 hour in the future, or a name over 120 characters
    */
   400: AppError;
   /**
@@ -3402,29 +6301,144 @@ export type GetApiLiabilitiesErrors = {
   500: AppError;
 };
 
-export type GetApiLiabilitiesError = GetApiLiabilitiesErrors[keyof GetApiLiabilitiesErrors];
+export type PostApiLiabilitySetsError =
+  PostApiLiabilitySetsErrors[keyof PostApiLiabilitySetsErrors];
 
-export type GetApiLiabilitiesResponses = {
+export type PostApiLiabilitySetsResponses = {
+  /**
+   * Created
+   */
+  201: Envelope & {
+    data?: LiabilitySetResponse;
+  };
+};
+
+export type PostApiLiabilitySetsResponse =
+  PostApiLiabilitySetsResponses[keyof PostApiLiabilitySetsResponses];
+
+export type GetApiLiabilitySetsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Liability Set ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/liability-sets/{id}';
+};
+
+export type GetApiLiabilitySetsByIdErrors = {
+  /**
+   * Invalid set ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Insufficient permissions, or the set belongs to another organization
+   */
+  403: DeniedResponse;
+  /**
+   * Set not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiLiabilitySetsByIdError =
+  GetApiLiabilitySetsByIdErrors[keyof GetApiLiabilitySetsByIdErrors];
+
+export type GetApiLiabilitySetsByIdResponses = {
   /**
    * OK
    */
-  200: Array<ProofOfLiabilitiesResponse>;
+  200: Envelope & {
+    data?: LiabilitySetResponse;
+  };
 };
 
-export type GetApiLiabilitiesResponse =
-  GetApiLiabilitiesResponses[keyof GetApiLiabilitiesResponses];
+export type GetApiLiabilitySetsByIdResponse =
+  GetApiLiabilitySetsByIdResponses[keyof GetApiLiabilitySetsByIdResponses];
 
-export type PostApiLiabilitiesData = {
+export type PatchApiLiabilitySetsByIdData = {
   /**
-   * Proof of liabilities parameters
+   * New name and/or cutoff
    */
-  body: CreateProofOfLiabilitiesRequest;
-  path?: never;
+  body: UpdateLiabilitySetRequest;
+  path: {
+    /**
+     * Liability Set ID (UUID)
+     */
+    id: string;
+  };
   query?: never;
-  url: '/api/liabilities';
+  url: '/api/liability-sets/{id}';
 };
 
-export type PostApiLiabilitiesErrors = {
+export type PatchApiLiabilitySetsByIdErrors = {
+  /**
+   * Invalid set ID, neither name nor cutoff_at sent, a name over 120 characters, or a cutoff more than 1 hour in the future
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Set not found
+   */
+  404: AppError;
+  /**
+   * Set is cancelled, or sealed and a cutoff_at was sent
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PatchApiLiabilitySetsByIdError =
+  PatchApiLiabilitySetsByIdErrors[keyof PatchApiLiabilitySetsByIdErrors];
+
+export type PatchApiLiabilitySetsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: LiabilitySetResponse;
+  };
+};
+
+export type PatchApiLiabilitySetsByIdResponse =
+  PatchApiLiabilitySetsByIdResponses[keyof PatchApiLiabilitySetsByIdResponses];
+
+export type PostApiLiabilitySetsByIdAssetsBySymbolResolveData = {
+  /**
+   * Resolution choice
+   */
+  body: ResolveAssetRequest;
+  path: {
+    /**
+     * Liability Set ID (UUID)
+     */
+    id: string;
+    /**
+     * Asset symbol to resolve
+     */
+    symbol: string;
+  };
+  query?: never;
+  url: '/api/liability-sets/{id}/assets/{symbol}/resolve';
+};
+
+export type PostApiLiabilitySetsByIdAssetsBySymbolResolveErrors = {
   /**
    * Validation error
    */
@@ -3434,87 +6448,308 @@ export type PostApiLiabilitiesErrors = {
    */
   401: AppError;
   /**
-   * Internal server error
+   * Insufficient permissions, the set belongs to another organization, or token-catalog:manage is required
    */
-  500: AppError;
-};
-
-export type PostApiLiabilitiesError = PostApiLiabilitiesErrors[keyof PostApiLiabilitiesErrors];
-
-export type PostApiLiabilitiesResponses = {
+  403: DeniedResponse;
   /**
-   * Created
-   */
-  201: ProofOfLiabilitiesResponse;
-};
-
-export type PostApiLiabilitiesResponse =
-  PostApiLiabilitiesResponses[keyof PostApiLiabilitiesResponses];
-
-export type GetApiLiabilitiesByIdData = {
-  body?: never;
-  path: {
-    /**
-     * Proof of Liabilities ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/liabilities/{id}';
-};
-
-export type GetApiLiabilitiesByIdErrors = {
-  /**
-   * Invalid proof ID
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Proof not found
+   * Set not found
    */
   404: AppError;
   /**
+   * Set already sealed/cancelled, or a seal is in progress
+   */
+  409: AppError;
+  /**
    * Internal server error
    */
   500: AppError;
 };
 
-export type GetApiLiabilitiesByIdError =
-  GetApiLiabilitiesByIdErrors[keyof GetApiLiabilitiesByIdErrors];
+export type PostApiLiabilitySetsByIdAssetsBySymbolResolveError =
+  PostApiLiabilitySetsByIdAssetsBySymbolResolveErrors[keyof PostApiLiabilitySetsByIdAssetsBySymbolResolveErrors];
 
-export type GetApiLiabilitiesByIdResponses = {
+export type PostApiLiabilitySetsByIdAssetsBySymbolResolveResponses = {
   /**
    * OK
    */
-  200: ProofOfLiabilitiesResponse;
+  200: Envelope & {
+    data?: AssetResolutionResponse;
+  };
 };
 
-export type GetApiLiabilitiesByIdResponse =
-  GetApiLiabilitiesByIdResponses[keyof GetApiLiabilitiesByIdResponses];
+export type PostApiLiabilitySetsByIdAssetsBySymbolResolveResponse =
+  PostApiLiabilitySetsByIdAssetsBySymbolResolveResponses[keyof PostApiLiabilitySetsByIdAssetsBySymbolResolveResponses];
 
-export type PostApiLiabilitiesByIdDataData = {
+export type PostApiLiabilitySetsByIdCancelData = {
+  body?: never;
+  path: {
+    /**
+     * Liability Set ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/liability-sets/{id}/cancel';
+};
+
+export type PostApiLiabilitySetsByIdCancelErrors = {
+  /**
+   * Invalid set ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Insufficient permissions, or the set belongs to another organization
+   */
+  403: DeniedResponse;
+  /**
+   * Set not found
+   */
+  404: AppError;
+  /**
+   * Set cannot be cancelled (sealed with a commitment or with a nonce export that is not lost, or a seal is in progress)
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiLiabilitySetsByIdCancelError =
+  PostApiLiabilitySetsByIdCancelErrors[keyof PostApiLiabilitySetsByIdCancelErrors];
+
+export type PostApiLiabilitySetsByIdCancelResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: LiabilitySetResponse;
+  };
+};
+
+export type PostApiLiabilitySetsByIdCancelResponse =
+  PostApiLiabilitySetsByIdCancelResponses[keyof PostApiLiabilitySetsByIdCancelResponses];
+
+export type PostApiLiabilitySetsByIdCommitData = {
+  body?: never;
+  path: {
+    /**
+     * Liability Set ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/liability-sets/{id}/commit';
+};
+
+export type PostApiLiabilitySetsByIdCommitErrors = {
+  /**
+   * Invalid set ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Set not found
+   */
+  404: AppError;
+  /**
+   * Set is not sealed, its nonce export has not been downloaded (details.reason nonce_export_not_downloaded), or a commit is in progress
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+  /**
+   * Background processing unavailable
+   */
+  503: AppError;
+};
+
+export type PostApiLiabilitySetsByIdCommitError =
+  PostApiLiabilitySetsByIdCommitErrors[keyof PostApiLiabilitySetsByIdCommitErrors];
+
+export type PostApiLiabilitySetsByIdCommitResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: CommitmentV1Response;
+  };
+  /**
+   * Accepted
+   */
+  202: Envelope & {
+    data?: CommitStartedResponse;
+  };
+};
+
+export type PostApiLiabilitySetsByIdCommitResponse =
+  PostApiLiabilitySetsByIdCommitResponses[keyof PostApiLiabilitySetsByIdCommitResponses];
+
+export type PostApiLiabilitySetsByIdCommitmentsByManifestHashPrecomputeData = {
+  body?: never;
+  path: {
+    /**
+     * Liability Set ID
+     */
+    id: string;
+    /**
+     * Manifest hash (hex)
+     */
+    manifest_hash: string;
+  };
+  query?: never;
+  url: '/api/liability-sets/{id}/commitments/{manifest_hash}/precompute';
+};
+
+export type PostApiLiabilitySetsByIdCommitmentsByManifestHashPrecomputeErrors = {
+  /**
+   * Not found
+   */
+  404: AppError;
+  /**
+   * Already running, or the nonce export is gone
+   */
+  409: AppError;
+  /**
+   * Background processing unavailable
+   */
+  503: AppError;
+};
+
+export type PostApiLiabilitySetsByIdCommitmentsByManifestHashPrecomputeError =
+  PostApiLiabilitySetsByIdCommitmentsByManifestHashPrecomputeErrors[keyof PostApiLiabilitySetsByIdCommitmentsByManifestHashPrecomputeErrors];
+
+export type PostApiLiabilitySetsByIdCommitmentsByManifestHashPrecomputeResponses = {
+  /**
+   * Accepted
+   */
+  202: PrecomputeStartedResponse;
+};
+
+export type PostApiLiabilitySetsByIdCommitmentsByManifestHashPrecomputeResponse =
+  PostApiLiabilitySetsByIdCommitmentsByManifestHashPrecomputeResponses[keyof PostApiLiabilitySetsByIdCommitmentsByManifestHashPrecomputeResponses];
+
+export type GetApiLiabilitySetsByIdNonceExportData = {
+  body?: never;
+  path: {
+    /**
+     * Liability Set ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/liability-sets/{id}/nonce-export';
+};
+
+export type GetApiLiabilitySetsByIdNonceExportErrors = {
+  /**
+   * Set not found
+   */
+  404: AppError;
+  /**
+   * Re-issue window closed or export deleted
+   */
+  410: AppError;
+};
+
+export type GetApiLiabilitySetsByIdNonceExportError =
+  GetApiLiabilitySetsByIdNonceExportErrors[keyof GetApiLiabilitySetsByIdNonceExportErrors];
+
+export type GetApiLiabilitySetsByIdNonceExportResponses = {
+  /**
+   * OK
+   */
+  200: NonceExportResponse;
+};
+
+export type GetApiLiabilitySetsByIdNonceExportResponse =
+  GetApiLiabilitySetsByIdNonceExportResponses[keyof GetApiLiabilitySetsByIdNonceExportResponses];
+
+export type GetApiLiabilitySetsByIdPartsData = {
+  body?: never;
+  path: {
+    /**
+     * Liability Set ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/liability-sets/{id}/parts';
+};
+
+export type GetApiLiabilitySetsByIdPartsErrors = {
+  /**
+   * Invalid set ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Insufficient permissions, or the set belongs to another organization
+   */
+  403: DeniedResponse;
+  /**
+   * Set not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiLiabilitySetsByIdPartsError =
+  GetApiLiabilitySetsByIdPartsErrors[keyof GetApiLiabilitySetsByIdPartsErrors];
+
+export type GetApiLiabilitySetsByIdPartsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<LiabilitySetPartResponse>;
+  };
+};
+
+export type GetApiLiabilitySetsByIdPartsResponse =
+  GetApiLiabilitySetsByIdPartsResponses[keyof GetApiLiabilitySetsByIdPartsResponses];
+
+export type PostApiLiabilitySetsByIdPartsData = {
   body?: {
     /**
-     * Liability data file (CSV, JSON, XLSX, or TXT)
+     * Obligation part file (.csv,.ndjson,.jsonl,.parquet)
      */
     file: Blob | File;
   };
+  headers: {
+    /**
+     * Client idempotency key for this part
+     */
+    'Idempotency-Key': string;
+  };
   path: {
     /**
-     * Proof of Liabilities ID (UUID)
+     * Liability Set ID (UUID)
      */
     id: string;
   };
   query?: never;
-  url: '/api/liabilities/{id}/data';
+  url: '/api/liability-sets/{id}/parts';
 };
 
-export type PostApiLiabilitiesByIdDataErrors = {
+export type PostApiLiabilitySetsByIdPartsErrors = {
   /**
-   * Validation error or no file provided
+   * Validation error, missing file, or missing idempotency key
    */
   400: AppError;
   /**
@@ -3522,95 +6757,57 @@ export type PostApiLiabilitiesByIdDataErrors = {
    */
   401: AppError;
   /**
-   * Proof not found
+   * Insufficient permissions, or the set belongs to another organization
+   */
+  403: DeniedResponse;
+  /**
+   * Set not found
    */
   404: AppError;
+  /**
+   * Set not open, or a seal is in progress
+   */
+  409: AppError;
+  /**
+   * Typed validation error (excess precision, duplicate row, or per-part cap), with the part's record and its failed job when the rejection was recorded
+   */
+  422: LiabilityValidationResponse;
   /**
    * Internal server error
    */
   500: AppError;
 };
 
-export type PostApiLiabilitiesByIdDataError =
-  PostApiLiabilitiesByIdDataErrors[keyof PostApiLiabilitiesByIdDataErrors];
+export type PostApiLiabilitySetsByIdPartsError =
+  PostApiLiabilitySetsByIdPartsErrors[keyof PostApiLiabilitySetsByIdPartsErrors];
 
-export type PostApiLiabilitiesByIdDataResponses = {
+export type PostApiLiabilitySetsByIdPartsResponses = {
   /**
-   * Upload confirmation with filename and liability data
+   * The part's record and its completed liability_set_ingest job
    */
-  201: {
-    [key: string]: unknown;
+  201: Envelope & {
+    data?: IngestPartResponse;
   };
 };
 
-export type PostApiLiabilitiesByIdDataResponse =
-  PostApiLiabilitiesByIdDataResponses[keyof PostApiLiabilitiesByIdDataResponses];
+export type PostApiLiabilitySetsByIdPartsResponse =
+  PostApiLiabilitySetsByIdPartsResponses[keyof PostApiLiabilitySetsByIdPartsResponses];
 
-export type GetApiLiabilitiesByIdNoncesByUserIdentifierData = {
+export type PostApiLiabilitySetsByIdSealData = {
   body?: never;
   path: {
     /**
-     * Proof of Liabilities ID (UUID)
-     */
-    id: string;
-    /**
-     * User identifier (e.g., email or account ID)
-     */
-    userIdentifier: string;
-  };
-  query?: never;
-  url: '/api/liabilities/{id}/nonces/{userIdentifier}';
-};
-
-export type GetApiLiabilitiesByIdNoncesByUserIdentifierErrors = {
-  /**
-   * Invalid proof ID or missing user identifier
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * User not found in proof
-   */
-  404: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type GetApiLiabilitiesByIdNoncesByUserIdentifierError =
-  GetApiLiabilitiesByIdNoncesByUserIdentifierErrors[keyof GetApiLiabilitiesByIdNoncesByUserIdentifierErrors];
-
-export type GetApiLiabilitiesByIdNoncesByUserIdentifierResponses = {
-  /**
-   * User nonce data with user_identifier, nonce, balance, currency
-   */
-  200: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiLiabilitiesByIdNoncesByUserIdentifierResponse =
-  GetApiLiabilitiesByIdNoncesByUserIdentifierResponses[keyof GetApiLiabilitiesByIdNoncesByUserIdentifierResponses];
-
-export type PostApiLiabilitiesByIdProcessingData = {
-  body?: never;
-  path: {
-    /**
-     * Proof of Liabilities ID (UUID)
+     * Liability Set ID (UUID)
      */
     id: string;
   };
   query?: never;
-  url: '/api/liabilities/{id}/processing';
+  url: '/api/liability-sets/{id}/seal';
 };
 
-export type PostApiLiabilitiesByIdProcessingErrors = {
+export type PostApiLiabilitySetsByIdSealErrors = {
   /**
-   * Invalid proof ID
+   * Invalid set ID or empty set
    */
   400: AppError;
   /**
@@ -3618,293 +6815,200 @@ export type PostApiLiabilitiesByIdProcessingErrors = {
    */
   401: AppError;
   /**
-   * Proof not found
+   * Insufficient permissions, or the set belongs to another organization
+   */
+  403: DeniedResponse;
+  /**
+   * Set not found
    */
   404: AppError;
   /**
-   * Processing already in progress
+   * Set already sealed or cancelled, a part in flight, or a seal in progress
    */
-  409: {
-    [key: string]: unknown;
-  };
+  409: AppError;
+  /**
+   * Typed validation error (including seal blocked: assets need resolution)
+   */
+  422: LiabilityValidationResponse;
   /**
    * Internal server error
    */
   500: AppError;
+  /**
+   * Background processing unavailable
+   */
+  503: AppError;
 };
 
-export type PostApiLiabilitiesByIdProcessingError =
-  PostApiLiabilitiesByIdProcessingErrors[keyof PostApiLiabilitiesByIdProcessingErrors];
+export type PostApiLiabilitySetsByIdSealError =
+  PostApiLiabilitySetsByIdSealErrors[keyof PostApiLiabilitySetsByIdSealErrors];
 
-export type PostApiLiabilitiesByIdProcessingResponses = {
+export type PostApiLiabilitySetsByIdSealResponses = {
   /**
-   * SSE event stream with processing progress
+   * Accepted
    */
-  200: string;
-};
-
-export type PostApiLiabilitiesByIdProcessingResponse =
-  PostApiLiabilitiesByIdProcessingResponses[keyof PostApiLiabilitiesByIdProcessingResponses];
-
-export type GetApiLiabilitiesByIdZkpArtifactData = {
-  body?: never;
-  path: {
-    /**
-     * Proof of Liabilities ID (UUID)
-     */
-    id: string;
-  };
-  query?: {
-    /**
-     * Processing version (defaults to latest)
-     */
-    version?: number;
-  };
-  url: '/api/liabilities/{id}/zkp-artifact';
-};
-
-export type GetApiLiabilitiesByIdZkpArtifactErrors = {
-  /**
-   * Invalid proof ID or version parameter
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * ZKP artifact not available for this proof mode or version
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type GetApiLiabilitiesByIdZkpArtifactError =
-  GetApiLiabilitiesByIdZkpArtifactErrors[keyof GetApiLiabilitiesByIdZkpArtifactErrors];
-
-export type GetApiLiabilitiesByIdZkpArtifactResponses = {
-  /**
-   * ZKP artifact metadata with proof_id, version, circuit_version, download URL
-   */
-  200: {
-    [key: string]: unknown;
+  202: Envelope & {
+    data?: SealStartedResponse;
   };
 };
 
-export type GetApiLiabilitiesByIdZkpArtifactResponse =
-  GetApiLiabilitiesByIdZkpArtifactResponses[keyof GetApiLiabilitiesByIdZkpArtifactResponses];
+export type PostApiLiabilitySetsByIdSealResponse =
+  PostApiLiabilitySetsByIdSealResponses[keyof PostApiLiabilitySetsByIdSealResponses];
 
-export type GetApiLiabilitiesByIdZkpArtifactDownloadData = {
-  body?: never;
-  path: {
-    /**
-     * Proof of Liabilities ID (UUID)
-     */
-    id: string;
-  };
-  query?: {
-    /**
-     * Processing version (defaults to latest)
-     */
-    version?: number;
-  };
-  url: '/api/liabilities/{id}/zkp-artifact/download';
-};
-
-export type GetApiLiabilitiesByIdZkpArtifactDownloadErrors = {
-  /**
-   * Invalid proof ID or version parameter
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * ZKP artifact not available for this proof mode or version
-   */
-  404: {
-    [key: string]: unknown;
-  };
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type GetApiLiabilitiesByIdZkpArtifactDownloadError =
-  GetApiLiabilitiesByIdZkpArtifactDownloadErrors[keyof GetApiLiabilitiesByIdZkpArtifactDownloadErrors];
-
-export type GetApiLiabilitiesByIdZkpArtifactDownloadResponses = {
-  /**
-   * ZKP proof artifact file
-   */
-  200: Blob | File;
-};
-
-export type GetApiLiabilitiesByIdZkpArtifactDownloadResponse =
-  GetApiLiabilitiesByIdZkpArtifactDownloadResponses[keyof GetApiLiabilitiesByIdZkpArtifactDownloadResponses];
-
-export type GetApiLiabilityFilesData = {
+export type GetApiOauthConnectionsMineData = {
   body?: never;
   path?: never;
-  query?: {
-    /**
-     * Page number (default 1)
-     */
-    page?: number;
-    /**
-     * Items per page (default 20, max 100)
-     */
-    limit?: number;
-  };
-  url: '/api/liability-files';
-};
-
-export type GetApiLiabilityFilesErrors = {
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type GetApiLiabilityFilesError =
-  GetApiLiabilityFilesErrors[keyof GetApiLiabilityFilesErrors];
-
-export type GetApiLiabilityFilesResponses = {
-  /**
-   * Paginated file list with files, total, page, limit
-   */
-  200: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetApiLiabilityFilesResponse =
-  GetApiLiabilityFilesResponses[keyof GetApiLiabilityFilesResponses];
-
-export type PostApiLiabilityFilesUploadData = {
-  body?: {
-    /**
-     * Liability file (CSV, JSON, XLSX, or TXT, max 100MB)
-     */
-    file: Blob | File;
-  };
-  path?: never;
   query?: never;
-  url: '/api/liability-files/upload';
+  url: '/api/oauth/connections/mine';
 };
 
-export type PostApiLiabilityFilesUploadErrors = {
+export type GetApiOauthConnectionsMineErrors = {
   /**
-   * Validation error or invalid file type/size
-   */
-  400: AppError;
-  /**
-   * Authentication required
+   * Unauthorized
    */
   401: AppError;
   /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type PostApiLiabilityFilesUploadError =
-  PostApiLiabilityFilesUploadErrors[keyof PostApiLiabilityFilesUploadErrors];
-
-export type PostApiLiabilityFilesUploadResponses = {
-  /**
-   * Created
-   */
-  201: LiabilityFileResponse;
-};
-
-export type PostApiLiabilityFilesUploadResponse =
-  PostApiLiabilityFilesUploadResponses[keyof PostApiLiabilityFilesUploadResponses];
-
-export type DeleteApiLiabilityFilesByIdData = {
-  body?: never;
-  path: {
-    /**
-     * Liability File ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/liability-files/{id}';
-};
-
-export type DeleteApiLiabilityFilesByIdErrors = {
-  /**
-   * Invalid file ID
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * File not found
-   */
-  404: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type DeleteApiLiabilityFilesByIdError =
-  DeleteApiLiabilityFilesByIdErrors[keyof DeleteApiLiabilityFilesByIdErrors];
-
-export type DeleteApiLiabilityFilesByIdResponses = {
-  /**
-   * Deletion confirmation message
-   */
-  200: {
-    [key: string]: unknown;
-  };
-};
-
-export type DeleteApiLiabilityFilesByIdResponse =
-  DeleteApiLiabilityFilesByIdResponses[keyof DeleteApiLiabilityFilesByIdResponses];
-
-export type GetApiLiabilityFilesByIdDownloadData = {
-  body?: never;
-  path: {
-    /**
-     * Liability File ID (UUID)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/api/liability-files/{id}/download';
-};
-
-export type GetApiLiabilityFilesByIdDownloadErrors = {
-  /**
-   * Invalid file ID
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Access denied (different organization)
+   * API keys and OAuth access tokens cannot manage connections
    */
   403: AppError;
   /**
-   * File not found
+   * Internal Server Error
+   */
+  500: AppError;
+};
+
+export type GetApiOauthConnectionsMineError =
+  GetApiOauthConnectionsMineErrors[keyof GetApiOauthConnectionsMineErrors];
+
+export type GetApiOauthConnectionsMineResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<ConnectionResponse>;
+  };
+};
+
+export type GetApiOauthConnectionsMineResponse =
+  GetApiOauthConnectionsMineResponses[keyof GetApiOauthConnectionsMineResponses];
+
+export type DeleteApiOauthConnectionsByClientIdData = {
+  body?: never;
+  path: {
+    /**
+     * Public client ID
+     */
+    client_id: string;
+  };
+  query: {
+    /**
+     * Organization the grant is bound to
+     */
+    organization_id: string;
+  };
+  url: '/api/oauth/connections/{client_id}';
+};
+
+export type DeleteApiOauthConnectionsByClientIdErrors = {
+  /**
+   * Bad Request
+   */
+  400: AppError;
+  /**
+   * Unauthorized
+   */
+  401: AppError;
+  /**
+   * API keys and OAuth access tokens cannot manage connections
+   */
+  403: AppError;
+  /**
+   * Not Found
+   */
+  404: AppError;
+  /**
+   * Internal Server Error
+   */
+  500: AppError;
+};
+
+export type DeleteApiOauthConnectionsByClientIdError =
+  DeleteApiOauthConnectionsByClientIdErrors[keyof DeleteApiOauthConnectionsByClientIdErrors];
+
+export type DeleteApiOauthConnectionsByClientIdResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type DeleteApiOauthConnectionsByClientIdResponse =
+  DeleteApiOauthConnectionsByClientIdResponses[keyof DeleteApiOauthConnectionsByClientIdResponses];
+
+export type GetApiOrganizationsMembersData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/api/organizations/members';
+};
+
+export type GetApiOrganizationsMembersErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: string;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: string;
+  };
+};
+
+export type GetApiOrganizationsMembersError =
+  GetApiOrganizationsMembersErrors[keyof GetApiOrganizationsMembersErrors];
+
+export type GetApiOrganizationsMembersResponses = {
+  /**
+   * Organization members
+   */
+  200: Envelope & {
+    data?: ListOrgMembersResponse;
+  };
+};
+
+export type GetApiOrganizationsMembersResponse =
+  GetApiOrganizationsMembersResponses[keyof GetApiOrganizationsMembersResponses];
+
+export type GetApiOrganizationsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Org ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}';
+};
+
+export type GetApiOrganizationsByIdErrors = {
+  /**
+   * Invalid org ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:settings:read
+   */
+  403: DeniedResponse;
+  /**
+   * Organization not found
    */
   404: AppError;
   /**
@@ -3913,18 +7017,119 @@ export type GetApiLiabilityFilesByIdDownloadErrors = {
   500: AppError;
 };
 
-export type GetApiLiabilityFilesByIdDownloadError =
-  GetApiLiabilityFilesByIdDownloadErrors[keyof GetApiLiabilityFilesByIdDownloadErrors];
+export type GetApiOrganizationsByIdError =
+  GetApiOrganizationsByIdErrors[keyof GetApiOrganizationsByIdErrors];
 
-export type GetApiLiabilityFilesByIdDownloadResponses = {
+export type GetApiOrganizationsByIdResponses = {
   /**
-   * File content
+   * OK
    */
-  200: Blob | File;
+  200: Envelope & {
+    data?: OrganizationResponse;
+  };
 };
 
-export type GetApiLiabilityFilesByIdDownloadResponse =
-  GetApiLiabilityFilesByIdDownloadResponses[keyof GetApiLiabilityFilesByIdDownloadResponses];
+export type GetApiOrganizationsByIdResponse =
+  GetApiOrganizationsByIdResponses[keyof GetApiOrganizationsByIdResponses];
+
+export type PatchApiOrganizationsByIdData = {
+  /**
+   * Details to change
+   */
+  body: UpdateOrganizationRequest;
+  path: {
+    /**
+     * Org ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}';
+};
+
+export type PatchApiOrganizationsByIdErrors = {
+  /**
+   * Invalid org ID or body, nothing to update, or a refused field (error.details)
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:settings:write
+   */
+  403: DeniedResponse;
+  /**
+   * Organization not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PatchApiOrganizationsByIdError =
+  PatchApiOrganizationsByIdErrors[keyof PatchApiOrganizationsByIdErrors];
+
+export type PatchApiOrganizationsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: OrganizationResponse;
+  };
+};
+
+export type PatchApiOrganizationsByIdResponse =
+  PatchApiOrganizationsByIdResponses[keyof PatchApiOrganizationsByIdResponses];
+
+export type GetApiOrganizationsByIdApiKeysData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID (must match caller's org, B6)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/api-keys';
+};
+
+export type GetApiOrganizationsByIdApiKeysErrors = {
+  /**
+   * Org-path mismatch
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:api-keys:write:service
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOrganizationsByIdApiKeysError =
+  GetApiOrganizationsByIdApiKeysErrors[keyof GetApiOrganizationsByIdApiKeysErrors];
+
+export type GetApiOrganizationsByIdApiKeysResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<ApiKeyListItem>;
+  };
+};
+
+export type GetApiOrganizationsByIdApiKeysResponse =
+  GetApiOrganizationsByIdApiKeysResponses[keyof GetApiOrganizationsByIdApiKeysResponses];
 
 export type GetApiOrganizationsByIdInvitationsData = {
   body?: never;
@@ -3954,9 +7159,7 @@ export type GetApiOrganizationsByIdInvitationsErrors = {
   /**
    * Insufficient permissions
    */
-  403: {
-    [key: string]: string;
-  };
+  403: DeniedResponse;
 };
 
 export type GetApiOrganizationsByIdInvitationsError =
@@ -3966,7 +7169,9 @@ export type GetApiOrganizationsByIdInvitationsResponses = {
   /**
    * OK
    */
-  200: Array<InvitationResponse>;
+  200: Envelope & {
+    data?: Array<InvitationResponse>;
+  };
 };
 
 export type GetApiOrganizationsByIdInvitationsResponse =
@@ -4001,11 +7206,9 @@ export type PostApiOrganizationsByIdInvitationsErrors = {
     [key: string]: string;
   };
   /**
-   * Insufficient permissions
+   * Insufficient permissions, or reason limit_reached when the organization has no member seat left
    */
-  403: {
-    [key: string]: string;
-  };
+  403: DeniedResponse;
   /**
    * Rate limit exceeded
    */
@@ -4021,7 +7224,9 @@ export type PostApiOrganizationsByIdInvitationsResponses = {
   /**
    * Created
    */
-  201: InvitationResponse;
+  201: Envelope & {
+    data?: InvitationResponse;
+  };
 };
 
 export type PostApiOrganizationsByIdInvitationsResponse =
@@ -4059,9 +7264,7 @@ export type DeleteApiOrganizationsByIdInvitationsByInvitationIdErrors = {
   /**
    * Insufficient permissions
    */
-  403: {
-    [key: string]: string;
-  };
+  403: DeniedResponse;
   /**
    * Invitation not found
    */
@@ -4115,9 +7318,7 @@ export type PostApiOrganizationsByIdInvitationsByInvitationIdResendErrors = {
   /**
    * Insufficient permissions
    */
-  403: {
-    [key: string]: string;
-  };
+  403: DeniedResponse;
   /**
    * Invitation not found
    */
@@ -4125,9 +7326,9 @@ export type PostApiOrganizationsByIdInvitationsByInvitationIdResendErrors = {
     [key: string]: string;
   };
   /**
-   * Invitation is no longer valid
+   * Invitation was revoked
    */
-  410: {
+  409: {
     [key: string]: string;
   };
 };
@@ -4142,13 +7343,385 @@ export type PostApiOrganizationsByIdInvitationsByInvitationIdResendResponses = {
   200: unknown;
 };
 
-export type PatchApiOrganizationsByIdProofModeData = {
-  /**
-   * Proof mode update (proof_mode: 'merkle' or 'zkp')
-   */
-  body: {
-    [key: string]: unknown;
+export type GetApiOrganizationsByIdMembersData = {
+  body?: never;
+  path: {
+    /**
+     * Org ID (UUID)
+     */
+    id: string;
   };
+  query?: never;
+  url: '/api/organizations/{id}/members';
+};
+
+export type GetApiOrganizationsByIdMembersErrors = {
+  /**
+   * Invalid org ID
+   */
+  400: {
+    [key: string]: string;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: string;
+  };
+  /**
+   * Missing org:members:read
+   */
+  403: DeniedResponse;
+  /**
+   * Organization not found
+   */
+  404: {
+    [key: string]: string;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: string;
+  };
+};
+
+export type GetApiOrganizationsByIdMembersError =
+  GetApiOrganizationsByIdMembersErrors[keyof GetApiOrganizationsByIdMembersErrors];
+
+export type GetApiOrganizationsByIdMembersResponses = {
+  /**
+   * Organization members
+   */
+  200: Envelope & {
+    data?: ListOrgMembersDetailedResponse;
+  };
+};
+
+export type GetApiOrganizationsByIdMembersResponse =
+  GetApiOrganizationsByIdMembersResponses[keyof GetApiOrganizationsByIdMembersResponses];
+
+export type DeleteApiOrganizationsByIdMembersByUserIdData = {
+  body?: never;
+  path: {
+    /**
+     * Org ID (UUID)
+     */
+    id: string;
+    /**
+     * Member user ID (UUID)
+     */
+    user_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/members/{user_id}';
+};
+
+export type DeleteApiOrganizationsByIdMembersByUserIdErrors = {
+  /**
+   * Invalid org or user ID
+   */
+  400: {
+    [key: string]: string;
+  };
+  /**
+   * Missing org:members:write, removing yourself, or removing a member who outranks you
+   */
+  403: DeniedResponse;
+  /**
+   * Organization or member not found
+   */
+  404: {
+    [key: string]: string;
+  };
+  /**
+   * The member is the last Owner
+   */
+  409: {
+    [key: string]: string;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: string;
+  };
+};
+
+export type DeleteApiOrganizationsByIdMembersByUserIdError =
+  DeleteApiOrganizationsByIdMembersByUserIdErrors[keyof DeleteApiOrganizationsByIdMembersByUserIdErrors];
+
+export type DeleteApiOrganizationsByIdMembersByUserIdResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type DeleteApiOrganizationsByIdMembersByUserIdResponse =
+  DeleteApiOrganizationsByIdMembersByUserIdResponses[keyof DeleteApiOrganizationsByIdMembersByUserIdResponses];
+
+export type GetApiOrganizationsByIdOauthClientsData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/oauth-clients';
+};
+
+export type GetApiOrganizationsByIdOauthClientsErrors = {
+  /**
+   * Org-path mismatch
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing oauth:clients:read
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOrganizationsByIdOauthClientsError =
+  GetApiOrganizationsByIdOauthClientsErrors[keyof GetApiOrganizationsByIdOauthClientsErrors];
+
+export type GetApiOrganizationsByIdOauthClientsResponses = {
+  /**
+   * OK
+   */
+  200: Array<OAuthClientListItem>;
+};
+
+export type GetApiOrganizationsByIdOauthClientsResponse =
+  GetApiOrganizationsByIdOauthClientsResponses[keyof GetApiOrganizationsByIdOauthClientsResponses];
+
+export type DeleteApiOrganizationsByIdOauthClientsByClientIdData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+    /**
+     * Client UUID
+     */
+    client_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/oauth-clients/{client_id}';
+};
+
+export type DeleteApiOrganizationsByIdOauthClientsByClientIdErrors = {
+  /**
+   * Invalid client_id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing oauth:clients:delete
+   */
+  403: DeniedResponse;
+  /**
+   * Client not found
+   */
+  404: AppError;
+  /**
+   * Client must be disabled before deletion
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type DeleteApiOrganizationsByIdOauthClientsByClientIdError =
+  DeleteApiOrganizationsByIdOauthClientsByClientIdErrors[keyof DeleteApiOrganizationsByIdOauthClientsByClientIdErrors];
+
+export type DeleteApiOrganizationsByIdOauthClientsByClientIdResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type DeleteApiOrganizationsByIdOauthClientsByClientIdResponse =
+  DeleteApiOrganizationsByIdOauthClientsByClientIdResponses[keyof DeleteApiOrganizationsByIdOauthClientsByClientIdResponses];
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdApproveData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+    /**
+     * Client UUID
+     */
+    client_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/oauth-clients/{client_id}/approve';
+};
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdApproveErrors = {
+  /**
+   * Invalid client_id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Self-approval or missing oauth:clients:approve
+   */
+  403: DeniedResponse;
+  /**
+   * Client not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdApproveError =
+  PostApiOrganizationsByIdOauthClientsByClientIdApproveErrors[keyof PostApiOrganizationsByIdOauthClientsByClientIdApproveErrors];
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdApproveResponses = {
+  /**
+   * OK
+   */
+  200: OAuthClientListItem;
+};
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdApproveResponse =
+  PostApiOrganizationsByIdOauthClientsByClientIdApproveResponses[keyof PostApiOrganizationsByIdOauthClientsByClientIdApproveResponses];
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdDisableData = {
+  /**
+   * Optional disable reason
+   */
+  body?: DisableClientRequest;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+    /**
+     * Client UUID
+     */
+    client_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/oauth-clients/{client_id}/disable';
+};
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdDisableErrors = {
+  /**
+   * Invalid client_id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing oauth:clients:write
+   */
+  403: DeniedResponse;
+  /**
+   * Client not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdDisableError =
+  PostApiOrganizationsByIdOauthClientsByClientIdDisableErrors[keyof PostApiOrganizationsByIdOauthClientsByClientIdDisableErrors];
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdDisableResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdDisableResponse =
+  PostApiOrganizationsByIdOauthClientsByClientIdDisableResponses[keyof PostApiOrganizationsByIdOauthClientsByClientIdDisableResponses];
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdRotateSecretData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+    /**
+     * Client UUID
+     */
+    client_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/oauth-clients/{client_id}/rotate-secret';
+};
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdRotateSecretErrors = {
+  /**
+   * Invalid client_id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing oauth:clients:write
+   */
+  403: DeniedResponse;
+  /**
+   * Client not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdRotateSecretError =
+  PostApiOrganizationsByIdOauthClientsByClientIdRotateSecretErrors[keyof PostApiOrganizationsByIdOauthClientsByClientIdRotateSecretErrors];
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdRotateSecretResponses = {
+  /**
+   * OK
+   */
+  200: RotateSecretResponse;
+};
+
+export type PostApiOrganizationsByIdOauthClientsByClientIdRotateSecretResponse =
+  PostApiOrganizationsByIdOauthClientsByClientIdRotateSecretResponses[keyof PostApiOrganizationsByIdOauthClientsByClientIdRotateSecretResponses];
+
+export type GetApiOrganizationsByIdPublicProfileData = {
+  body?: never;
   path: {
     /**
      * Organization ID (UUID)
@@ -4156,50 +7729,157 @@ export type PatchApiOrganizationsByIdProofModeData = {
     id: string;
   };
   query?: never;
-  url: '/api/organizations/{id}/proof-mode';
+  url: '/api/organizations/{id}/public-profile';
 };
 
-export type PatchApiOrganizationsByIdProofModeErrors = {
+export type GetApiOrganizationsByIdPublicProfileErrors = {
   /**
-   * Invalid request or proof_mode value
+   * Invalid organization ID
    */
-  400: {
-    [key: string]: unknown;
-  };
+  400: AppError;
   /**
    * Authentication required
    */
-  401: {
-    [key: string]: unknown;
+  401: AppError;
+  /**
+   * Needs reserves:read or org:settings:read
+   */
+  403: DeniedResponse;
+  /**
+   * Organization not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOrganizationsByIdPublicProfileError =
+  GetApiOrganizationsByIdPublicProfileErrors[keyof GetApiOrganizationsByIdPublicProfileErrors];
+
+export type GetApiOrganizationsByIdPublicProfileResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PublicProfileResponse;
+  };
+};
+
+export type GetApiOrganizationsByIdPublicProfileResponse =
+  GetApiOrganizationsByIdPublicProfileResponses[keyof GetApiOrganizationsByIdPublicProfileResponses];
+
+export type PatchApiOrganizationsByIdPublicProfileData = {
+  /**
+   * Public identity
+   */
+  body: PublicProfileRequest;
+  path: {
+    /**
+     * Organization ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/public-profile';
+};
+
+export type PatchApiOrganizationsByIdPublicProfileErrors = {
+  /**
+   * Validation error
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:settings:write
+   */
+  403: DeniedResponse;
+  /**
+   * Organization not found
+   */
+  404: AppError;
+  /**
+   * The address is taken or already set (in the envelope's data)
+   */
+  409: Envelope & {
+    data?: PublicationRefusedResponse;
   };
   /**
-   * Admin permission required
+   * Internal server error
    */
-  403: {
-    [key: string]: unknown;
+  500: AppError;
+};
+
+export type PatchApiOrganizationsByIdPublicProfileError =
+  PatchApiOrganizationsByIdPublicProfileErrors[keyof PatchApiOrganizationsByIdPublicProfileErrors];
+
+export type PatchApiOrganizationsByIdPublicProfileResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PublicProfileResponse;
+  };
+};
+
+export type PatchApiOrganizationsByIdPublicProfileResponse =
+  PatchApiOrganizationsByIdPublicProfileResponses[keyof PatchApiOrganizationsByIdPublicProfileResponses];
+
+export type GetApiOrganizationsByIdSecurityData = {
+  body?: never;
+  path: {
+    /**
+     * Org ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/security';
+};
+
+export type GetApiOrganizationsByIdSecurityErrors = {
+  /**
+   * Invalid org ID
+   */
+  400: {
+    [key: string]: string;
+  };
+  /**
+   * Missing org:settings:read
+   */
+  403: DeniedResponse;
+  /**
+   * Organization not found
+   */
+  404: {
+    [key: string]: string;
   };
   /**
    * Internal server error
    */
   500: {
-    [key: string]: unknown;
+    [key: string]: string;
   };
 };
 
-export type PatchApiOrganizationsByIdProofModeError =
-  PatchApiOrganizationsByIdProofModeErrors[keyof PatchApiOrganizationsByIdProofModeErrors];
+export type GetApiOrganizationsByIdSecurityError =
+  GetApiOrganizationsByIdSecurityErrors[keyof GetApiOrganizationsByIdSecurityErrors];
 
-export type PatchApiOrganizationsByIdProofModeResponses = {
+export type GetApiOrganizationsByIdSecurityResponses = {
   /**
-   * Updated organization with id and default_proof_mode
+   * Org security policy
    */
-  200: {
-    [key: string]: unknown;
+  200: Envelope & {
+    data?: OrgSecurityResponse;
   };
 };
 
-export type PatchApiOrganizationsByIdProofModeResponse =
-  PatchApiOrganizationsByIdProofModeResponses[keyof PatchApiOrganizationsByIdProofModeResponses];
+export type GetApiOrganizationsByIdSecurityResponse =
+  GetApiOrganizationsByIdSecurityResponses[keyof GetApiOrganizationsByIdSecurityResponses];
 
 export type PatchApiOrganizationsByIdSecurityData = {
   /**
@@ -4218,17 +7898,15 @@ export type PatchApiOrganizationsByIdSecurityData = {
 
 export type PatchApiOrganizationsByIdSecurityErrors = {
   /**
-   * Invalid org ID or request body
+   * Invalid org ID or request body, or nothing to update
    */
   400: {
     [key: string]: string;
   };
   /**
-   * Insufficient permissions (org:settings:write required)
+   * Missing org:settings:write, or org:four-eyes:disable to turn four-eyes off
    */
-  403: {
-    [key: string]: string;
-  };
+  403: DeniedResponse;
   /**
    * Organization not found
    */
@@ -4250,29 +7928,449 @@ export type PatchApiOrganizationsByIdSecurityResponses = {
   /**
    * Updated org security policy
    */
-  200: UpdateOrgSecurityResponse;
+  200: Envelope & {
+    data?: OrgSecurityResponse;
+  };
 };
 
 export type PatchApiOrganizationsByIdSecurityResponse =
   PatchApiOrganizationsByIdSecurityResponses[keyof PatchApiOrganizationsByIdSecurityResponses];
 
+export type GetApiOrganizationsByIdServiceUsersData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID (must match caller's org)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/service-users';
+};
+
+export type GetApiOrganizationsByIdServiceUsersErrors = {
+  /**
+   * Org-path mismatch
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:service-users:read
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOrganizationsByIdServiceUsersError =
+  GetApiOrganizationsByIdServiceUsersErrors[keyof GetApiOrganizationsByIdServiceUsersErrors];
+
+export type GetApiOrganizationsByIdServiceUsersResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<ServiceUserResponse>;
+  };
+};
+
+export type GetApiOrganizationsByIdServiceUsersResponse =
+  GetApiOrganizationsByIdServiceUsersResponses[keyof GetApiOrganizationsByIdServiceUsersResponses];
+
+export type PostApiOrganizationsByIdServiceUsersData = {
+  /**
+   * Service user details
+   */
+  body: CreateServiceUserRequest;
+  path: {
+    /**
+     * Organization ID (must match caller's org)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/service-users';
+};
+
+export type PostApiOrganizationsByIdServiceUsersErrors = {
+  /**
+   * Invalid request body or org-path mismatch
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:service-users:write
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOrganizationsByIdServiceUsersError =
+  PostApiOrganizationsByIdServiceUsersErrors[keyof PostApiOrganizationsByIdServiceUsersErrors];
+
+export type PostApiOrganizationsByIdServiceUsersResponses = {
+  /**
+   * Created
+   */
+  201: Envelope & {
+    data?: ServiceUserResponse;
+  };
+};
+
+export type PostApiOrganizationsByIdServiceUsersResponse =
+  PostApiOrganizationsByIdServiceUsersResponses[keyof PostApiOrganizationsByIdServiceUsersResponses];
+
+export type DeleteApiOrganizationsByIdServiceUsersBySvcIdData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID (must match caller's org)
+     */
+    id: string;
+    /**
+     * Service user ID
+     */
+    svc_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/service-users/{svc_id}';
+};
+
+export type DeleteApiOrganizationsByIdServiceUsersBySvcIdErrors = {
+  /**
+   * Invalid IDs or org-path mismatch
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:service-users:write
+   */
+  403: DeniedResponse;
+  /**
+   * Service user not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type DeleteApiOrganizationsByIdServiceUsersBySvcIdError =
+  DeleteApiOrganizationsByIdServiceUsersBySvcIdErrors[keyof DeleteApiOrganizationsByIdServiceUsersBySvcIdErrors];
+
+export type DeleteApiOrganizationsByIdServiceUsersBySvcIdResponses = {
+  /**
+   * No content
+   */
+  204: string;
+};
+
+export type DeleteApiOrganizationsByIdServiceUsersBySvcIdResponse =
+  DeleteApiOrganizationsByIdServiceUsersBySvcIdResponses[keyof DeleteApiOrganizationsByIdServiceUsersBySvcIdResponses];
+
+export type GetApiOrganizationsByIdServiceUsersBySvcIdApiKeysData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+    /**
+     * Service user ID
+     */
+    svc_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/service-users/{svc_id}/api-keys';
+};
+
+export type GetApiOrganizationsByIdServiceUsersBySvcIdApiKeysErrors = {
+  /**
+   * Invalid organization or service-user ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:service-users:read
+   */
+  403: DeniedResponse;
+  /**
+   * Organization not found (path organization is not the caller's), or service user not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOrganizationsByIdServiceUsersBySvcIdApiKeysError =
+  GetApiOrganizationsByIdServiceUsersBySvcIdApiKeysErrors[keyof GetApiOrganizationsByIdServiceUsersBySvcIdApiKeysErrors];
+
+export type GetApiOrganizationsByIdServiceUsersBySvcIdApiKeysResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<ApiKeyListItem>;
+  };
+};
+
+export type GetApiOrganizationsByIdServiceUsersBySvcIdApiKeysResponse =
+  GetApiOrganizationsByIdServiceUsersBySvcIdApiKeysResponses[keyof GetApiOrganizationsByIdServiceUsersBySvcIdApiKeysResponses];
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdApiKeysData = {
+  /**
+   * Mint details (label, purpose, expiry in days, allowed IPs)
+   */
+  body: MintServiceKeyRequest;
+  path: {
+    /**
+     * Organization ID (must match caller's org, B6)
+     */
+    id: string;
+    /**
+     * Service-user ID
+     */
+    svc_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/service-users/{svc_id}/api-keys';
+};
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdApiKeysErrors = {
+  /**
+   * Invalid request body, expiry or allowed IPs, or org-path mismatch
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:api-keys:write:service
+   */
+  403: DeniedResponse;
+  /**
+   * Service user not found, or it belongs to another org
+   */
+  404: AppError;
+  /**
+   * Service user is disabled
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdApiKeysError =
+  PostApiOrganizationsByIdServiceUsersBySvcIdApiKeysErrors[keyof PostApiOrganizationsByIdServiceUsersBySvcIdApiKeysErrors];
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdApiKeysResponses = {
+  /**
+   * Created
+   */
+  201: Envelope & {
+    data?: MintKeyResponse;
+  };
+};
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdApiKeysResponse =
+  PostApiOrganizationsByIdServiceUsersBySvcIdApiKeysResponses[keyof PostApiOrganizationsByIdServiceUsersBySvcIdApiKeysResponses];
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdDisableData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+    /**
+     * Service user ID
+     */
+    svc_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/service-users/{svc_id}/disable';
+};
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdDisableErrors = {
+  /**
+   * Invalid organization or service-user ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:service-users:write
+   */
+  403: DeniedResponse;
+  /**
+   * Organization not found (path organization is not the caller's), or service user not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdDisableError =
+  PostApiOrganizationsByIdServiceUsersBySvcIdDisableErrors[keyof PostApiOrganizationsByIdServiceUsersBySvcIdDisableErrors];
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdDisableResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ServiceUserResponse;
+  };
+};
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdDisableResponse =
+  PostApiOrganizationsByIdServiceUsersBySvcIdDisableResponses[keyof PostApiOrganizationsByIdServiceUsersBySvcIdDisableResponses];
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdEnableData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+    /**
+     * Service user ID
+     */
+    svc_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/service-users/{svc_id}/enable';
+};
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdEnableErrors = {
+  /**
+   * Invalid organization or service-user ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:service-users:write, or the service user's role holds permissions the caller does not
+   */
+  403: DeniedResponse;
+  /**
+   * Organization not found (path organization is not the caller's), or service user not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdEnableError =
+  PostApiOrganizationsByIdServiceUsersBySvcIdEnableErrors[keyof PostApiOrganizationsByIdServiceUsersBySvcIdEnableErrors];
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdEnableResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ServiceUserResponse;
+  };
+};
+
+export type PostApiOrganizationsByIdServiceUsersBySvcIdEnableResponse =
+  PostApiOrganizationsByIdServiceUsersBySvcIdEnableResponses[keyof PostApiOrganizationsByIdServiceUsersBySvcIdEnableResponses];
+
+export type PutApiOrganizationsByIdServiceUsersBySvcIdRoleData = {
+  /**
+   * Role to move the service user to
+   */
+  body: ChangeServiceUserRoleRequest;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+    /**
+     * Service user ID
+     */
+    svc_id: string;
+  };
+  query?: never;
+  url: '/api/organizations/{id}/service-users/{svc_id}/role';
+};
+
+export type PutApiOrganizationsByIdServiceUsersBySvcIdRoleErrors = {
+  /**
+   * Invalid organization or service-user ID, or invalid request body
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing org:service-users:write, a permission of the new role the caller lacks, org:invite:admin for an admin-level role, a current role holding permissions the caller does not, or a conflicting pair with the service user's grants
+   */
+  403: DeniedResponse;
+  /**
+   * Organization not found (path organization is not the caller's), service user not found, or role not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PutApiOrganizationsByIdServiceUsersBySvcIdRoleError =
+  PutApiOrganizationsByIdServiceUsersBySvcIdRoleErrors[keyof PutApiOrganizationsByIdServiceUsersBySvcIdRoleErrors];
+
+export type PutApiOrganizationsByIdServiceUsersBySvcIdRoleResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ServiceUserResponse;
+  };
+};
+
+export type PutApiOrganizationsByIdServiceUsersBySvcIdRoleResponse =
+  PutApiOrganizationsByIdServiceUsersBySvcIdRoleResponses[keyof PutApiOrganizationsByIdServiceUsersBySvcIdRoleResponses];
+
 export type GetApiOwnershipData = {
   body?: never;
   path?: never;
-  query: {
-    /**
-     * Organization ID (UUID)
-     */
-    organization_id: string;
-  };
+  query?: never;
   url: '/api/ownership';
 };
 
 export type GetApiOwnershipErrors = {
-  /**
-   * Invalid or missing organization ID
-   */
-  400: AppError;
   /**
    * Authentication required
    */
@@ -4289,7 +8387,9 @@ export type GetApiOwnershipResponses = {
   /**
    * OK
    */
-  200: Array<OwnershipResponse>;
+  200: Envelope & {
+    data?: Array<OwnershipResponse>;
+  };
 };
 
 export type GetApiOwnershipResponse = GetApiOwnershipResponses[keyof GetApiOwnershipResponses];
@@ -4314,6 +8414,18 @@ export type PostApiOwnershipErrors = {
    */
   401: AppError;
   /**
+   * Creating a wallet requires wallets:create
+   */
+  403: DeniedResponse;
+  /**
+   * Wallet not found
+   */
+  404: AppError;
+  /**
+   * Wallet has been retired
+   */
+  409: AppError;
+  /**
    * Internal server error
    */
   500: AppError;
@@ -4325,10 +8437,493 @@ export type PostApiOwnershipResponses = {
   /**
    * Created
    */
-  201: OwnershipResponse;
+  201: Envelope & {
+    data?: OwnershipResponse;
+  };
 };
 
 export type PostApiOwnershipResponse = PostApiOwnershipResponses[keyof PostApiOwnershipResponses];
+
+export type PostApiOwnershipBatchData = {
+  /**
+   * Batch start parameters (org/user come from the JWT)
+   */
+  body?: StartBatchRequest;
+  path?: never;
+  query?: never;
+  url: '/api/ownership/batch';
+};
+
+export type PostApiOwnershipBatchErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOwnershipBatchError =
+  PostApiOwnershipBatchErrors[keyof PostApiOwnershipBatchErrors];
+
+export type PostApiOwnershipBatchResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: BatchResponse;
+  };
+};
+
+export type PostApiOwnershipBatchResponse =
+  PostApiOwnershipBatchResponses[keyof PostApiOwnershipBatchResponses];
+
+export type GetApiOwnershipBatchActiveData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/api/ownership/batch/active';
+};
+
+export type GetApiOwnershipBatchActiveErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * No active batch
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOwnershipBatchActiveError =
+  GetApiOwnershipBatchActiveErrors[keyof GetApiOwnershipBatchActiveErrors];
+
+export type GetApiOwnershipBatchActiveResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: BatchResponse;
+  };
+};
+
+export type GetApiOwnershipBatchActiveResponse =
+  GetApiOwnershipBatchActiveResponses[keyof GetApiOwnershipBatchActiveResponses];
+
+export type GetApiOwnershipBatchByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Batch ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/ownership/batch/{id}';
+};
+
+export type GetApiOwnershipBatchByIdErrors = {
+  /**
+   * Invalid batch id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Batch not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOwnershipBatchByIdError =
+  GetApiOwnershipBatchByIdErrors[keyof GetApiOwnershipBatchByIdErrors];
+
+export type GetApiOwnershipBatchByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: BatchResponse;
+  };
+};
+
+export type GetApiOwnershipBatchByIdResponse =
+  GetApiOwnershipBatchByIdResponses[keyof GetApiOwnershipBatchByIdResponses];
+
+export type PostApiOwnershipBatchByIdExcludeData = {
+  /**
+   * Wallet to exclude + reason
+   */
+  body: ExcludeWalletRequest;
+  path: {
+    /**
+     * Batch ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/ownership/batch/{id}/exclude';
+};
+
+export type PostApiOwnershipBatchByIdExcludeErrors = {
+  /**
+   * Invalid batch id / body
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Batch not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOwnershipBatchByIdExcludeError =
+  PostApiOwnershipBatchByIdExcludeErrors[keyof PostApiOwnershipBatchByIdExcludeErrors];
+
+export type PostApiOwnershipBatchByIdExcludeResponses = {
+  /**
+   * Wallet excluded
+   */
+  204: void;
+};
+
+export type PostApiOwnershipBatchByIdExcludeResponse =
+  PostApiOwnershipBatchByIdExcludeResponses[keyof PostApiOwnershipBatchByIdExcludeResponses];
+
+export type PostApiOwnershipBatchByIdVerifyData = {
+  body?: never;
+  path: {
+    /**
+     * Batch ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/ownership/batch/{id}/verify';
+};
+
+export type PostApiOwnershipBatchByIdVerifyErrors = {
+  /**
+   * Invalid batch id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Batch not found
+   */
+  404: AppError;
+  /**
+   * Cannot complete: pending/met/excluded counts + live projection
+   */
+  409: Envelope & {
+    data?: BatchVerifyBlockedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOwnershipBatchByIdVerifyError =
+  PostApiOwnershipBatchByIdVerifyErrors[keyof PostApiOwnershipBatchByIdVerifyErrors];
+
+export type PostApiOwnershipBatchByIdVerifyResponses = {
+  /**
+   * Batch complete (or partial-final with zero pending)
+   */
+  200: Envelope & {
+    data?: BatchResponse;
+  };
+};
+
+export type PostApiOwnershipBatchByIdVerifyResponse =
+  PostApiOwnershipBatchByIdVerifyResponses[keyof PostApiOwnershipBatchByIdVerifyResponses];
+
+export type GetApiOwnershipPolicyData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/api/ownership/policy';
+};
+
+export type GetApiOwnershipPolicyErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Policy not seeded
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOwnershipPolicyError =
+  GetApiOwnershipPolicyErrors[keyof GetApiOwnershipPolicyErrors];
+
+export type GetApiOwnershipPolicyResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: OwnershipPolicyResponse;
+  };
+};
+
+export type GetApiOwnershipPolicyResponse =
+  GetApiOwnershipPolicyResponses[keyof GetApiOwnershipPolicyResponses];
+
+export type GetApiOwnershipSignerQueueData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/api/ownership/signer-queue';
+};
+
+export type GetApiOwnershipSignerQueueErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOwnershipSignerQueueError =
+  GetApiOwnershipSignerQueueErrors[keyof GetApiOwnershipSignerQueueErrors];
+
+export type GetApiOwnershipSignerQueueResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<SignerQueueItemResponse>;
+  };
+};
+
+export type GetApiOwnershipSignerQueueResponse =
+  GetApiOwnershipSignerQueueResponses[keyof GetApiOwnershipSignerQueueResponses];
+
+export type GetApiOwnershipSignersData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Only requests still awaiting a signature on a live proof
+     */
+    open?: boolean;
+    /**
+     * Filter by signer request status
+     */
+    status?: 'pending' | 'declined' | 'signed';
+  };
+  url: '/api/ownership/signers';
+};
+
+export type GetApiOwnershipSignersErrors = {
+  /**
+   * Invalid status filter
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing ownership:read
+   */
+  403: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOwnershipSignersError =
+  GetApiOwnershipSignersErrors[keyof GetApiOwnershipSignersErrors];
+
+export type GetApiOwnershipSignersResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<SignerRequestQueueEntry>;
+  };
+};
+
+export type GetApiOwnershipSignersResponse =
+  GetApiOwnershipSignersResponses[keyof GetApiOwnershipSignersResponses];
+
+export type PostApiOwnershipSignersBySignerIdDeclineData = {
+  /**
+   * Decline reason
+   */
+  body?: DeclineRequest;
+  path: {
+    /**
+     * Assigned signer ID
+     */
+    signerId: string;
+  };
+  query?: never;
+  url: '/api/ownership/signers/{signerId}/decline';
+};
+
+export type PostApiOwnershipSignersBySignerIdDeclineErrors = {
+  /**
+   * Invalid signer ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Signer not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOwnershipSignersBySignerIdDeclineError =
+  PostApiOwnershipSignersBySignerIdDeclineErrors[keyof PostApiOwnershipSignersBySignerIdDeclineErrors];
+
+export type PostApiOwnershipSignersBySignerIdDeclineResponses = {
+  /**
+   * Declined
+   */
+  204: void;
+};
+
+export type PostApiOwnershipSignersBySignerIdDeclineResponse =
+  PostApiOwnershipSignersBySignerIdDeclineResponses[keyof PostApiOwnershipSignersBySignerIdDeclineResponses];
+
+export type PostApiOwnershipSignersBySignerIdDeclineUndoData = {
+  body?: never;
+  path: {
+    /**
+     * Assigned signer ID
+     */
+    signerId: string;
+  };
+  query?: never;
+  url: '/api/ownership/signers/{signerId}/decline/undo';
+};
+
+export type PostApiOwnershipSignersBySignerIdDeclineUndoErrors = {
+  /**
+   * Invalid signer ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Signer not found
+   */
+  404: AppError;
+  /**
+   * Undo window elapsed
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOwnershipSignersBySignerIdDeclineUndoError =
+  PostApiOwnershipSignersBySignerIdDeclineUndoErrors[keyof PostApiOwnershipSignersBySignerIdDeclineUndoErrors];
+
+export type PostApiOwnershipSignersBySignerIdDeclineUndoResponses = {
+  /**
+   * Decline reversed
+   */
+  204: void;
+};
+
+export type PostApiOwnershipSignersBySignerIdDeclineUndoResponse =
+  PostApiOwnershipSignersBySignerIdDeclineUndoResponses[keyof PostApiOwnershipSignersBySignerIdDeclineUndoResponses];
+
+export type PostApiOwnershipSignersBySignerIdRemindData = {
+  body?: never;
+  path: {
+    /**
+     * Assigned signer ID (UUID)
+     */
+    signerId: string;
+  };
+  query?: never;
+  url: '/api/ownership/signers/{signerId}/remind';
+};
+
+export type PostApiOwnershipSignersBySignerIdRemindErrors = {
+  /**
+   * Invalid signer ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Signer not found
+   */
+  404: AppError;
+  /**
+   * Reminder throttled
+   */
+  429: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOwnershipSignersBySignerIdRemindError =
+  PostApiOwnershipSignersBySignerIdRemindErrors[keyof PostApiOwnershipSignersBySignerIdRemindErrors];
+
+export type PostApiOwnershipSignersBySignerIdRemindResponses = {
+  /**
+   * Reminder sent
+   */
+  204: void;
+};
+
+export type PostApiOwnershipSignersBySignerIdRemindResponse =
+  PostApiOwnershipSignersBySignerIdRemindResponses[keyof PostApiOwnershipSignersBySignerIdRemindResponses];
 
 export type GetApiOwnershipByIdData = {
   body?: never;
@@ -4367,19 +8962,16 @@ export type GetApiOwnershipByIdResponses = {
   /**
    * OK
    */
-  200: OwnershipResponse;
+  200: Envelope & {
+    data?: OwnershipResponse;
+  };
 };
 
 export type GetApiOwnershipByIdResponse =
   GetApiOwnershipByIdResponses[keyof GetApiOwnershipByIdResponses];
 
-export type PostApiOwnershipByIdVerificationData = {
-  /**
-   * Signature verification data
-   */
-  body: {
-    [key: string]: unknown;
-  };
+export type GetApiOwnershipByIdChallengeData = {
+  body?: never;
   path: {
     /**
      * Proof of Ownership ID (UUID)
@@ -4387,12 +8979,115 @@ export type PostApiOwnershipByIdVerificationData = {
     id: string;
   };
   query?: never;
-  url: '/api/ownership/{id}/verification';
+  url: '/api/ownership/{id}/challenge';
 };
 
-export type PostApiOwnershipByIdVerificationErrors = {
+export type GetApiOwnershipByIdChallengeErrors = {
   /**
-   * Invalid proof ID or signature data
+   * Invalid proof ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Proof not found or no active challenge
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOwnershipByIdChallengeError =
+  GetApiOwnershipByIdChallengeErrors[keyof GetApiOwnershipByIdChallengeErrors];
+
+export type GetApiOwnershipByIdChallengeResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ChallengeResponse;
+  };
+};
+
+export type GetApiOwnershipByIdChallengeResponse =
+  GetApiOwnershipByIdChallengeResponses[keyof GetApiOwnershipByIdChallengeResponses];
+
+export type PostApiOwnershipByIdChallengeData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of Ownership ID (UUID)
+     */
+    id: string;
+  };
+  query?: {
+    /**
+     * Explicit re-issue: void every prior active challenge (and re-arm declined signers) before minting a fresh one. Absent/false resumes the active challenge idempotently (never mints a second concurrent nonce).
+     */
+    reissue?: boolean;
+  };
+  url: '/api/ownership/{id}/challenge';
+};
+
+export type PostApiOwnershipByIdChallengeErrors = {
+  /**
+   * Invalid proof ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Proof not found
+   */
+  404: AppError;
+  /**
+   * Proof already verified and renewal window not open (carries valid_until + renewal_opens_at), the wallet has been retired, or the wallet is a Safe deployed too recently to be final (retry after the wait the message names)
+   */
+  409: Envelope & {
+    data?: BlockedChallengeResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOwnershipByIdChallengeError =
+  PostApiOwnershipByIdChallengeErrors[keyof PostApiOwnershipByIdChallengeErrors];
+
+export type PostApiOwnershipByIdChallengeResponses = {
+  /**
+   * Created
+   */
+  201: Envelope & {
+    data?: ChallengeResponse;
+  };
+};
+
+export type PostApiOwnershipByIdChallengeResponse =
+  PostApiOwnershipByIdChallengeResponses[keyof PostApiOwnershipByIdChallengeResponses];
+
+export type GetApiOwnershipByIdChallengesData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of Ownership ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/ownership/{id}/challenges';
+};
+
+export type GetApiOwnershipByIdChallengesErrors = {
+  /**
+   * Invalid proof ID
    */
   400: AppError;
   /**
@@ -4409,6 +9104,156 @@ export type PostApiOwnershipByIdVerificationErrors = {
   500: AppError;
 };
 
+export type GetApiOwnershipByIdChallengesError =
+  GetApiOwnershipByIdChallengesErrors[keyof GetApiOwnershipByIdChallengesErrors];
+
+export type GetApiOwnershipByIdChallengesResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<ChallengeResponse>;
+  };
+};
+
+export type GetApiOwnershipByIdChallengesResponse =
+  GetApiOwnershipByIdChallengesResponses[keyof GetApiOwnershipByIdChallengesResponses];
+
+export type GetApiOwnershipByIdSignersData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of Ownership ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/ownership/{id}/signers';
+};
+
+export type GetApiOwnershipByIdSignersErrors = {
+  /**
+   * Invalid proof ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiOwnershipByIdSignersError =
+  GetApiOwnershipByIdSignersErrors[keyof GetApiOwnershipByIdSignersErrors];
+
+export type GetApiOwnershipByIdSignersResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<AssignedSignerResponse>;
+  };
+};
+
+export type GetApiOwnershipByIdSignersResponse =
+  GetApiOwnershipByIdSignersResponses[keyof GetApiOwnershipByIdSignersResponses];
+
+export type PostApiOwnershipByIdSignersData = {
+  /**
+   * Signers to assign
+   */
+  body: AssignSignersRequest;
+  path: {
+    /**
+     * Proof of Ownership ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/ownership/{id}/signers';
+};
+
+export type PostApiOwnershipByIdSignersErrors = {
+  /**
+   * Invalid proof ID or signer input
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing ownership:update or wallets:update
+   */
+  403: DeniedResponse;
+  /**
+   * Proof not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiOwnershipByIdSignersError =
+  PostApiOwnershipByIdSignersErrors[keyof PostApiOwnershipByIdSignersErrors];
+
+export type PostApiOwnershipByIdSignersResponses = {
+  /**
+   * Created
+   */
+  201: Envelope & {
+    data?: Array<AssignedSignerResponse>;
+  };
+};
+
+export type PostApiOwnershipByIdSignersResponse =
+  PostApiOwnershipByIdSignersResponses[keyof PostApiOwnershipByIdSignersResponses];
+
+export type PostApiOwnershipByIdVerificationData = {
+  /**
+   * Signature verification data
+   */
+  body: VerifySignatureRequest;
+  path: {
+    /**
+     * Proof of Ownership ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/ownership/{id}/verification';
+};
+
+export type PostApiOwnershipByIdVerificationErrors = {
+  /**
+   * Structured verify verdict: empty signature, no active challenge, unsupported chain, or verification failed (failing check flagged)
+   */
+  400: Envelope & {
+    data?: VerifyResponse;
+  };
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Proof not found
+   */
+  404: AppError;
+  /**
+   * Wallet has been retired, or the proof has expired (challenge it to renew as a new proof)
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
 export type PostApiOwnershipByIdVerificationError =
   PostApiOwnershipByIdVerificationErrors[keyof PostApiOwnershipByIdVerificationErrors];
 
@@ -4416,7 +9261,9 @@ export type PostApiOwnershipByIdVerificationResponses = {
   /**
    * OK
    */
-  200: SignatureResponse;
+  200: Envelope & {
+    data?: VerifyResponse;
+  };
 };
 
 export type PostApiOwnershipByIdVerificationResponse =
@@ -4434,10 +9281,6 @@ export type GetApiPermissionsErrors = {
    * Authentication required
    */
   401: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
 };
 
 export type GetApiPermissionsError = GetApiPermissionsErrors[keyof GetApiPermissionsErrors];
@@ -4446,69 +9289,37 @@ export type GetApiPermissionsResponses = {
   /**
    * OK
    */
-  200: Array<Permission>;
+  200: Envelope & {
+    data?: Array<PermissionCatalogEntry>;
+  };
 };
 
 export type GetApiPermissionsResponse =
   GetApiPermissionsResponses[keyof GetApiPermissionsResponses];
 
-export type GetApiReportsData = {
+export type GetApiProofsOfFundsData = {
   body?: never;
   path?: never;
   query?: {
     /**
-     * Page number (default: 1)
+     * Page number (default 1)
      */
     page?: number;
     /**
-     * Items per page (default: 20, max: 100)
+     * Items per page (default 50, max 100)
      */
-    limit?: number;
+    per_page?: number;
+    /**
+     * Comma-separated statuses to include (e.g. completed,incomplete)
+     */
+    status?: string;
   };
-  url: '/api/reports';
+  url: '/api/proofs-of-funds';
 };
 
-export type GetApiReportsErrors = {
+export type GetApiProofsOfFundsErrors = {
   /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type GetApiReportsError = GetApiReportsErrors[keyof GetApiReportsErrors];
-
-export type GetApiReportsResponses = {
-  /**
-   * OK
-   */
-  200: Array<ReportResponse>;
-};
-
-export type GetApiReportsResponse = GetApiReportsResponses[keyof GetApiReportsResponses];
-
-export type PostApiReportsData = {
-  /**
-   * Report generation parameters
-   */
-  body: {
-    detail_level?: string;
-    format?: string;
-    jurisdiction?: string;
-    proof_id?: string;
-    proof_type?: string;
-  };
-  path?: never;
-  query?: never;
-  url: '/api/reports';
-};
-
-export type PostApiReportsErrors = {
-  /**
-   * Validation error or invalid proof_type/format
+   * Unknown status
    */
   400: AppError;
   /**
@@ -4521,16 +9332,1162 @@ export type PostApiReportsErrors = {
   500: AppError;
 };
 
+export type GetApiProofsOfFundsError = GetApiProofsOfFundsErrors[keyof GetApiProofsOfFundsErrors];
+
+export type GetApiProofsOfFundsResponses = {
+  /**
+   * OK
+   */
+  200: ListEnvelope & {
+    data?: Array<ProofOfFundsResponse>;
+  };
+};
+
+export type GetApiProofsOfFundsResponse =
+  GetApiProofsOfFundsResponses[keyof GetApiProofsOfFundsResponses];
+
+export type PostApiProofsOfFundsData = {
+  /**
+   * Capture mode, as_of and scope
+   */
+  body: CreateCaptureRequest;
+  path?: never;
+  query?: never;
+  url: '/api/proofs-of-funds';
+};
+
+export type PostApiProofsOfFundsErrors = {
+  /**
+   * Validation error
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * A scoped wallet is not in this organization
+   */
+  404: AppError;
+  /**
+   * The capture cannot be served at as_of (in the envelope's data)
+   */
+  422: Envelope & {
+    data?: CaptureRefusedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+  /**
+   * Workflow engine temporarily unavailable
+   */
+  503: AppError;
+};
+
+export type PostApiProofsOfFundsError =
+  PostApiProofsOfFundsErrors[keyof PostApiProofsOfFundsErrors];
+
+export type PostApiProofsOfFundsResponses = {
+  /**
+   * Accepted
+   */
+  202: Envelope & {
+    data?: CaptureStartedResponse;
+  };
+};
+
+export type PostApiProofsOfFundsResponse =
+  PostApiProofsOfFundsResponses[keyof PostApiProofsOfFundsResponses];
+
+export type GetApiProofsOfFundsAssetsByCatalogEntryIdSeriesData = {
+  body?: never;
+  path: {
+    /**
+     * Token catalog entry ID (UUID)
+     */
+    catalog_entry_id: string;
+  };
+  query?: {
+    /**
+     * Number of captures (default 30, max 100)
+     */
+    limit?: number;
+  };
+  url: '/api/proofs-of-funds/assets/{catalog_entry_id}/series';
+};
+
+export type GetApiProofsOfFundsAssetsByCatalogEntryIdSeriesErrors = {
+  /**
+   * Invalid catalog entry ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiProofsOfFundsAssetsByCatalogEntryIdSeriesError =
+  GetApiProofsOfFundsAssetsByCatalogEntryIdSeriesErrors[keyof GetApiProofsOfFundsAssetsByCatalogEntryIdSeriesErrors];
+
+export type GetApiProofsOfFundsAssetsByCatalogEntryIdSeriesResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<AssetPointResponse>;
+  };
+};
+
+export type GetApiProofsOfFundsAssetsByCatalogEntryIdSeriesResponse =
+  GetApiProofsOfFundsAssetsByCatalogEntryIdSeriesResponses[keyof GetApiProofsOfFundsAssetsByCatalogEntryIdSeriesResponses];
+
+export type GetApiProofsOfFundsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of Funds ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/proofs-of-funds/{id}';
+};
+
+export type GetApiProofsOfFundsByIdErrors = {
+  /**
+   * Invalid proof ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Proof not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiProofsOfFundsByIdError =
+  GetApiProofsOfFundsByIdErrors[keyof GetApiProofsOfFundsByIdErrors];
+
+export type GetApiProofsOfFundsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ProofOfFundsResponse;
+  };
+};
+
+export type GetApiProofsOfFundsByIdResponse =
+  GetApiProofsOfFundsByIdResponses[keyof GetApiProofsOfFundsByIdResponses];
+
+export type GetApiProofsOfFundsByIdAssetsData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of Funds ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/proofs-of-funds/{id}/assets';
+};
+
+export type GetApiProofsOfFundsByIdAssetsErrors = {
+  /**
+   * Invalid proof ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Proof not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiProofsOfFundsByIdAssetsError =
+  GetApiProofsOfFundsByIdAssetsErrors[keyof GetApiProofsOfFundsByIdAssetsErrors];
+
+export type GetApiProofsOfFundsByIdAssetsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<AssetTotalResponse>;
+  };
+};
+
+export type GetApiProofsOfFundsByIdAssetsResponse =
+  GetApiProofsOfFundsByIdAssetsResponses[keyof GetApiProofsOfFundsByIdAssetsResponses];
+
+export type GetApiProofsOfFundsByIdAuditData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of Funds ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/proofs-of-funds/{id}/audit';
+};
+
+export type GetApiProofsOfFundsByIdAuditErrors = {
+  /**
+   * Invalid proof ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Proof not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiProofsOfFundsByIdAuditError =
+  GetApiProofsOfFundsByIdAuditErrors[keyof GetApiProofsOfFundsByIdAuditErrors];
+
+export type GetApiProofsOfFundsByIdAuditResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: FundsAuditResponse;
+  };
+};
+
+export type GetApiProofsOfFundsByIdAuditResponse =
+  GetApiProofsOfFundsByIdAuditResponses[keyof GetApiProofsOfFundsByIdAuditResponses];
+
+export type GetApiProofsOfFundsByIdHoldingsData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of Funds ID (UUID)
+     */
+    id: string;
+  };
+  query?: {
+    /**
+     * Comma-separated catalog entry IDs (UUIDs) to include
+     */
+    catalog_entry_id?: string;
+  };
+  url: '/api/proofs-of-funds/{id}/holdings';
+};
+
+export type GetApiProofsOfFundsByIdHoldingsErrors = {
+  /**
+   * Invalid proof ID or catalog entry ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Proof not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiProofsOfFundsByIdHoldingsError =
+  GetApiProofsOfFundsByIdHoldingsErrors[keyof GetApiProofsOfFundsByIdHoldingsErrors];
+
+export type GetApiProofsOfFundsByIdHoldingsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<HoldingResponse>;
+  };
+};
+
+export type GetApiProofsOfFundsByIdHoldingsResponse =
+  GetApiProofsOfFundsByIdHoldingsResponses[keyof GetApiProofsOfFundsByIdHoldingsResponses];
+
+export type GetApiProofsOfLiabilitiesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Page (1-based)
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    limit?: number;
+  };
+  url: '/api/proofs-of-liabilities';
+};
+
+export type GetApiProofsOfLiabilitiesErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+};
+
+export type GetApiProofsOfLiabilitiesError =
+  GetApiProofsOfLiabilitiesErrors[keyof GetApiProofsOfLiabilitiesErrors];
+
+export type GetApiProofsOfLiabilitiesResponses = {
+  /**
+   * OK
+   */
+  200: ListEnvelope & {
+    data?: Array<CommitmentV1Response>;
+  };
+};
+
+export type GetApiProofsOfLiabilitiesResponse =
+  GetApiProofsOfLiabilitiesResponses[keyof GetApiProofsOfLiabilitiesResponses];
+
+export type GetApiProofsOfLiabilitiesByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of liabilities ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/proofs-of-liabilities/{id}';
+};
+
+export type GetApiProofsOfLiabilitiesByIdErrors = {
+  /**
+   * Not found
+   */
+  404: AppError;
+};
+
+export type GetApiProofsOfLiabilitiesByIdError =
+  GetApiProofsOfLiabilitiesByIdErrors[keyof GetApiProofsOfLiabilitiesByIdErrors];
+
+export type GetApiProofsOfLiabilitiesByIdResponses = {
+  /**
+   * OK
+   */
+  200: CommitmentV1Response;
+};
+
+export type GetApiProofsOfLiabilitiesByIdResponse =
+  GetApiProofsOfLiabilitiesByIdResponses[keyof GetApiProofsOfLiabilitiesByIdResponses];
+
+export type GetApiProofsOfReservesData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Page number (default 1)
+     */
+    page?: number;
+    /**
+     * Items per page (default 50, max 100)
+     */
+    per_page?: number;
+    /**
+     * Comma-separated verdicts: solvent, insolvent, incomplete
+     */
+    verdict?: string;
+    /**
+     * Comma-separated statuses: pending, running, signing, completed, failed, cancelled
+     */
+    status?: string;
+    /**
+     * Comma-separated modes: per_asset, cross_asset
+     */
+    mode?: string;
+    /**
+     * Only proofs as of this time or later (RFC 3339)
+     */
+    as_of_from?: string;
+    /**
+     * Only proofs as of before this time (RFC 3339, must be after as_of_from)
+     */
+    as_of_to?: string;
+    /**
+     * Only proofs built on this proof of funds (UUID)
+     */
+    proof_of_funds_id?: string;
+    /**
+     * Only the proofs that read this proof of liabilities (UUID)
+     */
+    proof_of_liabilities_id?: string;
+    /**
+     * Sort order: -created_at (default), created_at, -as_of, as_of
+     */
+    sort?: string;
+  };
+  url: '/api/proofs-of-reserves';
+};
+
+export type GetApiProofsOfReservesErrors = {
+  /**
+   * Unknown filter or sort value
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiProofsOfReservesError =
+  GetApiProofsOfReservesErrors[keyof GetApiProofsOfReservesErrors];
+
+export type GetApiProofsOfReservesResponses = {
+  /**
+   * OK
+   */
+  200: ProofOfReservesListResponse;
+};
+
+export type GetApiProofsOfReservesResponse =
+  GetApiProofsOfReservesResponses[keyof GetApiProofsOfReservesResponses];
+
+export type PostApiProofsOfReservesData = {
+  /**
+   * Commitment, funds source and mode
+   */
+  body: CreateProofOfReservesRequest;
+  path?: never;
+  query?: never;
+  url: '/api/proofs-of-reserves';
+};
+
+export type PostApiProofsOfReservesErrors = {
+  /**
+   * Validation error
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * The commitment or proof of funds is not in this organization
+   */
+  404: AppError;
+  /**
+   * The proof of funds is not completed or incomplete
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+  /**
+   * Workflow engine temporarily unavailable
+   */
+  503: AppError;
+};
+
+export type PostApiProofsOfReservesError =
+  PostApiProofsOfReservesErrors[keyof PostApiProofsOfReservesErrors];
+
+export type PostApiProofsOfReservesResponses = {
+  /**
+   * Accepted
+   */
+  202: Envelope & {
+    data?: ProofOfReservesStartedResponse;
+  };
+};
+
+export type PostApiProofsOfReservesResponse =
+  PostApiProofsOfReservesResponses[keyof PostApiProofsOfReservesResponses];
+
+export type GetApiProofsOfReservesAsOfData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * The time to look up (RFC 3339)
+     */
+    at: string;
+    /**
+     * Only proofs of this mode: per_asset or cross_asset
+     */
+    mode?: string;
+  };
+  url: '/api/proofs-of-reserves/as-of';
+};
+
+export type GetApiProofsOfReservesAsOfErrors = {
+  /**
+   * Missing or malformed at, or unknown mode
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * No completed proof of reserves by that time
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiProofsOfReservesAsOfError =
+  GetApiProofsOfReservesAsOfErrors[keyof GetApiProofsOfReservesAsOfErrors];
+
+export type GetApiProofsOfReservesAsOfResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ProofOfReservesSummary;
+  };
+};
+
+export type GetApiProofsOfReservesAsOfResponse =
+  GetApiProofsOfReservesAsOfResponses[keyof GetApiProofsOfReservesAsOfResponses];
+
+export type GetApiProofsOfReservesByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of reserves ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/proofs-of-reserves/{id}';
+};
+
+export type GetApiProofsOfReservesByIdErrors = {
+  /**
+   * Invalid proof of reserves ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Proof of reserves not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiProofsOfReservesByIdError =
+  GetApiProofsOfReservesByIdErrors[keyof GetApiProofsOfReservesByIdErrors];
+
+export type GetApiProofsOfReservesByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ProofOfReservesResponse;
+  };
+};
+
+export type GetApiProofsOfReservesByIdResponse =
+  GetApiProofsOfReservesByIdResponses[keyof GetApiProofsOfReservesByIdResponses];
+
+export type GetApiProofsOfReservesByIdManifestData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of reserves ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/proofs-of-reserves/{id}/manifest';
+};
+
+export type GetApiProofsOfReservesByIdManifestErrors = {
+  /**
+   * Invalid proof of reserves ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Proof of reserves not found
+   */
+  404: AppError;
+  /**
+   * The proof of reserves is not completed
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiProofsOfReservesByIdManifestError =
+  GetApiProofsOfReservesByIdManifestErrors[keyof GetApiProofsOfReservesByIdManifestErrors];
+
+export type GetApiProofsOfReservesByIdManifestResponses = {
+  /**
+   * The signed canonical manifest bytes
+   */
+  200: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetApiProofsOfReservesByIdManifestResponse =
+  GetApiProofsOfReservesByIdManifestResponses[keyof GetApiProofsOfReservesByIdManifestResponses];
+
+export type PostApiProofsOfReservesByIdPublishData = {
+  /**
+   * Publish options
+   */
+  body?: PublishRequest;
+  path: {
+    /**
+     * Proof of reserves ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/proofs-of-reserves/{id}/publish';
+};
+
+export type PostApiProofsOfReservesByIdPublishErrors = {
+  /**
+   * Validation error
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing reserves:publish, or four_eyes: the caller started the proof or committed its liabilities
+   */
+  403: DeniedResponse;
+  /**
+   * Proof of reserves not found
+   */
+  404: AppError;
+  /**
+   * Publishing is refused (in the envelope's data)
+   */
+  409: Envelope & {
+    data?: PublicationRefusedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+  /**
+   * Workflow engine temporarily unavailable
+   */
+  503: AppError;
+};
+
+export type PostApiProofsOfReservesByIdPublishError =
+  PostApiProofsOfReservesByIdPublishErrors[keyof PostApiProofsOfReservesByIdPublishErrors];
+
+export type PostApiProofsOfReservesByIdPublishResponses = {
+  /**
+   * Accepted
+   */
+  202: Envelope & {
+    data?: PublishResponse;
+  };
+};
+
+export type PostApiProofsOfReservesByIdPublishResponse =
+  PostApiProofsOfReservesByIdPublishResponses[keyof PostApiProofsOfReservesByIdPublishResponses];
+
+export type GetApiProofsOfReservesByIdWalletsData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of reserves ID (UUID)
+     */
+    id: string;
+  };
+  query?: {
+    /**
+     * Page number (default 1)
+     */
+    page?: number;
+    /**
+     * Items per page (default 50, max 100)
+     */
+    per_page?: number;
+  };
+  url: '/api/proofs-of-reserves/{id}/wallets';
+};
+
+export type GetApiProofsOfReservesByIdWalletsErrors = {
+  /**
+   * Invalid proof of reserves ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Proof of reserves not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiProofsOfReservesByIdWalletsError =
+  GetApiProofsOfReservesByIdWalletsErrors[keyof GetApiProofsOfReservesByIdWalletsErrors];
+
+export type GetApiProofsOfReservesByIdWalletsResponses = {
+  /**
+   * OK
+   */
+  200: ListEnvelope & {
+    data?: Array<WalletCoverageResponse>;
+  };
+};
+
+export type GetApiProofsOfReservesByIdWalletsResponse =
+  GetApiProofsOfReservesByIdWalletsResponses[keyof GetApiProofsOfReservesByIdWalletsResponses];
+
+export type GetApiPublicationsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Status
+     */
+    status?: 'pending' | 'published' | 'superseded' | 'withdrawn' | 'cancelled';
+    /**
+     * Only the publications of this proof of reserves (UUID)
+     */
+    proof_of_reserves_id?: string;
+    /**
+     * Page number (default 1)
+     */
+    page?: number;
+    /**
+     * Items per page (default 50, max 100)
+     */
+    per_page?: number;
+  };
+  url: '/api/publications';
+};
+
+export type GetApiPublicationsErrors = {
+  /**
+   * Invalid status or proof of reserves ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing reserves:read
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiPublicationsError = GetApiPublicationsErrors[keyof GetApiPublicationsErrors];
+
+export type GetApiPublicationsResponses = {
+  /**
+   * OK
+   */
+  200: ListEnvelope & {
+    data?: Array<PublicationResponse>;
+  };
+};
+
+export type GetApiPublicationsResponse =
+  GetApiPublicationsResponses[keyof GetApiPublicationsResponses];
+
+export type GetApiPublicationsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Publication ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/publications/{id}';
+};
+
+export type GetApiPublicationsByIdErrors = {
+  /**
+   * Invalid publication ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing reserves:read
+   */
+  403: DeniedResponse;
+  /**
+   * Publication not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiPublicationsByIdError =
+  GetApiPublicationsByIdErrors[keyof GetApiPublicationsByIdErrors];
+
+export type GetApiPublicationsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PublicationResponse;
+  };
+};
+
+export type GetApiPublicationsByIdResponse =
+  GetApiPublicationsByIdResponses[keyof GetApiPublicationsByIdResponses];
+
+export type PatchApiPublicationsByIdData = {
+  /**
+   * Balance lookups
+   */
+  body: PatchPublicationRequest;
+  path: {
+    /**
+     * Publication ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/publications/{id}';
+};
+
+export type PatchApiPublicationsByIdErrors = {
+  /**
+   * Validation error
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing reserves:publish
+   */
+  403: DeniedResponse;
+  /**
+   * Publication not found
+   */
+  404: AppError;
+  /**
+   * The publication is not published (in the envelope's data)
+   */
+  409: Envelope & {
+    data?: PublicationRefusedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PatchApiPublicationsByIdError =
+  PatchApiPublicationsByIdErrors[keyof PatchApiPublicationsByIdErrors];
+
+export type PatchApiPublicationsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PublicationResponse;
+  };
+};
+
+export type PatchApiPublicationsByIdResponse =
+  PatchApiPublicationsByIdResponses[keyof PatchApiPublicationsByIdResponses];
+
+export type PostApiPublicationsByIdCancelData = {
+  body?: never;
+  path: {
+    /**
+     * Publication ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/publications/{id}/cancel';
+};
+
+export type PostApiPublicationsByIdCancelErrors = {
+  /**
+   * Invalid publication ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing reserves:publish
+   */
+  403: DeniedResponse;
+  /**
+   * Publication not found
+   */
+  404: AppError;
+  /**
+   * The publication cannot be cancelled (in the envelope's data)
+   */
+  409: Envelope & {
+    data?: PublicationRefusedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+  /**
+   * Workflow engine temporarily unavailable
+   */
+  503: AppError;
+};
+
+export type PostApiPublicationsByIdCancelError =
+  PostApiPublicationsByIdCancelErrors[keyof PostApiPublicationsByIdCancelErrors];
+
+export type PostApiPublicationsByIdCancelResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PublicationResponse;
+  };
+};
+
+export type PostApiPublicationsByIdCancelResponse =
+  PostApiPublicationsByIdCancelResponses[keyof PostApiPublicationsByIdCancelResponses];
+
+export type PostApiPublicationsByIdWithdrawData = {
+  /**
+   * Public reason
+   */
+  body: WithdrawRequest;
+  path: {
+    /**
+     * Publication ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/publications/{id}/withdraw';
+};
+
+export type PostApiPublicationsByIdWithdrawErrors = {
+  /**
+   * Validation error
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing reserves:publish
+   */
+  403: DeniedResponse;
+  /**
+   * Publication not found
+   */
+  404: AppError;
+  /**
+   * The publication cannot be withdrawn now (in the envelope's data)
+   */
+  409: Envelope & {
+    data?: PublicationRefusedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+  /**
+   * Workflow engine temporarily unavailable
+   */
+  503: AppError;
+};
+
+export type PostApiPublicationsByIdWithdrawError =
+  PostApiPublicationsByIdWithdrawErrors[keyof PostApiPublicationsByIdWithdrawErrors];
+
+export type PostApiPublicationsByIdWithdrawResponses = {
+  /**
+   * Accepted
+   */
+  202: Envelope & {
+    data?: JobAccepted;
+  };
+};
+
+export type PostApiPublicationsByIdWithdrawResponse =
+  PostApiPublicationsByIdWithdrawResponses[keyof PostApiPublicationsByIdWithdrawResponses];
+
+export type GetApiReportsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Page number (default: 1)
+     */
+    page?: number;
+    /**
+     * Items per page (default: 20, max: 100)
+     */
+    per_page?: number;
+  };
+  url: '/api/reports';
+};
+
+export type GetApiReportsErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing report:read
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiReportsError = GetApiReportsErrors[keyof GetApiReportsErrors];
+
+export type GetApiReportsResponses = {
+  /**
+   * OK
+   */
+  200: ListEnvelope & {
+    data?: Array<ReportResponse>;
+  };
+};
+
+export type GetApiReportsResponse = GetApiReportsResponses[keyof GetApiReportsResponses];
+
+export type PostApiReportsData = {
+  /**
+   * The artifact and the variant
+   */
+  body: RequestReportRequest;
+  path?: never;
+  query?: never;
+  url: '/api/reports';
+};
+
+export type PostApiReportsErrors = {
+  /**
+   * Validation error or malformed artifact_ref
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing report:generate
+   */
+  403: DeniedResponse;
+  /**
+   * Artifact not found
+   */
+  404: AppError;
+  /**
+   * The request is refused (in the envelope's data): artifact_not_ready
+   */
+  409: Envelope & {
+    data?: ReportRefusedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+  /**
+   * Workflow engine temporarily unavailable
+   */
+  503: AppError;
+};
+
 export type PostApiReportsError = PostApiReportsErrors[keyof PostApiReportsErrors];
 
 export type PostApiReportsResponses = {
   /**
-   * Accepted
+   * The variant already exists; no job_id
    */
-  202: {
-    job_id?: string;
-    report_id?: string;
-    status?: string;
+  200: Envelope & {
+    data?: ReportCreatedResponse;
+  };
+  /**
+   * Created or reset, with the job_id of its generation
+   */
+  201: Envelope & {
+    data?: ReportCreatedResponse;
   };
 };
 
@@ -4558,9 +10515,19 @@ export type DeleteApiReportsByIdErrors = {
    */
   401: AppError;
   /**
+   * Missing report:delete
+   */
+  403: DeniedResponse;
+  /**
    * Report not found
    */
   404: AppError;
+  /**
+   * The delete is refused (in the envelope's data): report_in_progress
+   */
+  409: Envelope & {
+    data?: ReportRefusedResponse;
+  };
   /**
    * Internal server error
    */
@@ -4572,9 +10539,9 @@ export type DeleteApiReportsByIdError =
 
 export type DeleteApiReportsByIdResponses = {
   /**
-   * OK
+   * Deleted
    */
-  200: ReportResponse;
+  204: void;
 };
 
 export type DeleteApiReportsByIdResponse =
@@ -4602,6 +10569,10 @@ export type GetApiReportsByIdErrors = {
    */
   401: AppError;
   /**
+   * Missing report:read
+   */
+  403: DeniedResponse;
+  /**
    * Report not found
    */
   404: AppError;
@@ -4617,7 +10588,9 @@ export type GetApiReportsByIdResponses = {
   /**
    * OK
    */
-  200: ReportResponse;
+  200: Envelope & {
+    data?: ReportResponse;
+  };
 };
 
 export type GetApiReportsByIdResponse =
@@ -4645,13 +10618,19 @@ export type GetApiReportsByIdDownloadErrors = {
    */
   401: AppError;
   /**
+   * Missing report:read
+   */
+  403: DeniedResponse;
+  /**
    * Report not found
    */
   404: AppError;
   /**
-   * Report is not completed
+   * The download is refused (in the envelope's data): report_not_ready
    */
-  409: AppError;
+  409: Envelope & {
+    data?: ReportRefusedResponse;
+  };
   /**
    * Internal server error
    */
@@ -4665,9 +10644,8 @@ export type GetApiReportsByIdDownloadResponses = {
   /**
    * OK
    */
-  200: {
-    download_url?: string;
-    expires_in?: number;
+  200: Envelope & {
+    data?: DownloadReportUrlResponse;
   };
 };
 
@@ -4698,7 +10676,9 @@ export type GetApiRolesResponses = {
   /**
    * OK
    */
-  200: Array<Role>;
+  200: Envelope & {
+    data?: Array<RoleResponse>;
+  };
 };
 
 export type GetApiRolesResponse = GetApiRolesResponses[keyof GetApiRolesResponses];
@@ -4707,11 +10687,7 @@ export type PostApiRolesData = {
   /**
    * Role creation parameters
    */
-  body: {
-    description?: string;
-    name?: string;
-    permission_keys?: Array<string>;
-  };
+  body: CreateRoleRequest;
   path?: never;
   query?: never;
   url: '/api/roles';
@@ -4719,13 +10695,17 @@ export type PostApiRolesData = {
 
 export type PostApiRolesErrors = {
   /**
-   * Validation error
+   * Validation error, or an unknown permission key
    */
   400: AppError;
   /**
    * Authentication required
    */
   401: AppError;
+  /**
+   * A key the caller lacks, an admin-level key without org:invite:admin, a platform key, or an unacknowledged conflicting pair
+   */
+  403: DeniedResponse;
   /**
    * Role with this name already exists
    */
@@ -4742,13 +10722,18 @@ export type PostApiRolesResponses = {
   /**
    * Created
    */
-  201: Role;
+  201: Envelope & {
+    data?: RoleResponse;
+  };
 };
 
 export type PostApiRolesResponse = PostApiRolesResponses[keyof PostApiRolesResponses];
 
 export type DeleteApiRolesByIdData = {
-  body?: never;
+  /**
+   * Replacement role for the role's holders
+   */
+  body?: DeleteRoleRequest;
   path: {
     /**
      * Role ID (UUID)
@@ -4769,11 +10754,15 @@ export type DeleteApiRolesByIdErrors = {
    */
   401: AppError;
   /**
-   * Role not found
+   * A built-in role, or a replacement the caller cannot grant
+   */
+  403: DeniedResponse;
+  /**
+   * Role or replacement role not found
    */
   404: AppError;
   /**
-   * Cannot delete system or immutable role
+   * role_in_use: the role is held and no replacement was given
    */
   409: AppError;
   /**
@@ -4788,7 +10777,9 @@ export type DeleteApiRolesByIdResponses = {
   /**
    * OK
    */
-  200: RoleResponse;
+  200: Envelope & {
+    data?: RoleResponse;
+  };
 };
 
 export type DeleteApiRolesByIdResponse =
@@ -4831,7 +10822,9 @@ export type GetApiRolesByIdResponses = {
   /**
    * OK
    */
-  200: Role;
+  200: Envelope & {
+    data?: RoleResponse;
+  };
 };
 
 export type GetApiRolesByIdResponse = GetApiRolesByIdResponses[keyof GetApiRolesByIdResponses];
@@ -4840,11 +10833,7 @@ export type PutApiRolesByIdData = {
   /**
    * Fields to update
    */
-  body: {
-    description?: string;
-    name?: string;
-    permission_keys?: Array<string>;
-  };
+  body: UpdateRoleRequest;
   path: {
     /**
      * Role ID (UUID)
@@ -4865,13 +10854,13 @@ export type PutApiRolesByIdErrors = {
    */
   401: AppError;
   /**
+   * A built-in role, or a key the caller cannot grant
+   */
+  403: DeniedResponse;
+  /**
    * Role not found
    */
   404: AppError;
-  /**
-   * Role is immutable
-   */
-  409: AppError;
   /**
    * Internal server error
    */
@@ -4884,7 +10873,9 @@ export type PutApiRolesByIdResponses = {
   /**
    * OK
    */
-  200: Role;
+  200: Envelope & {
+    data?: RoleResponse;
+  };
 };
 
 export type PutApiRolesByIdResponse = PutApiRolesByIdResponses[keyof PutApiRolesByIdResponses];
@@ -4893,9 +10884,7 @@ export type PostApiRolesByIdBulkAssignData = {
   /**
    * Array of user UUIDs to assign
    */
-  body: {
-    user_ids?: Array<string>;
-  };
+  body: BulkAssignRoleRequest;
   path: {
     /**
      * Role ID (UUID)
@@ -4916,9 +10905,17 @@ export type PostApiRolesByIdBulkAssignErrors = {
    */
   401: AppError;
   /**
-   * Role not found
+   * The caller's own user, a role the caller cannot grant, or a member who holds more than the caller
+   */
+  403: DeniedResponse;
+  /**
+   * Role or member not found
    */
   404: AppError;
+  /**
+   * The organization would have no Owner
+   */
+  409: AppError;
   /**
    * Internal server error
    */
@@ -4932,8 +10929,8 @@ export type PostApiRolesByIdBulkAssignResponses = {
   /**
    * OK
    */
-  200: {
-    message?: string;
+  200: Envelope & {
+    data?: BulkAssignRoleResponse;
   };
 };
 
@@ -4944,9 +10941,7 @@ export type PostApiRolesByIdCloneData = {
   /**
    * New role name
    */
-  body: {
-    name?: string;
-  };
+  body: CloneRoleRequest;
   path: {
     /**
      * Source Role ID (UUID)
@@ -4966,6 +10961,10 @@ export type PostApiRolesByIdCloneErrors = {
    * Authentication required
    */
   401: AppError;
+  /**
+   * The source role carries a key the caller cannot grant, or a conflicting pair without acknowledge_conflicts
+   */
+  403: DeniedResponse;
   /**
    * Source role not found
    */
@@ -4987,11 +10986,65 @@ export type PostApiRolesByIdCloneResponses = {
   /**
    * Created
    */
-  201: Role;
+  201: Envelope & {
+    data?: RoleResponse;
+  };
 };
 
 export type PostApiRolesByIdCloneResponse =
   PostApiRolesByIdCloneResponses[keyof PostApiRolesByIdCloneResponses];
+
+export type GetApiSearchData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Search text (at least 3 characters after trimming)
+     */
+    q: string;
+    /**
+     * Comma-separated types to search: wallet, ownership_proof, proof_of_funds, proof_of_reserves, commitment (default all)
+     */
+    types?: string;
+    /**
+     * Hits per type (default 5, clamped to 1..20)
+     */
+    limit?: number;
+  };
+  url: '/api/search';
+};
+
+export type GetApiSearchErrors = {
+  /**
+   * Invalid query parameter
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Insufficient permissions
+   */
+  403: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiSearchError = GetApiSearchErrors[keyof GetApiSearchErrors];
+
+export type GetApiSearchResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<SearchHitResponse>;
+  };
+};
+
+export type GetApiSearchResponse = GetApiSearchResponses[keyof GetApiSearchResponses];
 
 export type GetApiSpecialRequestsData = {
   body?: never;
@@ -5023,9 +11076,7 @@ export type GetApiSpecialRequestsErrors = {
   /**
    * Insufficient permissions
    */
-  403: {
-    [key: string]: unknown;
-  };
+  403: DeniedResponse;
   /**
    * Internal server error
    */
@@ -5041,8 +11092,8 @@ export type GetApiSpecialRequestsResponses = {
   /**
    * Paginated list of special requests
    */
-  200: {
-    [key: string]: unknown;
+  200: ListEnvelope & {
+    data?: Array<SpecialRequestsSpecialRequestResponse>;
   };
 };
 
@@ -5061,7 +11112,7 @@ export type PostApiSpecialRequestsData = {
 
 export type PostApiSpecialRequestsErrors = {
   /**
-   * Invalid request body
+   * Invalid request body, or request_type token_catalog
    */
   400: {
     [key: string]: unknown;
@@ -5075,9 +11126,7 @@ export type PostApiSpecialRequestsErrors = {
   /**
    * Insufficient permissions
    */
-  403: {
-    [key: string]: unknown;
-  };
+  403: DeniedResponse;
   /**
    * Internal server error
    */
@@ -5093,8 +11142,10 @@ export type PostApiSpecialRequestsResponses = {
   /**
    * Created special request
    */
-  201: {
-    [key: string]: unknown;
+  201: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
   };
 };
 
@@ -5137,9 +11188,7 @@ export type GetApiSpecialRequestsSearchErrors = {
   /**
    * Insufficient permissions
    */
-  403: {
-    [key: string]: unknown;
-  };
+  403: DeniedResponse;
   /**
    * Internal server error
    */
@@ -5155,8 +11204,8 @@ export type GetApiSpecialRequestsSearchResponses = {
   /**
    * Search results with pagination
    */
-  200: {
-    [key: string]: unknown;
+  200: ListEnvelope & {
+    data?: Array<SpecialRequestsSpecialRequestResponse>;
   };
 };
 
@@ -5180,9 +11229,7 @@ export type GetApiSpecialRequestsStatsErrors = {
   /**
    * Insufficient permissions
    */
-  403: {
-    [key: string]: unknown;
-  };
+  403: DeniedResponse;
   /**
    * Internal server error
    */
@@ -5198,8 +11245,10 @@ export type GetApiSpecialRequestsStatsResponses = {
   /**
    * Request statistics
    */
-  200: {
-    [key: string]: unknown;
+  200: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
   };
 };
 
@@ -5232,13 +11281,11 @@ export type GetApiSpecialRequestsByIdErrors = {
     [key: string]: unknown;
   };
   /**
-   * Access denied - different organization
+   * Insufficient permissions
    */
-  403: {
-    [key: string]: unknown;
-  };
+  403: DeniedResponse;
   /**
-   * Special request not found
+   * Special request not found, or it belongs to another organization
    */
   404: {
     [key: string]: unknown;
@@ -5258,8 +11305,10 @@ export type GetApiSpecialRequestsByIdResponses = {
   /**
    * Special request details
    */
-  200: {
-    [key: string]: unknown;
+  200: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
   };
 };
 
@@ -5292,13 +11341,11 @@ export type GetApiSpecialRequestsByIdCommentsErrors = {
     [key: string]: unknown;
   };
   /**
-   * Access denied - different organization
+   * Insufficient permissions
    */
-  403: {
-    [key: string]: unknown;
-  };
+  403: DeniedResponse;
   /**
-   * Special request not found
+   * Special request not found, or it belongs to another organization
    */
   404: {
     [key: string]: unknown;
@@ -5318,8 +11365,10 @@ export type GetApiSpecialRequestsByIdCommentsResponses = {
   /**
    * List of comments
    */
-  200: {
-    [key: string]: unknown;
+  200: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
   };
 };
 
@@ -5355,13 +11404,11 @@ export type PostApiSpecialRequestsByIdCommentsErrors = {
     [key: string]: unknown;
   };
   /**
-   * Access denied - different organization
+   * Insufficient permissions
    */
-  403: {
-    [key: string]: unknown;
-  };
+  403: DeniedResponse;
   /**
-   * Special request not found
+   * Special request not found, or it belongs to another organization
    */
   404: {
     [key: string]: unknown;
@@ -5381,8 +11428,10 @@ export type PostApiSpecialRequestsByIdCommentsResponses = {
   /**
    * Created comment
    */
-  201: {
-    [key: string]: unknown;
+  201: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
   };
 };
 
@@ -5424,9 +11473,11 @@ export type GetApiSupportImpersonationResponses = {
   /**
    * List of active sessions
    */
-  200: Array<{
-    [key: string]: unknown;
-  }>;
+  200: Envelope & {
+    data?: Array<{
+      [key: string]: unknown;
+    }>;
+  };
 };
 
 export type GetApiSupportImpersonationResponse =
@@ -5476,8 +11527,10 @@ export type PostApiSupportImpersonationResponses = {
   /**
    * Created impersonation session
    */
-  201: {
-    [key: string]: unknown;
+  201: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
   };
 };
 
@@ -5536,8 +11589,10 @@ export type DeleteApiSupportImpersonationByIdResponses = {
   /**
    * Session ended confirmation
    */
-  200: {
-    [key: string]: string;
+  200: Envelope & {
+    data?: {
+      [key: string]: string;
+    };
   };
 };
 
@@ -5590,21 +11645,379 @@ export type GetApiSupportImpersonationByIdResponses = {
   /**
    * Session details
    */
-  200: {
-    [key: string]: unknown;
+  200: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
   };
 };
 
 export type GetApiSupportImpersonationByIdResponse =
   GetApiSupportImpersonationByIdResponses[keyof GetApiSupportImpersonationByIdResponses];
 
+export type GetApiTokensData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/api/tokens';
+};
+
+export type GetApiTokensErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing funds:read
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiTokensError = GetApiTokensErrors[keyof GetApiTokensErrors];
+
+export type GetApiTokensResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<TokenResponse>;
+  };
+};
+
+export type GetApiTokensResponse = GetApiTokensResponses[keyof GetApiTokensResponses];
+
+export type PostApiTokensData = {
+  /**
+   * The contract to register
+   */
+  body: RegisterTokenRequest;
+  path?: never;
+  query?: never;
+  url: '/api/tokens';
+};
+
+export type PostApiTokensErrors = {
+  /**
+   * Validation error, or the contract could not be verified on-chain
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing funds:configure-tokens
+   */
+  403: DeniedResponse;
+  /**
+   * Token already registered for this chain
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiTokensError = PostApiTokensErrors[keyof PostApiTokensErrors];
+
+export type PostApiTokensResponses = {
+  /**
+   * Created
+   */
+  201: Envelope & {
+    data?: RegisterTokenResponse;
+  };
+};
+
+export type PostApiTokensResponse = PostApiTokensResponses[keyof PostApiTokensResponses];
+
+export type PostApiTokensBulkData = {
+  /**
+   * Catalog entry IDs to track
+   */
+  body: BulkOnboardRequest;
+  path?: never;
+  query?: never;
+  url: '/api/tokens/bulk';
+};
+
+export type PostApiTokensBulkErrors = {
+  /**
+   * Validation error, or an unknown or unlisted catalog entry
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing funds:configure-tokens
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiTokensBulkError = PostApiTokensBulkErrors[keyof PostApiTokensBulkErrors];
+
+export type PostApiTokensBulkResponses = {
+  /**
+   * Created
+   */
+  201: Envelope & {
+    data?: Array<TokenResponse>;
+  };
+};
+
+export type PostApiTokensBulkResponse =
+  PostApiTokensBulkResponses[keyof PostApiTokensBulkResponses];
+
+export type GetApiTokensCatalogData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/api/tokens/catalog';
+};
+
+export type GetApiTokensCatalogErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing funds:read
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiTokensCatalogError = GetApiTokensCatalogErrors[keyof GetApiTokensCatalogErrors];
+
+export type GetApiTokensCatalogResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<CatalogEntryBrowseResponse>;
+  };
+};
+
+export type GetApiTokensCatalogResponse =
+  GetApiTokensCatalogResponses[keyof GetApiTokensCatalogResponses];
+
+export type PostApiTokensVerifyData = {
+  /**
+   * The contract to verify
+   */
+  body: VerifyTokenRequest;
+  path?: never;
+  query?: never;
+  url: '/api/tokens/verify';
+};
+
+export type PostApiTokensVerifyErrors = {
+  /**
+   * Validation error, or the contract could not be verified on-chain
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing funds:configure-tokens
+   */
+  403: DeniedResponse;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiTokensVerifyError = PostApiTokensVerifyErrors[keyof PostApiTokensVerifyErrors];
+
+export type PostApiTokensVerifyResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: VerifyTokenResponse;
+  };
+};
+
+export type PostApiTokensVerifyResponse =
+  PostApiTokensVerifyResponses[keyof PostApiTokensVerifyResponses];
+
+export type DeleteApiTokensByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Token ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/tokens/{id}';
+};
+
+export type DeleteApiTokensByIdErrors = {
+  /**
+   * Invalid token ID format
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing funds:configure-tokens
+   */
+  403: DeniedResponse;
+  /**
+   * Token not found
+   */
+  404: AppError;
+  /**
+   * The token is a native token (in the envelope's data)
+   */
+  409: Envelope & {
+    data?: TokenRefusedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type DeleteApiTokensByIdError = DeleteApiTokensByIdErrors[keyof DeleteApiTokensByIdErrors];
+
+export type DeleteApiTokensByIdResponses = {
+  /**
+   * Token deleted
+   */
+  204: void;
+};
+
+export type DeleteApiTokensByIdResponse =
+  DeleteApiTokensByIdResponses[keyof DeleteApiTokensByIdResponses];
+
+export type PostApiTokensByIdCatalogRequestData = {
+  /**
+   * An optional note
+   */
+  body?: CatalogListingRequest;
+  path: {
+    /**
+     * Token ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/tokens/{id}/catalog-request';
+};
+
+export type PostApiTokensByIdCatalogRequestErrors = {
+  /**
+   * Invalid token ID or note
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing funds:configure-tokens
+   */
+  403: DeniedResponse;
+  /**
+   * Token not found
+   */
+  404: AppError;
+  /**
+   * The entry is listed or already has an open request (in the envelope's data)
+   */
+  409: Envelope & {
+    data?: TokenRefusedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiTokensByIdCatalogRequestError =
+  PostApiTokensByIdCatalogRequestErrors[keyof PostApiTokensByIdCatalogRequestErrors];
+
+export type PostApiTokensByIdCatalogRequestResponses = {
+  /**
+   * Created
+   */
+  201: Envelope & {
+    data?: TokenCatalogRequestState;
+  };
+};
+
+export type PostApiTokensByIdCatalogRequestResponse =
+  PostApiTokensByIdCatalogRequestResponses[keyof PostApiTokensByIdCatalogRequestResponses];
+
+export type PutApiUsersMeRoleData = {
+  /**
+   * Role to move to, confirmed
+   */
+  body: DemoteSelfRequest;
+  path?: never;
+  query?: never;
+  url: '/api/users/me/role';
+};
+
+export type PutApiUsersMeRoleErrors = {
+  /**
+   * Missing confirmation, or the role does not hold fewer permissions
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Role or membership not found
+   */
+  404: AppError;
+  /**
+   * The organization would have no Owner
+   */
+  409: AppError;
+};
+
+export type PutApiUsersMeRoleError = PutApiUsersMeRoleErrors[keyof PutApiUsersMeRoleErrors];
+
+export type PutApiUsersMeRoleResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: AssignRoleResponse;
+  };
+};
+
+export type PutApiUsersMeRoleResponse =
+  PutApiUsersMeRoleResponses[keyof PutApiUsersMeRoleResponses];
+
 export type PutApiUsersByUserIdRoleData = {
   /**
    * Role to assign
    */
-  body: {
-    role_id?: string;
-  };
+  body: AssignRoleRequest;
   path: {
     /**
      * User ID (UUID)
@@ -5625,9 +12038,17 @@ export type PutApiUsersByUserIdRoleErrors = {
    */
   401: AppError;
   /**
+   * The caller's own role, a role the caller cannot grant, or a member who holds more than the caller
+   */
+  403: DeniedResponse;
+  /**
    * User or role not found
    */
   404: AppError;
+  /**
+   * The organization would have no Owner
+   */
+  409: AppError;
   /**
    * Internal server error
    */
@@ -5641,13 +12062,104 @@ export type PutApiUsersByUserIdRoleResponses = {
   /**
    * OK
    */
-  200: {
-    message?: string;
+  200: Envelope & {
+    data?: AssignRoleResponse;
   };
 };
 
 export type PutApiUsersByUserIdRoleResponse =
   PutApiUsersByUserIdRoleResponses[keyof PutApiUsersByUserIdRoleResponses];
+
+export type GetApiValuationsAmbientData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/api/valuations/ambient';
+};
+
+export type GetApiValuationsAmbientErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing funds:read
+   */
+  403: DeniedResponse;
+  /**
+   * No ambient valuation yet
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiValuationsAmbientError =
+  GetApiValuationsAmbientErrors[keyof GetApiValuationsAmbientErrors];
+
+export type GetApiValuationsAmbientResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ValuationResponse;
+  };
+};
+
+export type GetApiValuationsAmbientResponse =
+  GetApiValuationsAmbientResponses[keyof GetApiValuationsAmbientResponses];
+
+export type GetApiValuationsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Valuation ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/valuations/{id}';
+};
+
+export type GetApiValuationsByIdErrors = {
+  /**
+   * Invalid valuation ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Missing funds:read
+   */
+  403: DeniedResponse;
+  /**
+   * Valuation not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiValuationsByIdError =
+  GetApiValuationsByIdErrors[keyof GetApiValuationsByIdErrors];
+
+export type GetApiValuationsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ValuationResponse;
+  };
+};
+
+export type GetApiValuationsByIdResponse =
+  GetApiValuationsByIdResponses[keyof GetApiValuationsByIdResponses];
 
 export type GetApiWalletsData = {
   body?: never;
@@ -5660,7 +12172,7 @@ export type GetApiWalletsData = {
     /**
      * Items per page (default: 20, max: 100)
      */
-    limit?: number;
+    per_page?: number;
   };
   url: '/api/wallets';
 };
@@ -5682,11 +12194,8 @@ export type GetApiWalletsResponses = {
   /**
    * OK
    */
-  200: {
-    limit?: number;
-    page?: number;
-    total?: number;
-    wallets?: Array<Wallet>;
+  200: ListEnvelope & {
+    data?: Array<WalletResponse>;
   };
 };
 
@@ -5696,13 +12205,7 @@ export type PostApiWalletsData = {
   /**
    * Wallet creation parameters
    */
-  body: {
-    address?: string;
-    chain_id?: string;
-    description?: string;
-    name?: string;
-    public_key?: string;
-  };
+  body: CreateWalletRequest;
   path?: never;
   query?: never;
   url: '/api/wallets';
@@ -5710,7 +12213,7 @@ export type PostApiWalletsData = {
 
 export type PostApiWalletsErrors = {
   /**
-   * Validation error
+   * Validation error, or a Safe on a non-EVM chain or at an address without contract code
    */
   400: AppError;
   /**
@@ -5733,7 +12236,9 @@ export type PostApiWalletsResponses = {
   /**
    * Created
    */
-  201: Wallet;
+  201: Envelope & {
+    data?: WalletResponse;
+  };
 };
 
 export type PostApiWalletsResponse = PostApiWalletsResponses[keyof PostApiWalletsResponses];
@@ -5776,8 +12281,10 @@ export type DeleteApiWalletsByIdResponses = {
   /**
    * OK
    */
-  200: {
-    message?: string;
+  200: Envelope & {
+    data?: {
+      message?: string;
+    };
   };
 };
 
@@ -5821,7 +12328,9 @@ export type GetApiWalletsByIdResponses = {
   /**
    * OK
    */
-  200: Wallet;
+  200: Envelope & {
+    data?: WalletResponse;
+  };
 };
 
 export type GetApiWalletsByIdResponse =
@@ -5829,14 +12338,9 @@ export type GetApiWalletsByIdResponse =
 
 export type PutApiWalletsByIdData = {
   /**
-   * Fields to update (partial)
+   * Fields to update (partial). owners replaces the owner contact hints; on a Safe it also re-reads the owner set from the chain
    */
-  body: {
-    description?: string;
-    is_active?: boolean;
-    is_watched?: boolean;
-    name?: string;
-  };
+  body: UpdateWalletRequest;
   path: {
     /**
      * Wallet ID (UUID)
@@ -5861,6 +12365,10 @@ export type PutApiWalletsByIdErrors = {
    */
   404: AppError;
   /**
+   * Owners were updated on a Safe deployed too recently to be final: the update is saved, and the owner set can be read once the message's wait has passed
+   */
+  409: AppError;
+  /**
    * Internal server error
    */
   500: AppError;
@@ -5872,17 +12380,460 @@ export type PutApiWalletsByIdResponses = {
   /**
    * OK
    */
-  200: {
-    message?: string;
+  200: Envelope & {
+    data?: WalletResponse;
   };
 };
 
 export type PutApiWalletsByIdResponse =
   PutApiWalletsByIdResponses[keyof PutApiWalletsByIdResponses];
 
+export type GetApiWalletsByIdInclusionHistoryData = {
+  body?: never;
+  path: {
+    /**
+     * Wallet ID (UUID)
+     */
+    id: string;
+  };
+  query?: {
+    /**
+     * Max runs to return (default 200)
+     */
+    limit?: number;
+    /**
+     * Runs to skip (default 0)
+     */
+    offset?: number;
+  };
+  url: '/api/wallets/{id}/inclusion-history';
+};
+
+export type GetApiWalletsByIdInclusionHistoryErrors = {
+  /**
+   * Invalid wallet ID format
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Wallet not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetApiWalletsByIdInclusionHistoryError =
+  GetApiWalletsByIdInclusionHistoryErrors[keyof GetApiWalletsByIdInclusionHistoryErrors];
+
+export type GetApiWalletsByIdInclusionHistoryResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: {
+      runs?: Array<{
+        at?: string;
+        counted?: boolean;
+        counted_balances?: Array<{
+          amount?: string;
+          priced?: boolean;
+          symbol?: string;
+          usd_value?: string;
+        }>;
+        coverage?: string;
+        holdings_usd?: string;
+        reason?: string;
+        run_id?: string;
+        verdict?: string;
+      }>;
+      runs_included?: number;
+      runs_total?: number;
+    };
+  };
+};
+
+export type GetApiWalletsByIdInclusionHistoryResponse =
+  GetApiWalletsByIdInclusionHistoryResponses[keyof GetApiWalletsByIdInclusionHistoryResponses];
+
+export type PostApiWalletsByIdNetworksData = {
+  /**
+   * Network to add
+   */
+  body: {
+    chain_id?: string;
+  };
+  path: {
+    /**
+     * Wallet ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/wallets/{id}/networks';
+};
+
+export type PostApiWalletsByIdNetworksErrors = {
+  /**
+   * Validation error (Safe wallet, non-EVM, non-active, not scannable, or malformed ID)
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Wallet not found
+   */
+  404: AppError;
+  /**
+   * Network already registered
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiWalletsByIdNetworksError =
+  PostApiWalletsByIdNetworksErrors[keyof PostApiWalletsByIdNetworksErrors];
+
+export type PostApiWalletsByIdNetworksResponses = {
+  /**
+   * Created
+   */
+  201: Envelope & {
+    data?: {
+      chain_id?: string;
+      id?: string;
+      included_in_runs?: boolean;
+      wallet_id?: string;
+    };
+  };
+};
+
+export type PostApiWalletsByIdNetworksResponse =
+  PostApiWalletsByIdNetworksResponses[keyof PostApiWalletsByIdNetworksResponses];
+
+export type DeleteApiWalletsByIdNetworksByChainIdData = {
+  body?: never;
+  path: {
+    /**
+     * Wallet ID (UUID)
+     */
+    id: string;
+    /**
+     * Chain ID (UUID)
+     */
+    chainId: string;
+  };
+  query?: never;
+  url: '/api/wallets/{id}/networks/{chainId}';
+};
+
+export type DeleteApiWalletsByIdNetworksByChainIdErrors = {
+  /**
+   * Validation error (primary network or malformed ID)
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Wallet or network not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type DeleteApiWalletsByIdNetworksByChainIdError =
+  DeleteApiWalletsByIdNetworksByChainIdErrors[keyof DeleteApiWalletsByIdNetworksByChainIdErrors];
+
+export type DeleteApiWalletsByIdNetworksByChainIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
+export type DeleteApiWalletsByIdNetworksByChainIdResponse =
+  DeleteApiWalletsByIdNetworksByChainIdResponses[keyof DeleteApiWalletsByIdNetworksByChainIdResponses];
+
+export type PatchApiWalletsByIdNetworksByChainIdData = {
+  /**
+   * New inclusion flag
+   */
+  body: {
+    included_in_runs?: boolean;
+  };
+  path: {
+    /**
+     * Wallet ID (UUID)
+     */
+    id: string;
+    /**
+     * Chain ID (UUID)
+     */
+    chainId: string;
+  };
+  query?: never;
+  url: '/api/wallets/{id}/networks/{chainId}';
+};
+
+export type PatchApiWalletsByIdNetworksByChainIdErrors = {
+  /**
+   * Validation error (missing flag or malformed ID)
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Wallet or network not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PatchApiWalletsByIdNetworksByChainIdError =
+  PatchApiWalletsByIdNetworksByChainIdErrors[keyof PatchApiWalletsByIdNetworksByChainIdErrors];
+
+export type PatchApiWalletsByIdNetworksByChainIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
+export type PatchApiWalletsByIdNetworksByChainIdResponse =
+  PatchApiWalletsByIdNetworksByChainIdResponses[keyof PatchApiWalletsByIdNetworksByChainIdResponses];
+
+export type PostApiWalletsByIdReRegisterData = {
+  body?: never;
+  path: {
+    /**
+     * Wallet ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/wallets/{id}/re-register';
+};
+
+export type PostApiWalletsByIdReRegisterErrors = {
+  /**
+   * Invalid wallet ID format
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Wallet not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiWalletsByIdReRegisterError =
+  PostApiWalletsByIdReRegisterErrors[keyof PostApiWalletsByIdReRegisterErrors];
+
+export type PostApiWalletsByIdReRegisterResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
+export type PostApiWalletsByIdReRegisterResponse =
+  PostApiWalletsByIdReRegisterResponses[keyof PostApiWalletsByIdReRegisterResponses];
+
+export type PostApiWalletsByIdRetireData = {
+  body?: never;
+  path: {
+    /**
+     * Wallet ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/wallets/{id}/retire';
+};
+
+export type PostApiWalletsByIdRetireErrors = {
+  /**
+   * Invalid wallet ID format
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Wallet not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiWalletsByIdRetireError =
+  PostApiWalletsByIdRetireErrors[keyof PostApiWalletsByIdRetireErrors];
+
+export type PostApiWalletsByIdRetireResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
+export type PostApiWalletsByIdRetireResponse =
+  PostApiWalletsByIdRetireResponses[keyof PostApiWalletsByIdRetireResponses];
+
+export type PostApiWalletsByIdRetireUndoData = {
+  body?: never;
+  path: {
+    /**
+     * Wallet ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/wallets/{id}/retire/undo';
+};
+
+export type PostApiWalletsByIdRetireUndoErrors = {
+  /**
+   * Invalid wallet ID format
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Wallet not found
+   */
+  404: AppError;
+  /**
+   * Undo window elapsed or wallet not retired
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostApiWalletsByIdRetireUndoError =
+  PostApiWalletsByIdRetireUndoErrors[keyof PostApiWalletsByIdRetireUndoErrors];
+
+export type PostApiWalletsByIdRetireUndoResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
+export type PostApiWalletsByIdRetireUndoResponse =
+  PostApiWalletsByIdRetireUndoResponses[keyof PostApiWalletsByIdRetireUndoResponses];
+
+export type PutApiWalletsByIdSignerSetData = {
+  /**
+   * Replacement owner contact hints
+   */
+  body: ChangeSignerSetRequest;
+  path: {
+    /**
+     * Wallet ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/api/wallets/{id}/signer-set';
+};
+
+export type PutApiWalletsByIdSignerSetErrors = {
+  /**
+   * Invalid wallet id / body / not a Safe wallet / bad owner
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Wallet not found
+   */
+  404: AppError;
+  /**
+   * The Safe was deployed too recently to be final: the hints are saved, and the owner set can be read once the message's wait has passed
+   */
+  409: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PutApiWalletsByIdSignerSetError =
+  PutApiWalletsByIdSignerSetErrors[keyof PutApiWalletsByIdSignerSetErrors];
+
+export type PutApiWalletsByIdSignerSetResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: ChangeSignerSetResponse;
+  };
+};
+
+export type PutApiWalletsByIdSignerSetResponse =
+  PutApiWalletsByIdSignerSetResponses[keyof PutApiWalletsByIdSignerSetResponses];
+
 export type PostAuthChangePasswordData = {
   /**
-   * Old + new password
+   * Old + new password; optional client_type and refresh_token
    */
   body: ChangePasswordRequest;
   path?: never;
@@ -5904,6 +12855,12 @@ export type PostAuthChangePasswordErrors = {
     [key: string]: string;
   };
   /**
+   * Origin not allowed
+   */
+  403: {
+    [key: string]: string;
+  };
+  /**
    * Server busy verifying credentials.
    */
   429: {
@@ -5918,35 +12875,13 @@ export type PostAuthChangePasswordResponses = {
   /**
    * OK
    */
-  200: LoginResponse;
+  200: Envelope & {
+    data?: LoginResponse;
+  };
 };
 
 export type PostAuthChangePasswordResponse =
   PostAuthChangePasswordResponses[keyof PostAuthChangePasswordResponses];
-
-export type GetAuthInviteByTokenData = {
-  body?: never;
-  path: {
-    /**
-     * Invitation token (raw, from email link)
-     */
-    token: string;
-  };
-  query?: never;
-  url: '/auth/invite/{token}';
-};
-
-export type GetAuthInviteByTokenErrors = {
-  /**
-   * Invitation is no longer valid
-   */
-  410: {
-    [key: string]: string;
-  };
-};
-
-export type GetAuthInviteByTokenError =
-  GetAuthInviteByTokenErrors[keyof GetAuthInviteByTokenErrors];
 
 export type PostAuthInviteByTokenAcceptData = {
   body?: never;
@@ -5988,6 +12923,40 @@ export type PostAuthInviteByTokenAcceptResponses = {
 export type PostAuthInviteByTokenAcceptResponse =
   PostAuthInviteByTokenAcceptResponses[keyof PostAuthInviteByTokenAcceptResponses];
 
+export type GetAuthInviteByTokenPreviewData = {
+  body?: never;
+  path: {
+    /**
+     * Invitation token (raw, from email link)
+     */
+    token: string;
+  };
+  query?: never;
+  url: '/auth/invite/{token}/preview';
+};
+
+export type GetAuthInviteByTokenPreviewErrors = {
+  /**
+   * Invitation is no longer valid
+   */
+  410: {
+    [key: string]: string;
+  };
+};
+
+export type GetAuthInviteByTokenPreviewError =
+  GetAuthInviteByTokenPreviewErrors[keyof GetAuthInviteByTokenPreviewErrors];
+
+export type GetAuthInviteByTokenPreviewResponses = {
+  /**
+   * OK
+   */
+  200: InvitePreviewResponse;
+};
+
+export type GetAuthInviteByTokenPreviewResponse =
+  GetAuthInviteByTokenPreviewResponses[keyof GetAuthInviteByTokenPreviewResponses];
+
 export type PostAuthLoginData = {
   /**
    * Login credentials
@@ -6025,7 +12994,9 @@ export type PostAuthLoginResponses = {
   /**
    * OK
    */
-  200: LoginResponse;
+  200: Envelope & {
+    data?: LoginResponse;
+  };
 };
 
 export type PostAuthLoginResponse = PostAuthLoginResponses[keyof PostAuthLoginResponses];
@@ -6039,6 +13010,17 @@ export type PostAuthLogoutData = {
   query?: never;
   url: '/auth/logout';
 };
+
+export type PostAuthLogoutErrors = {
+  /**
+   * Origin not allowed
+   */
+  403: {
+    [key: string]: string;
+  };
+};
+
+export type PostAuthLogoutError = PostAuthLogoutErrors[keyof PostAuthLogoutErrors];
 
 export type PostAuthLogoutResponses = {
   /**
@@ -6071,10 +13053,43 @@ export type GetAuthMeResponses = {
   /**
    * OK
    */
-  200: MeResponse;
+  200: Envelope & {
+    data?: MeResponse;
+  };
 };
 
 export type GetAuthMeResponse = GetAuthMeResponses[keyof GetAuthMeResponses];
+
+export type GetAuthMeOrganizationsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/auth/me/organizations';
+};
+
+export type GetAuthMeOrganizationsErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: string;
+  };
+};
+
+export type GetAuthMeOrganizationsError =
+  GetAuthMeOrganizationsErrors[keyof GetAuthMeOrganizationsErrors];
+
+export type GetAuthMeOrganizationsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: MeOrganizationsResponse;
+  };
+};
+
+export type GetAuthMeOrganizationsResponse =
+  GetAuthMeOrganizationsResponses[keyof GetAuthMeOrganizationsResponses];
 
 export type PostAuthMfaChallengeData = {
   /**
@@ -6108,7 +13123,9 @@ export type PostAuthMfaChallengeResponses = {
   /**
    * Access token (+ refresh in body for native; + Set-Cookie for browser)
    */
-  200: LoginResponse;
+  200: Envelope & {
+    data?: LoginResponse;
+  };
 };
 
 export type PostAuthMfaChallengeResponse =
@@ -6135,6 +13152,12 @@ export type PostAuthMfaDisableErrors = {
    * Invalid or already used code
    */
   401: {
+    [key: string]: string;
+  };
+  /**
+   * MFA is not turned on, or an organization the user belongs to requires it (details.reason mfa_required_by_organization)
+   */
+  409: {
     [key: string]: string;
   };
 };
@@ -6183,7 +13206,9 @@ export type PostAuthMfaEnrollStartResponses = {
   /**
    * OK
    */
-  200: EnrollMfaStartResponse;
+  200: Envelope & {
+    data?: EnrollMfaStartResponse;
+  };
 };
 
 export type PostAuthMfaEnrollStartResponse =
@@ -6225,9 +13250,11 @@ export type PostAuthMfaEnrollVerifyError =
 
 export type PostAuthMfaEnrollVerifyResponses = {
   /**
-   * 10 recovery codes — store immediately
+   * 10 recovery codes, store immediately
    */
-  200: EnrollMfaVerifyResponse;
+  200: Envelope & {
+    data?: EnrollMfaVerifyResponse;
+  };
 };
 
 export type PostAuthMfaEnrollVerifyResponse =
@@ -6263,13 +13290,46 @@ export type PostAuthMfaRecoveryCodesError =
 
 export type PostAuthMfaRecoveryCodesResponses = {
   /**
-   * 10 new recovery codes — store immediately
+   * 10 new recovery codes, store immediately
    */
-  200: RegenerateRecoveryCodesResponse;
+  200: Envelope & {
+    data?: RegenerateRecoveryCodesResponse;
+  };
 };
 
 export type PostAuthMfaRecoveryCodesResponse =
   PostAuthMfaRecoveryCodesResponses[keyof PostAuthMfaRecoveryCodesResponses];
+
+export type GetAuthPasswordResetChallengeData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/auth/password-reset/challenge';
+};
+
+export type GetAuthPasswordResetChallengeErrors = {
+  /**
+   * Failed to issue challenge
+   */
+  500: {
+    [key: string]: string;
+  };
+};
+
+export type GetAuthPasswordResetChallengeError =
+  GetAuthPasswordResetChallengeErrors[keyof GetAuthPasswordResetChallengeErrors];
+
+export type GetAuthPasswordResetChallengeResponses = {
+  /**
+   * Altcha challenge
+   */
+  200: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetAuthPasswordResetChallengeResponse =
+  GetAuthPasswordResetChallengeResponses[keyof GetAuthPasswordResetChallengeResponses];
 
 export type PostAuthPasswordResetRequestData = {
   /**
@@ -6344,7 +13404,7 @@ export type PostAuthPasswordResetByTokenError =
 
 export type PostAuthPasswordResetByTokenResponses = {
   /**
-   * No content — password reset
+   * No content: password reset
    */
   204: void;
 };
@@ -6373,6 +13433,12 @@ export type PostAuthRefreshErrors = {
    * Invalid email or password.
    */
   401: {
+    [key: string]: string;
+  };
+  /**
+   * Origin not allowed
+   */
+  403: {
     [key: string]: string;
   };
   /**
@@ -6470,7 +13536,9 @@ export type GetAuthSessionsResponses = {
   /**
    * OK
    */
-  200: ListSessionsResponse;
+  200: Envelope & {
+    data?: ListSessionsResponse;
+  };
 };
 
 export type GetAuthSessionsResponse = GetAuthSessionsResponses[keyof GetAuthSessionsResponses];
@@ -6535,6 +13603,12 @@ export type PostAuthSignOutAllErrors = {
   401: {
     [key: string]: string;
   };
+  /**
+   * Origin not allowed
+   */
+  403: {
+    [key: string]: string;
+  };
 };
 
 export type PostAuthSignOutAllError = PostAuthSignOutAllErrors[keyof PostAuthSignOutAllErrors];
@@ -6572,6 +13646,14 @@ export type PostAuthSwitchOrgErrors = {
   401: {
     [key: string]: string;
   };
+  /**
+   * No access to the target organization or it is not active, or it requires MFA and the session never passed it or the user has MFA turned off (error.reason mfa_required)
+   */
+  403: DeniedResponse;
+  /**
+   * Membership lookup failed
+   */
+  500: AppError;
 };
 
 export type PostAuthSwitchOrgError = PostAuthSwitchOrgErrors[keyof PostAuthSwitchOrgErrors];
@@ -6580,7 +13662,9 @@ export type PostAuthSwitchOrgResponses = {
   /**
    * OK
    */
-  200: LoginResponse;
+  200: Envelope & {
+    data?: LoginResponse;
+  };
 };
 
 export type PostAuthSwitchOrgResponse =
@@ -6650,7 +13734,7 @@ export type PostAuthVerifyEmailByTokenError =
 
 export type PostAuthVerifyEmailByTokenResponses = {
   /**
-   * No content — email verified
+   * No content: email verified
    */
   204: void;
 };
@@ -6671,7 +13755,7 @@ export type GetOauthAuthorizeData = {
      */
     client_id: string;
     /**
-     * Exact-match registered URI
+     * Exact-match registered URI (required, never defaulted)
      */
     redirect_uri: string;
     /**
@@ -6679,9 +13763,9 @@ export type GetOauthAuthorizeData = {
      */
     scope?: string;
     /**
-     * Opaque client-side state
+     * Opaque client-side state, at least 32 characters
      */
-    state?: string;
+    state: string;
     /**
      * PKCE S256 challenge
      */
@@ -6698,12 +13782,67 @@ export type GetOauthAuthorizeData = {
   url: '/oauth/authorize';
 };
 
+export type GetOauthAuthorizeErrors = {
+  /**
+   * redirect_uri missing or not registered
+   */
+  400: OAuthErrorBody;
+  /**
+   * unknown or inactive client
+   */
+  401: OAuthErrorBody;
+  /**
+   * PUBLIC_DASHBOARD_URL not configured
+   */
+  503: string;
+};
+
+export type GetOauthAuthorizeError = GetOauthAuthorizeErrors[keyof GetOauthAuthorizeErrors];
+
+export type PostOauthAuthorizeSessionData = {
+  /**
+   * the authorize query string
+   */
+  body: AuthorizeSessionRequest;
+  path?: never;
+  query?: never;
+  url: '/oauth/authorize/session';
+};
+
+export type PostOauthAuthorizeSessionErrors = {
+  /**
+   * unknown client, or redirect_uri missing or not registered
+   */
+  400: OAuthErrorBody;
+  /**
+   * Unauthorized
+   */
+  401: AppError;
+  /**
+   * API keys and OAuth access tokens cannot give consent
+   */
+  403: AppError;
+};
+
+export type PostOauthAuthorizeSessionError =
+  PostOauthAuthorizeSessionErrors[keyof PostOauthAuthorizeSessionErrors];
+
+export type PostOauthAuthorizeSessionResponses = {
+  /**
+   * OK
+   */
+  200: AuthorizeSessionResponse;
+};
+
+export type PostOauthAuthorizeSessionResponse =
+  PostOauthAuthorizeSessionResponses[keyof PostOauthAuthorizeSessionResponses];
+
 export type GetOauthConsentData = {
   body?: never;
   path?: never;
   query: {
     /**
-     * consent request ID
+     * Consent request ID
      */
     consent_id: string;
   };
@@ -6712,9 +13851,25 @@ export type GetOauthConsentData = {
 
 export type GetOauthConsentErrors = {
   /**
+   * Bad Request
+   */
+  400: AppError;
+  /**
+   * Unauthorized
+   */
+  401: AppError;
+  /**
+   * API keys and OAuth access tokens cannot give consent
+   */
+  403: AppError;
+  /**
    * Not Found
    */
   404: AppError;
+  /**
+   * consent request already decided
+   */
+  409: AppError;
   /**
    * consent request expired
    */
@@ -6748,11 +13903,23 @@ export type PostOauthConsentDecisionErrors = {
    */
   400: AppError;
   /**
-   * invalid CSRF
+   * Unauthorized
+   */
+  401: AppError;
+  /**
+   * API keys and OAuth access tokens cannot give consent
    */
   403: AppError;
   /**
-   * expired
+   * Not Found
+   */
+  404: AppError;
+  /**
+   * consent request already decided
+   */
+  409: AppError;
+  /**
+   * consent request expired
    */
   410: AppError;
 };
@@ -6762,7 +13929,7 @@ export type PostOauthConsentDecisionError =
 
 export type PostOauthConsentDecisionResponses = {
   /**
-   * JSON with redirect_uri the SPA navigates to (allow=code+state, deny=error=access_denied)
+   * OK
    */
   200: ConsentDecisionResponse;
 };
@@ -6787,6 +13954,10 @@ export type GetOauthDeviceErrors = {
    * Unauthorized
    */
   401: AppError;
+  /**
+   * caller is an API key or OAuth access token
+   */
+  403: AppError;
   /**
    * unknown user_code
    */
@@ -6828,7 +13999,7 @@ export type PostOauthDeviceDecisionErrors = {
    */
   401: AppError;
   /**
-   * invalid CSRF
+   * invalid CSRF, or caller is an API key or OAuth access token
    */
   403: AppError;
   /**
@@ -6876,7 +14047,7 @@ export type PostOauthDeviceAuthorizationData = {
 
 export type PostOauthDeviceAuthorizationErrors = {
   /**
-   * invalid_request or invalid_scope
+   * invalid_request, invalid_scope or invalid_target
    */
   400: AppError;
   /**
@@ -6910,7 +14081,7 @@ export type PostOauthRegisterData = {
 
 export type PostOauthRegisterErrors = {
   /**
-   * Bad Request
+   * invalid_client_metadata (including an unknown availability), or invalid_redirect_uri
    */
   400: OAuthErrorBody;
   /**
@@ -6918,7 +14089,7 @@ export type PostOauthRegisterErrors = {
    */
   401: OAuthErrorBody;
   /**
-   * Forbidden
+   * missing oauth:clients:create, or a service API key
    */
   403: OAuthErrorBody;
   /**
@@ -7011,7 +14182,7 @@ export type PostOauthTokenError = PostOauthTokenErrors[keyof PostOauthTokenError
 
 export type PostOauthTokenResponses = {
   /**
-   * {access_token, token_type, expires_in, refresh_token, scope}
+   * {access_token, token_type, expires_in, refresh_token, scope, organization: {id, name}}; organization, on the authorization_code and refresh_token grants, is the organization the token is bound to (its org_id claim)
    */
   200: {
     [key: string]: unknown;
@@ -7020,639 +14191,5637 @@ export type PostOauthTokenResponses = {
 
 export type PostOauthTokenResponse = PostOauthTokenResponses[keyof PostOauthTokenResponses];
 
-export type GetOrganizationsByIdApiKeysData = {
-  body?: never;
-  path: {
-    /**
-     * Organization ID (must match caller's org — B6)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/organizations/{id}/api-keys';
-};
-
-export type GetOrganizationsByIdApiKeysErrors = {
-  /**
-   * Org-path mismatch
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Missing org:api_keys:write_service
-   */
-  403: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type GetOrganizationsByIdApiKeysError =
-  GetOrganizationsByIdApiKeysErrors[keyof GetOrganizationsByIdApiKeysErrors];
-
-export type GetOrganizationsByIdApiKeysResponses = {
-  /**
-   * OK
-   */
-  200: Array<ApiKeyListItem>;
-};
-
-export type GetOrganizationsByIdApiKeysResponse =
-  GetOrganizationsByIdApiKeysResponses[keyof GetOrganizationsByIdApiKeysResponses];
-
-export type GetOrganizationsByIdOauthClientsData = {
-  body?: never;
-  path: {
-    /**
-     * Organization ID
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/organizations/{id}/oauth-clients';
-};
-
-export type GetOrganizationsByIdOauthClientsErrors = {
-  /**
-   * Org-path mismatch
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Missing oauth:clients:read
-   */
-  403: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type GetOrganizationsByIdOauthClientsError =
-  GetOrganizationsByIdOauthClientsErrors[keyof GetOrganizationsByIdOauthClientsErrors];
-
-export type GetOrganizationsByIdOauthClientsResponses = {
-  /**
-   * OK
-   */
-  200: Array<OAuthClientListItem>;
-};
-
-export type GetOrganizationsByIdOauthClientsResponse =
-  GetOrganizationsByIdOauthClientsResponses[keyof GetOrganizationsByIdOauthClientsResponses];
-
-export type DeleteOrganizationsByIdOauthClientsByClientIdData = {
-  body?: never;
-  path: {
-    /**
-     * Organization ID
-     */
-    id: string;
-    /**
-     * Client UUID
-     */
-    client_id: string;
-  };
-  query?: never;
-  url: '/organizations/{id}/oauth-clients/{client_id}';
-};
-
-export type DeleteOrganizationsByIdOauthClientsByClientIdErrors = {
-  /**
-   * Invalid client_id
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Missing oauth:clients:delete
-   */
-  403: AppError;
-  /**
-   * Client not found
-   */
-  404: AppError;
-  /**
-   * Client must be disabled before deletion
-   */
-  409: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type DeleteOrganizationsByIdOauthClientsByClientIdError =
-  DeleteOrganizationsByIdOauthClientsByClientIdErrors[keyof DeleteOrganizationsByIdOauthClientsByClientIdErrors];
-
-export type DeleteOrganizationsByIdOauthClientsByClientIdResponses = {
-  /**
-   * No Content
-   */
-  204: void;
-};
-
-export type DeleteOrganizationsByIdOauthClientsByClientIdResponse =
-  DeleteOrganizationsByIdOauthClientsByClientIdResponses[keyof DeleteOrganizationsByIdOauthClientsByClientIdResponses];
-
-export type PostOrganizationsByIdOauthClientsByClientIdApproveData = {
-  body?: never;
-  path: {
-    /**
-     * Organization ID
-     */
-    id: string;
-    /**
-     * Client UUID
-     */
-    client_id: string;
-  };
-  query?: never;
-  url: '/organizations/{id}/oauth-clients/{client_id}/approve';
-};
-
-export type PostOrganizationsByIdOauthClientsByClientIdApproveErrors = {
-  /**
-   * Invalid client_id
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Self-approval or missing oauth:clients:approve
-   */
-  403: AppError;
-  /**
-   * Client not found
-   */
-  404: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type PostOrganizationsByIdOauthClientsByClientIdApproveError =
-  PostOrganizationsByIdOauthClientsByClientIdApproveErrors[keyof PostOrganizationsByIdOauthClientsByClientIdApproveErrors];
-
-export type PostOrganizationsByIdOauthClientsByClientIdApproveResponses = {
-  /**
-   * OK
-   */
-  200: OAuthClientListItem;
-};
-
-export type PostOrganizationsByIdOauthClientsByClientIdApproveResponse =
-  PostOrganizationsByIdOauthClientsByClientIdApproveResponses[keyof PostOrganizationsByIdOauthClientsByClientIdApproveResponses];
-
-export type PostOrganizationsByIdOauthClientsByClientIdDisableData = {
-  /**
-   * Optional disable reason
-   */
-  body?: DisableClientRequest;
-  path: {
-    /**
-     * Organization ID
-     */
-    id: string;
-    /**
-     * Client UUID
-     */
-    client_id: string;
-  };
-  query?: never;
-  url: '/organizations/{id}/oauth-clients/{client_id}/disable';
-};
-
-export type PostOrganizationsByIdOauthClientsByClientIdDisableErrors = {
-  /**
-   * Invalid client_id
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Missing oauth:clients:write
-   */
-  403: AppError;
-  /**
-   * Client not found
-   */
-  404: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type PostOrganizationsByIdOauthClientsByClientIdDisableError =
-  PostOrganizationsByIdOauthClientsByClientIdDisableErrors[keyof PostOrganizationsByIdOauthClientsByClientIdDisableErrors];
-
-export type PostOrganizationsByIdOauthClientsByClientIdDisableResponses = {
-  /**
-   * No Content
-   */
-  204: void;
-};
-
-export type PostOrganizationsByIdOauthClientsByClientIdDisableResponse =
-  PostOrganizationsByIdOauthClientsByClientIdDisableResponses[keyof PostOrganizationsByIdOauthClientsByClientIdDisableResponses];
-
-export type PostOrganizationsByIdOauthClientsByClientIdRotateSecretData = {
-  body?: never;
-  path: {
-    /**
-     * Organization ID
-     */
-    id: string;
-    /**
-     * Client UUID
-     */
-    client_id: string;
-  };
-  query?: never;
-  url: '/organizations/{id}/oauth-clients/{client_id}/rotate-secret';
-};
-
-export type PostOrganizationsByIdOauthClientsByClientIdRotateSecretErrors = {
-  /**
-   * Invalid client_id
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Missing oauth:clients:write
-   */
-  403: AppError;
-  /**
-   * Client not found
-   */
-  404: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type PostOrganizationsByIdOauthClientsByClientIdRotateSecretError =
-  PostOrganizationsByIdOauthClientsByClientIdRotateSecretErrors[keyof PostOrganizationsByIdOauthClientsByClientIdRotateSecretErrors];
-
-export type PostOrganizationsByIdOauthClientsByClientIdRotateSecretResponses = {
-  /**
-   * OK
-   */
-  200: RotateSecretResponse;
-};
-
-export type PostOrganizationsByIdOauthClientsByClientIdRotateSecretResponse =
-  PostOrganizationsByIdOauthClientsByClientIdRotateSecretResponses[keyof PostOrganizationsByIdOauthClientsByClientIdRotateSecretResponses];
-
-export type GetOrganizationsByIdServiceUsersData = {
-  body?: never;
-  path: {
-    /**
-     * Organization ID (must match caller's org)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/organizations/{id}/service-users';
-};
-
-export type GetOrganizationsByIdServiceUsersErrors = {
-  /**
-   * Org-path mismatch
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Missing org:service_users:write permission
-   */
-  403: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type GetOrganizationsByIdServiceUsersError =
-  GetOrganizationsByIdServiceUsersErrors[keyof GetOrganizationsByIdServiceUsersErrors];
-
-export type GetOrganizationsByIdServiceUsersResponses = {
-  /**
-   * OK
-   */
-  200: Array<ServiceUserResponse>;
-};
-
-export type GetOrganizationsByIdServiceUsersResponse =
-  GetOrganizationsByIdServiceUsersResponses[keyof GetOrganizationsByIdServiceUsersResponses];
-
-export type PostOrganizationsByIdServiceUsersData = {
-  /**
-   * Service user details
-   */
-  body: CreateServiceUserRequest;
-  path: {
-    /**
-     * Organization ID (must match caller's org)
-     */
-    id: string;
-  };
-  query?: never;
-  url: '/organizations/{id}/service-users';
-};
-
-export type PostOrganizationsByIdServiceUsersErrors = {
-  /**
-   * Invalid request body or org-path mismatch
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Missing org:service_users:write permission
-   */
-  403: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type PostOrganizationsByIdServiceUsersError =
-  PostOrganizationsByIdServiceUsersErrors[keyof PostOrganizationsByIdServiceUsersErrors];
-
-export type PostOrganizationsByIdServiceUsersResponses = {
-  /**
-   * Created
-   */
-  201: ServiceUserResponse;
-};
-
-export type PostOrganizationsByIdServiceUsersResponse =
-  PostOrganizationsByIdServiceUsersResponses[keyof PostOrganizationsByIdServiceUsersResponses];
-
-export type DeleteOrganizationsByIdServiceUsersBySvcIdData = {
-  body?: never;
-  path: {
-    /**
-     * Organization ID (must match caller's org)
-     */
-    id: string;
-    /**
-     * Service user ID
-     */
-    svc_id: string;
-  };
-  query?: never;
-  url: '/organizations/{id}/service-users/{svc_id}';
-};
-
-export type DeleteOrganizationsByIdServiceUsersBySvcIdErrors = {
-  /**
-   * Invalid IDs or org-path mismatch
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Missing org:service_users:write permission
-   */
-  403: AppError;
-  /**
-   * Service user not found
-   */
-  404: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type DeleteOrganizationsByIdServiceUsersBySvcIdError =
-  DeleteOrganizationsByIdServiceUsersBySvcIdErrors[keyof DeleteOrganizationsByIdServiceUsersBySvcIdErrors];
-
-export type DeleteOrganizationsByIdServiceUsersBySvcIdResponses = {
-  /**
-   * No content
-   */
-  204: string;
-};
-
-export type DeleteOrganizationsByIdServiceUsersBySvcIdResponse =
-  DeleteOrganizationsByIdServiceUsersBySvcIdResponses[keyof DeleteOrganizationsByIdServiceUsersBySvcIdResponses];
-
-export type PostOrganizationsByIdServiceUsersBySvcIdApiKeysData = {
-  /**
-   * Mint details (operator label + optional expiry)
-   */
-  body: MintServiceKeyRequest;
-  path: {
-    /**
-     * Organization ID (must match caller's org — B6)
-     */
-    id: string;
-    /**
-     * Service-user ID
-     */
-    svc_id: string;
-  };
-  query?: never;
-  url: '/organizations/{id}/service-users/{svc_id}/api-keys';
-};
-
-export type PostOrganizationsByIdServiceUsersBySvcIdApiKeysErrors = {
-  /**
-   * Invalid request body or org-path mismatch
-   */
-  400: AppError;
-  /**
-   * Authentication required
-   */
-  401: AppError;
-  /**
-   * Missing org:api_keys:write_service or service-user belongs to another org
-   */
-  403: AppError;
-  /**
-   * Service user not found
-   */
-  404: AppError;
-  /**
-   * Internal server error
-   */
-  500: AppError;
-};
-
-export type PostOrganizationsByIdServiceUsersBySvcIdApiKeysError =
-  PostOrganizationsByIdServiceUsersBySvcIdApiKeysErrors[keyof PostOrganizationsByIdServiceUsersBySvcIdApiKeysErrors];
-
-export type PostOrganizationsByIdServiceUsersBySvcIdApiKeysResponses = {
-  /**
-   * Created
-   */
-  201: MintKeyResponse;
-};
-
-export type PostOrganizationsByIdServiceUsersBySvcIdApiKeysResponse =
-  PostOrganizationsByIdServiceUsersBySvcIdApiKeysResponses[keyof PostOrganizationsByIdServiceUsersBySvcIdApiKeysResponses];
-
-export type PostVerifyLiabilitiesByProofIdCheckData = {
-  /**
-   * Inclusion proof to verify
-   */
-  body: VerifyRequest;
-  path: {
-    /**
-     * Proof of Liabilities ID (UUID)
-     */
-    proofId: string;
-  };
-  query?: never;
-  url: '/verify/liabilities/{proofId}/check';
-};
-
-export type PostVerifyLiabilitiesByProofIdCheckErrors = {
-  /**
-   * Invalid proof ID or request body
-   */
-  400: {
-    [key: string]: unknown;
-  };
-};
-
-export type PostVerifyLiabilitiesByProofIdCheckError =
-  PostVerifyLiabilitiesByProofIdCheckErrors[keyof PostVerifyLiabilitiesByProofIdCheckErrors];
-
-export type PostVerifyLiabilitiesByProofIdCheckResponses = {
-  /**
-   * OK
-   */
-  200: CheckProofResponse;
-};
-
-export type PostVerifyLiabilitiesByProofIdCheckResponse =
-  PostVerifyLiabilitiesByProofIdCheckResponses[keyof PostVerifyLiabilitiesByProofIdCheckResponses];
-
-export type GetVerifyLiabilitiesByProofIdInclusionData = {
-  body?: never;
-  path: {
-    /**
-     * Proof of Liabilities ID (UUID)
-     */
-    proofId: string;
-  };
-  query: {
-    /**
-     * User identifier (e.g., email or account ID)
-     */
-    user: string;
-    /**
-     * 256-bit nonce as hex string (with or without 0x prefix)
-     */
-    nonce: string;
-    /**
-     * Processing version (defaults to latest)
-     */
-    version?: number;
-  };
-  url: '/verify/liabilities/{proofId}/inclusion';
-};
-
-export type GetVerifyLiabilitiesByProofIdInclusionErrors = {
-  /**
-   * Not found (returned for all validation failures)
-   */
-  404: {
-    [key: string]: unknown;
-  };
-};
-
-export type GetVerifyLiabilitiesByProofIdInclusionError =
-  GetVerifyLiabilitiesByProofIdInclusionErrors[keyof GetVerifyLiabilitiesByProofIdInclusionErrors];
-
-export type GetVerifyLiabilitiesByProofIdInclusionResponses = {
-  /**
-   * OK
-   */
-  200: InclusionProofResponse;
-};
-
-export type GetVerifyLiabilitiesByProofIdInclusionResponse =
-  GetVerifyLiabilitiesByProofIdInclusionResponses[keyof GetVerifyLiabilitiesByProofIdInclusionResponses];
-
-export type GetVerifyZkpVkData = {
+export type GetPanelAttestationsData = {
   body?: never;
   path?: never;
   query?: {
     /**
-     * Circuit version (defaults to current)
+     * Page number (default: 1)
      */
-    version?: number;
+    page?: number;
+    /**
+     * Items per page (default: 20, max: 100)
+     */
+    per_page?: number;
+    /**
+     * Attestation type filter (reserves|ownership|funds|liabilities)
+     */
+    type?: string;
+    /**
+     * Verdict filter (solvent|insolvent|incomplete), reserves only
+     */
+    verdict?: string;
+    /**
+     * Status filter
+     */
+    status?: string;
+    /**
+     * Display narrowing to a single tenant (UUID)
+     */
+    organization_id?: string;
   };
-  url: '/verify/zkp/vk';
+  url: '/panel/attestations';
 };
 
-export type GetVerifyZkpVkErrors = {
+export type GetPanelAttestationsErrors = {
   /**
-   * Invalid version parameter
+   * Authentication required
    */
-  400: {
-    [key: string]: unknown;
-  };
+  401: AppError;
   /**
-   * Circuit version not found
+   * Platform access required
    */
-  404: {
-    [key: string]: unknown;
-  };
+  403: AppError;
   /**
-   * Failed to retrieve verification key
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelAttestationsError =
+  GetPanelAttestationsErrors[keyof GetPanelAttestationsErrors];
+
+export type GetPanelAttestationsResponses = {
+  /**
+   * OK
+   */
+  200: ListEnvelope & {
+    data?: Array<AttestationResponse>;
+  };
+};
+
+export type GetPanelAttestationsResponse =
+  GetPanelAttestationsResponses[keyof GetPanelAttestationsResponses];
+
+export type GetPanelAttestationsByTypeByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Attestation type (reserves|ownership|funds|liabilities)
+     */
+    type: string;
+    /**
+     * Attestation UUID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/attestations/{type}/{id}';
+};
+
+export type GetPanelAttestationsByTypeByIdErrors = {
+  /**
+   * Invalid id or unknown attestation type
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Attestation not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelAttestationsByTypeByIdError =
+  GetPanelAttestationsByTypeByIdErrors[keyof GetPanelAttestationsByTypeByIdErrors];
+
+export type GetPanelAttestationsByTypeByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: AttestationDetailResponse;
+  };
+};
+
+export type GetPanelAttestationsByTypeByIdResponse =
+  GetPanelAttestationsByTypeByIdResponses[keyof GetPanelAttestationsByTypeByIdResponses];
+
+export type GetPanelAuditLogsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Organization ID (UUID), or platform for rows with no organization
+     */
+    organization_id?: string;
+    /**
+     * Include panel page views and API key use
+     */
+    include_reads?: boolean;
+    /**
+     * Filter by action type
+     */
+    action?: string;
+    /**
+     * Filter by action prefix; repeat to match any of several
+     */
+    action_prefix?: Array<string>;
+    /**
+     * Filter by resource type
+     */
+    resource_type?: string;
+    /**
+     * Filter by resource ID (UUID)
+     */
+    resource_id?: string;
+    /**
+     * Filter by actor user ID (UUID), staff included
+     */
+    actor_id?: string;
+    /**
+     * Filter by API key ID (UUID)
+     */
+    api_key_id?: string;
+    /**
+     * Filter by OAuth client ID (UUID)
+     */
+    oauth_client_id?: string;
+    /**
+     * Filter by actor kind
+     */
+    actor_kind?: 'user' | 'api_key' | 'oauth_client' | 'support' | 'system';
+    /**
+     * Filter by start time (RFC3339)
+     */
+    start?: string;
+    /**
+     * Filter by end time (RFC3339)
+     */
+    end?: string;
+    /**
+     * Pagination cursor from previous response
+     */
+    cursor?: string;
+    /**
+     * Items per page (max 100)
+     */
+    limit?: number;
+  };
+  url: '/panel/audit-logs';
+};
+
+export type GetPanelAuditLogsErrors = {
+  /**
+   * Invalid query parameter
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelAuditLogsError = GetPanelAuditLogsErrors[keyof GetPanelAuditLogsErrors];
+
+export type GetPanelAuditLogsResponses = {
+  /**
+   * Audit log entries; meta.next_cursor pages forward
+   */
+  200: ListEnvelope & {
+    data?: Array<AuditAuditLogSummaryResponse>;
+  };
+};
+
+export type GetPanelAuditLogsResponse =
+  GetPanelAuditLogsResponses[keyof GetPanelAuditLogsResponses];
+
+export type GetPanelAuditLogsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Audit log entry ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/audit-logs/{id}';
+};
+
+export type GetPanelAuditLogsByIdErrors = {
+  /**
+   * Invalid audit log ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Audit log entry not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelAuditLogsByIdError =
+  GetPanelAuditLogsByIdErrors[keyof GetPanelAuditLogsByIdErrors];
+
+export type GetPanelAuditLogsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: AuditAuditLogResponse;
+  };
+};
+
+export type GetPanelAuditLogsByIdResponse =
+  GetPanelAuditLogsByIdResponses[keyof GetPanelAuditLogsByIdResponses];
+
+export type GetPanelAuthAltchaChallengeData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/auth/altcha-challenge';
+};
+
+export type GetPanelAuthAltchaChallengeErrors = {
+  /**
+   * Failed to issue challenge
    */
   500: {
-    [key: string]: unknown;
-  };
-  /**
-   * ZKP not available
-   */
-  503: {
-    [key: string]: unknown;
+    [key: string]: string;
   };
 };
 
-export type GetVerifyZkpVkError = GetVerifyZkpVkErrors[keyof GetVerifyZkpVkErrors];
+export type GetPanelAuthAltchaChallengeError =
+  GetPanelAuthAltchaChallengeErrors[keyof GetPanelAuthAltchaChallengeErrors];
 
-export type GetVerifyZkpVkResponses = {
+export type GetPanelAuthAltchaChallengeResponses = {
   /**
-   * Verification key with hex-encoded key, proving_system, curve, circuit_version
+   * Altcha challenge
    */
   200: {
     [key: string]: unknown;
   };
 };
 
-export type GetVerifyZkpVkResponse = GetVerifyZkpVkResponses[keyof GetVerifyZkpVkResponses];
+export type GetPanelAuthAltchaChallengeResponse =
+  GetPanelAuthAltchaChallengeResponses[keyof GetPanelAuthAltchaChallengeResponses];
+
+export type PostPanelAuthLoginData = {
+  /**
+   * Platform-admin login credentials
+   */
+  body: PanelLoginRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/auth/login';
+};
+
+export type PostPanelAuthLoginErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: string;
+  };
+  /**
+   * Invalid email or password.
+   */
+  401: {
+    [key: string]: string;
+  };
+  /**
+   * Server busy verifying credentials.
+   */
+  429: {
+    [key: string]: string;
+  };
+};
+
+export type PostPanelAuthLoginError = PostPanelAuthLoginErrors[keyof PostPanelAuthLoginErrors];
+
+export type PostPanelAuthLoginResponses = {
+  /**
+   * OK
+   */
+  200: PanelLoginResponse;
+};
+
+export type PostPanelAuthLoginResponse =
+  PostPanelAuthLoginResponses[keyof PostPanelAuthLoginResponses];
+
+export type PostPanelAuthLogoutData = {
+  /**
+   * Refresh token (optional if cookie present)
+   */
+  body?: PanelLogoutRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/auth/logout';
+};
+
+export type PostPanelAuthLogoutErrors = {
+  /**
+   * Origin not allowed
+   */
+  403: {
+    [key: string]: string;
+  };
+};
+
+export type PostPanelAuthLogoutError = PostPanelAuthLogoutErrors[keyof PostPanelAuthLogoutErrors];
+
+export type PostPanelAuthLogoutResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type PostPanelAuthLogoutResponse =
+  PostPanelAuthLogoutResponses[keyof PostPanelAuthLogoutResponses];
+
+export type GetPanelAuthMeData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/auth/me';
+};
+
+export type GetPanelAuthMeErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: string;
+  };
+};
+
+export type GetPanelAuthMeError = GetPanelAuthMeErrors[keyof GetPanelAuthMeErrors];
+
+export type GetPanelAuthMeResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: AuthMeResponse;
+  };
+};
+
+export type GetPanelAuthMeResponse = GetPanelAuthMeResponses[keyof GetPanelAuthMeResponses];
+
+export type PostPanelAuthMfaEnrollStartData = {
+  /**
+   * Forced-enrollment JWT
+   */
+  body: PanelMfaEnrollStartRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/auth/mfa/enroll/start';
+};
+
+export type PostPanelAuthMfaEnrollStartErrors = {
+  /**
+   * Authentication required (invalid or missing enrollment_token)
+   */
+  401: {
+    [key: string]: string;
+  };
+  /**
+   * MFA already enabled
+   */
+  409: {
+    [key: string]: string;
+  };
+};
+
+export type PostPanelAuthMfaEnrollStartError =
+  PostPanelAuthMfaEnrollStartErrors[keyof PostPanelAuthMfaEnrollStartErrors];
+
+export type PostPanelAuthMfaEnrollStartResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PanelMfaEnrollStartResponse;
+  };
+};
+
+export type PostPanelAuthMfaEnrollStartResponse =
+  PostPanelAuthMfaEnrollStartResponses[keyof PostPanelAuthMfaEnrollStartResponses];
+
+export type PostPanelAuthMfaEnrollVerifyData = {
+  /**
+   * Current TOTP code + forced-enrollment JWT
+   */
+  body: PanelMfaEnrollVerifyRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/auth/mfa/enroll/verify';
+};
+
+export type PostPanelAuthMfaEnrollVerifyErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: string;
+  };
+  /**
+   * Invalid or already used code; OR invalid/missing enrollment_token
+   */
+  401: {
+    [key: string]: string;
+  };
+  /**
+   * MFA already enabled
+   */
+  409: {
+    [key: string]: string;
+  };
+};
+
+export type PostPanelAuthMfaEnrollVerifyError =
+  PostPanelAuthMfaEnrollVerifyErrors[keyof PostPanelAuthMfaEnrollVerifyErrors];
+
+export type PostPanelAuthMfaEnrollVerifyResponses = {
+  /**
+   * 10 recovery codes: store immediately
+   */
+  200: Envelope & {
+    data?: PanelMfaEnrollVerifyResponse;
+  };
+};
+
+export type PostPanelAuthMfaEnrollVerifyResponse =
+  PostPanelAuthMfaEnrollVerifyResponses[keyof PostPanelAuthMfaEnrollVerifyResponses];
+
+export type PostPanelAuthMfaVerifyData = {
+  /**
+   * challenge_token + 6-digit TOTP or recovery code; optional client_type=\
+   */
+  body: PanelMfaVerifyRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/auth/mfa/verify';
+};
+
+export type PostPanelAuthMfaVerifyErrors = {
+  /**
+   * Invalid request body or missing fields
+   */
+  400: {
+    [key: string]: string;
+  };
+  /**
+   * Invalid or expired challenge
+   */
+  401: {
+    [key: string]: string;
+  };
+};
+
+export type PostPanelAuthMfaVerifyError =
+  PostPanelAuthMfaVerifyErrors[keyof PostPanelAuthMfaVerifyErrors];
+
+export type PostPanelAuthMfaVerifyResponses = {
+  /**
+   * Access token (+ refresh in body for native; + Set-Cookie for browser)
+   */
+  200: Envelope & {
+    data?: PanelLoginResponse;
+  };
+};
+
+export type PostPanelAuthMfaVerifyResponse =
+  PostPanelAuthMfaVerifyResponses[keyof PostPanelAuthMfaVerifyResponses];
+
+export type PostPanelAuthRefreshData = {
+  /**
+   * Refresh token (optional if cookie present)
+   */
+  body?: PanelRefreshRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/auth/refresh';
+};
+
+export type PostPanelAuthRefreshErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: string;
+  };
+  /**
+   * Invalid email or password.
+   */
+  401: {
+    [key: string]: string;
+  };
+  /**
+   * Origin not allowed
+   */
+  403: {
+    [key: string]: string;
+  };
+  /**
+   * Server busy verifying credentials.
+   */
+  429: {
+    [key: string]: string;
+  };
+};
+
+export type PostPanelAuthRefreshError =
+  PostPanelAuthRefreshErrors[keyof PostPanelAuthRefreshErrors];
+
+export type PostPanelAuthRefreshResponses = {
+  /**
+   * OK
+   */
+  200: PanelRefreshResponse;
+};
+
+export type PostPanelAuthRefreshResponse =
+  PostPanelAuthRefreshResponses[keyof PostPanelAuthRefreshResponses];
+
+export type GetPanelChainsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Filter by chain status
+     */
+    status?: 'active' | 'inactive';
+    /**
+     * Filter by protocol type
+     */
+    protocol_type?: 'evm' | 'utxo' | 'solana';
+  };
+  url: '/panel/chains';
+};
+
+export type GetPanelChainsErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelChainsError = GetPanelChainsErrors[keyof GetPanelChainsErrors];
+
+export type GetPanelChainsResponses = {
+  /**
+   * List of chains
+   */
+  200: Array<ChainResponse>;
+};
+
+export type GetPanelChainsResponse = GetPanelChainsResponses[keyof GetPanelChainsResponses];
+
+export type PostPanelChainsData = {
+  /**
+   * Chain creation parameters
+   */
+  body: CreateChainRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/chains';
+};
+
+export type PostPanelChainsErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Chain with same name already exists
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Validation error
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelChainsError = PostPanelChainsErrors[keyof PostPanelChainsErrors];
+
+export type PostPanelChainsResponses = {
+  /**
+   * Created chain
+   */
+  201: ChainResponse;
+};
+
+export type PostPanelChainsResponse = PostPanelChainsResponses[keyof PostPanelChainsResponses];
+
+export type DeletePanelChainsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Chain ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/chains/{id}';
+};
+
+export type DeletePanelChainsByIdErrors = {
+  /**
+   * Invalid chain ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Chain not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Chain has active dependencies
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type DeletePanelChainsByIdError =
+  DeletePanelChainsByIdErrors[keyof DeletePanelChainsByIdErrors];
+
+export type DeletePanelChainsByIdResponses = {
+  /**
+   * Chain deleted
+   */
+  204: void;
+};
+
+export type DeletePanelChainsByIdResponse =
+  DeletePanelChainsByIdResponses[keyof DeletePanelChainsByIdResponses];
+
+export type GetPanelChainsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Chain ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/chains/{id}';
+};
+
+export type GetPanelChainsByIdErrors = {
+  /**
+   * Invalid chain ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Chain not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelChainsByIdError = GetPanelChainsByIdErrors[keyof GetPanelChainsByIdErrors];
+
+export type GetPanelChainsByIdResponses = {
+  /**
+   * Chain details
+   */
+  200: ChainResponse;
+};
+
+export type GetPanelChainsByIdResponse =
+  GetPanelChainsByIdResponses[keyof GetPanelChainsByIdResponses];
+
+export type PutPanelChainsByIdData = {
+  /**
+   * Chain update parameters
+   */
+  body: UpdateChainRequest;
+  path: {
+    /**
+     * Chain ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/chains/{id}';
+};
+
+export type PutPanelChainsByIdErrors = {
+  /**
+   * Invalid chain ID or request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Chain not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Invalid status value (must be draft or active)
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelChainsByIdError = PutPanelChainsByIdErrors[keyof PutPanelChainsByIdErrors];
+
+export type PutPanelChainsByIdResponses = {
+  /**
+   * Updated chain
+   */
+  200: ChainResponse;
+};
+
+export type PutPanelChainsByIdResponse =
+  PutPanelChainsByIdResponses[keyof PutPanelChainsByIdResponses];
+
+export type GetPanelChainsByIdProvidersData = {
+  body?: never;
+  path: {
+    /**
+     * Chain ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/chains/{id}/providers';
+};
+
+export type GetPanelChainsByIdProvidersErrors = {
+  /**
+   * Invalid chain ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelChainsByIdProvidersError =
+  GetPanelChainsByIdProvidersErrors[keyof GetPanelChainsByIdProvidersErrors];
+
+export type GetPanelChainsByIdProvidersResponses = {
+  /**
+   * List of providers
+   */
+  200: Array<ProviderResponse>;
+};
+
+export type GetPanelChainsByIdProvidersResponse =
+  GetPanelChainsByIdProvidersResponses[keyof GetPanelChainsByIdProvidersResponses];
+
+export type PutPanelChainsByIdProvidersOrderData = {
+  /**
+   * Complete ordered provider id list
+   */
+  body: ReorderProvidersRequest;
+  path: {
+    /**
+     * Chain ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/chains/{id}/providers/order';
+};
+
+export type PutPanelChainsByIdProvidersOrderErrors = {
+  /**
+   * Invalid chain ID or request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Chain not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * provider_ids is not a complete permutation of the chain's providers
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelChainsByIdProvidersOrderError =
+  PutPanelChainsByIdProvidersOrderErrors[keyof PutPanelChainsByIdProvidersOrderErrors];
+
+export type PutPanelChainsByIdProvidersOrderResponses = {
+  /**
+   * Providers reordered, priority 0..n-1
+   */
+  200: Array<ProviderResponse>;
+};
+
+export type PutPanelChainsByIdProvidersOrderResponse =
+  PutPanelChainsByIdProvidersOrderResponses[keyof PutPanelChainsByIdProvidersOrderResponses];
+
+export type GetPanelDashboardData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/dashboard';
+};
+
+export type GetPanelDashboardErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelDashboardError = GetPanelDashboardErrors[keyof GetPanelDashboardErrors];
+
+export type GetPanelDashboardResponses = {
+  /**
+   * Dashboard statistics
+   */
+  200: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
+  };
+};
+
+export type GetPanelDashboardResponse =
+  GetPanelDashboardResponses[keyof GetPanelDashboardResponses];
+
+export type GetPanelFundsInfraSummaryData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/funds-infra/summary';
+};
+
+export type GetPanelFundsInfraSummaryErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelFundsInfraSummaryError =
+  GetPanelFundsInfraSummaryErrors[keyof GetPanelFundsInfraSummaryErrors];
+
+export type GetPanelFundsInfraSummaryResponses = {
+  /**
+   * Dependency-chain summary
+   */
+  200: Envelope & {
+    data?: FundsInfraSummaryResponse;
+  };
+};
+
+export type GetPanelFundsInfraSummaryResponse =
+  GetPanelFundsInfraSummaryResponses[keyof GetPanelFundsInfraSummaryResponses];
+
+export type GetPanelHealthData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/health';
+};
+
+export type GetPanelHealthErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelHealthError = GetPanelHealthErrors[keyof GetPanelHealthErrors];
+
+export type GetPanelHealthResponses = {
+  /**
+   * System health status
+   */
+  200: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
+  };
+};
+
+export type GetPanelHealthResponse = GetPanelHealthResponses[keyof GetPanelHealthResponses];
+
+export type GetPanelNotificationsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Items per page
+     */
+    limit?: number;
+  };
+  url: '/panel/notifications';
+};
+
+export type GetPanelNotificationsErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelNotificationsError =
+  GetPanelNotificationsErrors[keyof GetPanelNotificationsErrors];
+
+export type GetPanelNotificationsResponses = {
+  /**
+   * Paginated notification history
+   */
+  200: ListEnvelope & {
+    data?: Array<NotificationResponse>;
+  };
+};
+
+export type GetPanelNotificationsResponse =
+  GetPanelNotificationsResponses[keyof GetPanelNotificationsResponses];
+
+export type PostPanelNotificationsRetryFailedData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/notifications/retry-failed';
+};
+
+export type PostPanelNotificationsRetryFailedErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelNotificationsRetryFailedError =
+  PostPanelNotificationsRetryFailedErrors[keyof PostPanelNotificationsRetryFailedErrors];
+
+export type PostPanelNotificationsRetryFailedResponses = {
+  /**
+   * Retry initiated confirmation
+   */
+  200: Envelope & {
+    data?: {
+      [key: string]: string;
+    };
+  };
+};
+
+export type PostPanelNotificationsRetryFailedResponse =
+  PostPanelNotificationsRetryFailedResponses[keyof PostPanelNotificationsRetryFailedResponses];
+
+export type PostPanelNotificationsTestData = {
+  /**
+   * Notification parameters
+   */
+  body: SendTestNotificationRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/notifications/test';
+};
+
+export type PostPanelNotificationsTestErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelNotificationsTestError =
+  PostPanelNotificationsTestErrors[keyof PostPanelNotificationsTestErrors];
+
+export type PostPanelNotificationsTestResponses = {
+  /**
+   * Notification sent confirmation
+   */
+  200: Envelope & {
+    data?: {
+      [key: string]: string;
+    };
+  };
+};
+
+export type PostPanelNotificationsTestResponse =
+  PostPanelNotificationsTestResponses[keyof PostPanelNotificationsTestResponses];
+
+export type PostPanelOrganizationsData = {
+  /**
+   * Organization provisioning parameters
+   */
+  body: CreateOrganizationRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/organizations';
+};
+
+export type PostPanelOrganizationsErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Slug already in use
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Validation error (reserved/invalid slug, bad jurisdiction)
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelOrganizationsError =
+  PostPanelOrganizationsErrors[keyof PostPanelOrganizationsErrors];
+
+export type PostPanelOrganizationsResponses = {
+  /**
+   * Provisioned organization
+   */
+  201: Envelope & {
+    data?: CreateOrganizationResponse;
+  };
+};
+
+export type PostPanelOrganizationsResponse =
+  PostPanelOrganizationsResponses[keyof PostPanelOrganizationsResponses];
+
+export type DeletePanelOrganizationsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}';
+};
+
+export type DeletePanelOrganizationsByIdErrors = {
+  /**
+   * Invalid org id
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Organization not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Organization is not pending
+   */
+  409: {
+    [key: string]: unknown;
+  };
+};
+
+export type DeletePanelOrganizationsByIdError =
+  DeletePanelOrganizationsByIdErrors[keyof DeletePanelOrganizationsByIdErrors];
+
+export type DeletePanelOrganizationsByIdResponses = {
+  /**
+   * Organization deleted
+   */
+  204: void;
+};
+
+export type DeletePanelOrganizationsByIdResponse =
+  DeletePanelOrganizationsByIdResponses[keyof DeletePanelOrganizationsByIdResponses];
+
+export type GetPanelOrganizationsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}';
+};
+
+export type GetPanelOrganizationsByIdErrors = {
+  /**
+   * Invalid organization id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Organization not found
+   */
+  404: AppError;
+};
+
+export type GetPanelOrganizationsByIdError =
+  GetPanelOrganizationsByIdErrors[keyof GetPanelOrganizationsByIdErrors];
+
+export type GetPanelOrganizationsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: OrgDetailResponse;
+  };
+};
+
+export type GetPanelOrganizationsByIdResponse =
+  GetPanelOrganizationsByIdResponses[keyof GetPanelOrganizationsByIdResponses];
+
+export type PatchPanelOrganizationsByIdData = {
+  /**
+   * Target status
+   */
+  body: UpdateOrgStatusRequest;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}';
+};
+
+export type PatchPanelOrganizationsByIdErrors = {
+  /**
+   * Invalid org id or request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Organization not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Illegal status transition
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Unknown target status
+   */
+  422: {
+    [key: string]: unknown;
+  };
+};
+
+export type PatchPanelOrganizationsByIdError =
+  PatchPanelOrganizationsByIdErrors[keyof PatchPanelOrganizationsByIdErrors];
+
+export type PatchPanelOrganizationsByIdResponses = {
+  /**
+   * Status updated
+   */
+  204: void;
+};
+
+export type PatchPanelOrganizationsByIdResponse =
+  PatchPanelOrganizationsByIdResponses[keyof PatchPanelOrganizationsByIdResponses];
+
+export type GetPanelOrganizationsByIdApiKeysData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/api-keys';
+};
+
+export type GetPanelOrganizationsByIdApiKeysErrors = {
+  /**
+   * Invalid organization id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+};
+
+export type GetPanelOrganizationsByIdApiKeysError =
+  GetPanelOrganizationsByIdApiKeysErrors[keyof GetPanelOrganizationsByIdApiKeysErrors];
+
+export type GetPanelOrganizationsByIdApiKeysResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<PanelApiKey>;
+  };
+};
+
+export type GetPanelOrganizationsByIdApiKeysResponse =
+  GetPanelOrganizationsByIdApiKeysResponses[keyof GetPanelOrganizationsByIdApiKeysResponses];
+
+export type PostPanelOrganizationsByIdAttestationBatchData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/attestation-batch';
+};
+
+export type PostPanelOrganizationsByIdAttestationBatchErrors = {
+  /**
+   * Invalid organization id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type PostPanelOrganizationsByIdAttestationBatchError =
+  PostPanelOrganizationsByIdAttestationBatchErrors[keyof PostPanelOrganizationsByIdAttestationBatchErrors];
+
+export type PostPanelOrganizationsByIdAttestationBatchResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: OwnershipBatchResponse;
+  };
+};
+
+export type PostPanelOrganizationsByIdAttestationBatchResponse =
+  PostPanelOrganizationsByIdAttestationBatchResponses[keyof PostPanelOrganizationsByIdAttestationBatchResponses];
+
+export type GetPanelOrganizationsByIdAttestationBatchActiveData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/attestation-batch/active';
+};
+
+export type GetPanelOrganizationsByIdAttestationBatchActiveErrors = {
+  /**
+   * Invalid organization id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * No active batch
+   */
+  404: AppError;
+};
+
+export type GetPanelOrganizationsByIdAttestationBatchActiveError =
+  GetPanelOrganizationsByIdAttestationBatchActiveErrors[keyof GetPanelOrganizationsByIdAttestationBatchActiveErrors];
+
+export type GetPanelOrganizationsByIdAttestationBatchActiveResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: OwnershipBatchResponse;
+  };
+};
+
+export type GetPanelOrganizationsByIdAttestationBatchActiveResponse =
+  GetPanelOrganizationsByIdAttestationBatchActiveResponses[keyof GetPanelOrganizationsByIdAttestationBatchActiveResponses];
+
+export type GetPanelOrganizationsByIdAttestationBatchByBatchIdData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+    /**
+     * Batch ID
+     */
+    batchId: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/attestation-batch/{batchId}';
+};
+
+export type GetPanelOrganizationsByIdAttestationBatchByBatchIdErrors = {
+  /**
+   * Invalid organization or batch id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Batch not found
+   */
+  404: AppError;
+};
+
+export type GetPanelOrganizationsByIdAttestationBatchByBatchIdError =
+  GetPanelOrganizationsByIdAttestationBatchByBatchIdErrors[keyof GetPanelOrganizationsByIdAttestationBatchByBatchIdErrors];
+
+export type GetPanelOrganizationsByIdAttestationBatchByBatchIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: OwnershipBatchResponse;
+  };
+};
+
+export type GetPanelOrganizationsByIdAttestationBatchByBatchIdResponse =
+  GetPanelOrganizationsByIdAttestationBatchByBatchIdResponses[keyof GetPanelOrganizationsByIdAttestationBatchByBatchIdResponses];
+
+export type PostPanelOrganizationsByIdAttestationBatchByBatchIdExcludeData = {
+  /**
+   * Wallet to exclude + optional reason
+   */
+  body: ExcludeWalletRequest;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+    /**
+     * Batch ID
+     */
+    batchId: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/attestation-batch/{batchId}/exclude';
+};
+
+export type PostPanelOrganizationsByIdAttestationBatchByBatchIdExcludeErrors = {
+  /**
+   * Invalid organization or batch id / body
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Batch not found
+   */
+  404: AppError;
+};
+
+export type PostPanelOrganizationsByIdAttestationBatchByBatchIdExcludeError =
+  PostPanelOrganizationsByIdAttestationBatchByBatchIdExcludeErrors[keyof PostPanelOrganizationsByIdAttestationBatchByBatchIdExcludeErrors];
+
+export type PostPanelOrganizationsByIdAttestationBatchByBatchIdExcludeResponses = {
+  /**
+   * Excluded
+   */
+  204: void;
+};
+
+export type PostPanelOrganizationsByIdAttestationBatchByBatchIdExcludeResponse =
+  PostPanelOrganizationsByIdAttestationBatchByBatchIdExcludeResponses[keyof PostPanelOrganizationsByIdAttestationBatchByBatchIdExcludeResponses];
+
+export type PostPanelOrganizationsByIdAttestationBatchByBatchIdVerifyData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+    /**
+     * Batch ID
+     */
+    batchId: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/attestation-batch/{batchId}/verify';
+};
+
+export type PostPanelOrganizationsByIdAttestationBatchByBatchIdVerifyErrors = {
+  /**
+   * Invalid organization or batch id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Batch not found
+   */
+  404: AppError;
+  /**
+   * Cannot complete: pending/met/excluded counts + live projection
+   */
+  409: Envelope & {
+    data?: OwnershipBatchVerifyBlockedResponse;
+  };
+};
+
+export type PostPanelOrganizationsByIdAttestationBatchByBatchIdVerifyError =
+  PostPanelOrganizationsByIdAttestationBatchByBatchIdVerifyErrors[keyof PostPanelOrganizationsByIdAttestationBatchByBatchIdVerifyErrors];
+
+export type PostPanelOrganizationsByIdAttestationBatchByBatchIdVerifyResponses = {
+  /**
+   * Batch complete (or partial-final with zero pending)
+   */
+  200: Envelope & {
+    data?: OwnershipBatchResponse;
+  };
+};
+
+export type PostPanelOrganizationsByIdAttestationBatchByBatchIdVerifyResponse =
+  PostPanelOrganizationsByIdAttestationBatchByBatchIdVerifyResponses[keyof PostPanelOrganizationsByIdAttestationBatchByBatchIdVerifyResponses];
+
+export type GetPanelOrganizationsByIdCaptureSchedulesData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/capture-schedules';
+};
+
+export type GetPanelOrganizationsByIdCaptureSchedulesErrors = {
+  /**
+   * Invalid organization id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelOrganizationsByIdCaptureSchedulesError =
+  GetPanelOrganizationsByIdCaptureSchedulesErrors[keyof GetPanelOrganizationsByIdCaptureSchedulesErrors];
+
+export type GetPanelOrganizationsByIdCaptureSchedulesResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<PanelCaptureScheduleResponse>;
+  };
+};
+
+export type GetPanelOrganizationsByIdCaptureSchedulesResponse =
+  GetPanelOrganizationsByIdCaptureSchedulesResponses[keyof GetPanelOrganizationsByIdCaptureSchedulesResponses];
+
+export type GetPanelOrganizationsByIdCaptureWindowData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID (UUID)
+     */
+    id: string;
+  };
+  query?: {
+    /**
+     * Comma-separated chain IDs to narrow the scope
+     */
+    chain_ids?: string;
+    /**
+     * Comma-separated token IDs to narrow the scope
+     */
+    token_ids?: string;
+  };
+  url: '/panel/organizations/{id}/capture-window';
+};
+
+export type GetPanelOrganizationsByIdCaptureWindowErrors = {
+  /**
+   * Invalid organization, chain or token ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Organization not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelOrganizationsByIdCaptureWindowError =
+  GetPanelOrganizationsByIdCaptureWindowErrors[keyof GetPanelOrganizationsByIdCaptureWindowErrors];
+
+export type GetPanelOrganizationsByIdCaptureWindowResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PanelCaptureWindowResponse;
+  };
+};
+
+export type GetPanelOrganizationsByIdCaptureWindowResponse =
+  GetPanelOrganizationsByIdCaptureWindowResponses[keyof GetPanelOrganizationsByIdCaptureWindowResponses];
+
+export type PutPanelOrganizationsByIdDemoData = {
+  /**
+   * Demo flag
+   */
+  body: SetOrgDemoRequest;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/demo';
+};
+
+export type PutPanelOrganizationsByIdDemoErrors = {
+  /**
+   * Invalid org id or request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Organization not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelOrganizationsByIdDemoError =
+  PutPanelOrganizationsByIdDemoErrors[keyof PutPanelOrganizationsByIdDemoErrors];
+
+export type PutPanelOrganizationsByIdDemoResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: OrgDetailResponse;
+  };
+};
+
+export type PutPanelOrganizationsByIdDemoResponse =
+  PutPanelOrganizationsByIdDemoResponses[keyof PutPanelOrganizationsByIdDemoResponses];
+
+export type GetPanelOrganizationsByIdGrantsData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+  };
+  query?: {
+    /**
+     * Include revoked grants
+     */
+    include_revoked?: boolean;
+  };
+  url: '/panel/organizations/{id}/grants';
+};
+
+export type GetPanelOrganizationsByIdGrantsErrors = {
+  /**
+   * Invalid organization id or include_revoked
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+};
+
+export type GetPanelOrganizationsByIdGrantsError =
+  GetPanelOrganizationsByIdGrantsErrors[keyof GetPanelOrganizationsByIdGrantsErrors];
+
+export type GetPanelOrganizationsByIdGrantsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<PanelGrant>;
+  };
+};
+
+export type GetPanelOrganizationsByIdGrantsResponse =
+  GetPanelOrganizationsByIdGrantsResponses[keyof GetPanelOrganizationsByIdGrantsResponses];
+
+export type GetPanelOrganizationsByIdInvitationsData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/invitations';
+};
+
+export type GetPanelOrganizationsByIdInvitationsErrors = {
+  /**
+   * Invalid organization id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+};
+
+export type GetPanelOrganizationsByIdInvitationsError =
+  GetPanelOrganizationsByIdInvitationsErrors[keyof GetPanelOrganizationsByIdInvitationsErrors];
+
+export type GetPanelOrganizationsByIdInvitationsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<PanelInvitation>;
+  };
+};
+
+export type GetPanelOrganizationsByIdInvitationsResponse =
+  GetPanelOrganizationsByIdInvitationsResponses[keyof GetPanelOrganizationsByIdInvitationsResponses];
+
+export type PostPanelOrganizationsByIdInviteResendData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/invite/resend';
+};
+
+export type PostPanelOrganizationsByIdInviteResendErrors = {
+  /**
+   * Invalid org id
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Organization not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * No pending onboarding invitation
+   */
+  409: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelOrganizationsByIdInviteResendError =
+  PostPanelOrganizationsByIdInviteResendErrors[keyof PostPanelOrganizationsByIdInviteResendErrors];
+
+export type PostPanelOrganizationsByIdInviteResendResponses = {
+  /**
+   * Invitation resent
+   */
+  204: void;
+};
+
+export type PostPanelOrganizationsByIdInviteResendResponse =
+  PostPanelOrganizationsByIdInviteResendResponses[keyof PostPanelOrganizationsByIdInviteResendResponses];
+
+export type PostPanelOrganizationsByIdInviteRevokeData = {
+  body?: never;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/invite/revoke';
+};
+
+export type PostPanelOrganizationsByIdInviteRevokeErrors = {
+  /**
+   * Invalid org id
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Organization not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * No pending onboarding invitation
+   */
+  409: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelOrganizationsByIdInviteRevokeError =
+  PostPanelOrganizationsByIdInviteRevokeErrors[keyof PostPanelOrganizationsByIdInviteRevokeErrors];
+
+export type PostPanelOrganizationsByIdInviteRevokeResponses = {
+  /**
+   * Invitation revoked
+   */
+  204: void;
+};
+
+export type PostPanelOrganizationsByIdInviteRevokeResponse =
+  PostPanelOrganizationsByIdInviteRevokeResponses[keyof PostPanelOrganizationsByIdInviteRevokeResponses];
+
+export type PutPanelOrganizationsByIdMemberLimitData = {
+  /**
+   * Member limit (integer or null)
+   */
+  body: SetMemberLimitRequest;
+  path: {
+    /**
+     * Organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/member-limit';
+};
+
+export type PutPanelOrganizationsByIdMemberLimitErrors = {
+  /**
+   * Invalid org id or request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Organization not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelOrganizationsByIdMemberLimitError =
+  PutPanelOrganizationsByIdMemberLimitErrors[keyof PutPanelOrganizationsByIdMemberLimitErrors];
+
+export type PutPanelOrganizationsByIdMemberLimitResponses = {
+  /**
+   * Member limit updated
+   */
+  204: void;
+};
+
+export type PutPanelOrganizationsByIdMemberLimitResponse =
+  PutPanelOrganizationsByIdMemberLimitResponses[keyof PutPanelOrganizationsByIdMemberLimitResponses];
+
+export type GetPanelOrganizationsByIdMembersData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/members';
+};
+
+export type GetPanelOrganizationsByIdMembersErrors = {
+  /**
+   * Invalid organization id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+};
+
+export type GetPanelOrganizationsByIdMembersError =
+  GetPanelOrganizationsByIdMembersErrors[keyof GetPanelOrganizationsByIdMembersErrors];
+
+export type GetPanelOrganizationsByIdMembersResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<PanelMember>;
+  };
+};
+
+export type GetPanelOrganizationsByIdMembersResponse =
+  GetPanelOrganizationsByIdMembersResponses[keyof GetPanelOrganizationsByIdMembersResponses];
+
+export type GetPanelOrganizationsByIdRolesData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/roles';
+};
+
+export type GetPanelOrganizationsByIdRolesErrors = {
+  /**
+   * Invalid organization id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+};
+
+export type GetPanelOrganizationsByIdRolesError =
+  GetPanelOrganizationsByIdRolesErrors[keyof GetPanelOrganizationsByIdRolesErrors];
+
+export type GetPanelOrganizationsByIdRolesResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<PanelRole>;
+  };
+};
+
+export type GetPanelOrganizationsByIdRolesResponse =
+  GetPanelOrganizationsByIdRolesResponses[keyof GetPanelOrganizationsByIdRolesResponses];
+
+export type GetPanelOrganizationsByIdServiceUsersData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/service-users';
+};
+
+export type GetPanelOrganizationsByIdServiceUsersErrors = {
+  /**
+   * Invalid organization id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+};
+
+export type GetPanelOrganizationsByIdServiceUsersError =
+  GetPanelOrganizationsByIdServiceUsersErrors[keyof GetPanelOrganizationsByIdServiceUsersErrors];
+
+export type GetPanelOrganizationsByIdServiceUsersResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<PanelServiceUser>;
+  };
+};
+
+export type GetPanelOrganizationsByIdServiceUsersResponse =
+  GetPanelOrganizationsByIdServiceUsersResponses[keyof GetPanelOrganizationsByIdServiceUsersResponses];
+
+export type GetPanelOrganizationsByIdWalletsData = {
+  body?: never;
+  path: {
+    /**
+     * Target organization ID
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/organizations/{id}/wallets';
+};
+
+export type GetPanelOrganizationsByIdWalletsErrors = {
+  /**
+   * Invalid organization id
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Organization not found
+   */
+  404: AppError;
+};
+
+export type GetPanelOrganizationsByIdWalletsError =
+  GetPanelOrganizationsByIdWalletsErrors[keyof GetPanelOrganizationsByIdWalletsErrors];
+
+export type GetPanelOrganizationsByIdWalletsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<PanelWalletResponse>;
+  };
+};
+
+export type GetPanelOrganizationsByIdWalletsResponse =
+  GetPanelOrganizationsByIdWalletsResponses[keyof GetPanelOrganizationsByIdWalletsResponses];
+
+export type GetPanelOverviewData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Display narrowing to a single tenant (UUID)
+     */
+    organization_id?: string;
+  };
+  url: '/panel/overview';
+};
+
+export type GetPanelOverviewErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelOverviewError = GetPanelOverviewErrors[keyof GetPanelOverviewErrors];
+
+export type GetPanelOverviewResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: OverviewResponse;
+  };
+};
+
+export type GetPanelOverviewResponse = GetPanelOverviewResponses[keyof GetPanelOverviewResponses];
+
+export type GetPanelOwnershipPolicyData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/ownership-policy';
+};
+
+export type GetPanelOwnershipPolicyErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Policy not seeded
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelOwnershipPolicyError =
+  GetPanelOwnershipPolicyErrors[keyof GetPanelOwnershipPolicyErrors];
+
+export type GetPanelOwnershipPolicyResponses = {
+  /**
+   * Current ownership policy
+   */
+  200: Envelope & {
+    data?: PanelOwnershipPolicyResponse;
+  };
+};
+
+export type GetPanelOwnershipPolicyResponse =
+  GetPanelOwnershipPolicyResponses[keyof GetPanelOwnershipPolicyResponses];
+
+export type PutPanelOwnershipPolicyData = {
+  /**
+   * New ownership policy values (seconds)
+   */
+  body: UpdateOwnershipPolicyRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/ownership-policy';
+};
+
+export type PutPanelOwnershipPolicyErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Policy not seeded
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Validation error (out-of-bounds)
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelOwnershipPolicyError =
+  PutPanelOwnershipPolicyErrors[keyof PutPanelOwnershipPolicyErrors];
+
+export type PutPanelOwnershipPolicyResponses = {
+  /**
+   * Updated ownership policy
+   */
+  200: Envelope & {
+    data?: PanelOwnershipPolicyResponse;
+  };
+};
+
+export type PutPanelOwnershipPolicyResponse =
+  PutPanelOwnershipPolicyResponses[keyof PutPanelOwnershipPolicyResponses];
+
+export type GetPanelPriceSourcesData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/price-sources';
+};
+
+export type GetPanelPriceSourcesErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelPriceSourcesError =
+  GetPanelPriceSourcesErrors[keyof GetPanelPriceSourcesErrors];
+
+export type GetPanelPriceSourcesResponses = {
+  /**
+   * Price sources with health
+   */
+  200: Envelope & {
+    data?: Array<PriceSourceHealthResponse>;
+  };
+};
+
+export type GetPanelPriceSourcesResponse =
+  GetPanelPriceSourcesResponses[keyof GetPanelPriceSourcesResponses];
+
+export type PostPanelPriceSourcesData = {
+  /**
+   * The source
+   */
+  body: CreatePriceSourceRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/price-sources';
+};
+
+export type PostPanelPriceSourcesErrors = {
+  /**
+   * Unknown adapter name, invalid capabilities or base URL, or malformed body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * A source with this name exists
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelPriceSourcesError =
+  PostPanelPriceSourcesErrors[keyof PostPanelPriceSourcesErrors];
+
+export type PostPanelPriceSourcesResponses = {
+  /**
+   * The created source (redacted)
+   */
+  201: Envelope & {
+    data?: PriceSourceHealthResponse;
+  };
+};
+
+export type PostPanelPriceSourcesResponse =
+  PostPanelPriceSourcesResponses[keyof PostPanelPriceSourcesResponses];
+
+export type DeletePanelPriceSourcesByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Price source ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/price-sources/{id}';
+};
+
+export type DeletePanelPriceSourcesByIdErrors = {
+  /**
+   * Invalid source ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Price source not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Feed mappings still name the source
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type DeletePanelPriceSourcesByIdError =
+  DeletePanelPriceSourcesByIdErrors[keyof DeletePanelPriceSourcesByIdErrors];
+
+export type DeletePanelPriceSourcesByIdResponses = {
+  /**
+   * Deleted
+   */
+  204: void;
+};
+
+export type DeletePanelPriceSourcesByIdResponse =
+  DeletePanelPriceSourcesByIdResponses[keyof DeletePanelPriceSourcesByIdResponses];
+
+export type PutPanelPriceSourcesByIdData = {
+  /**
+   * The fields to change
+   */
+  body: UpdatePriceSourceRequest;
+  path: {
+    /**
+     * Price source ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/price-sources/{id}';
+};
+
+export type PutPanelPriceSourcesByIdErrors = {
+  /**
+   * Invalid source ID, capabilities or base URL, or malformed body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Price source not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelPriceSourcesByIdError =
+  PutPanelPriceSourcesByIdErrors[keyof PutPanelPriceSourcesByIdErrors];
+
+export type PutPanelPriceSourcesByIdResponses = {
+  /**
+   * The updated source (redacted)
+   */
+  200: Envelope & {
+    data?: PriceSourceHealthResponse;
+  };
+};
+
+export type PutPanelPriceSourcesByIdResponse =
+  PutPanelPriceSourcesByIdResponses[keyof PutPanelPriceSourcesByIdResponses];
+
+export type PutPanelPriceSourcesByIdKeyData = {
+  /**
+   * New API key (write-only)
+   */
+  body: RotateSourceKeyRequest;
+  path: {
+    /**
+     * Price source ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/price-sources/{id}/key';
+};
+
+export type PutPanelPriceSourcesByIdKeyErrors = {
+  /**
+   * Invalid source ID or request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Price source not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Validation error
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelPriceSourcesByIdKeyError =
+  PutPanelPriceSourcesByIdKeyErrors[keyof PutPanelPriceSourcesByIdKeyErrors];
+
+export type PutPanelPriceSourcesByIdKeyResponses = {
+  /**
+   * Rotated source (redacted)
+   */
+  200: PriceSourceHealthResponse;
+};
+
+export type PutPanelPriceSourcesByIdKeyResponse =
+  PutPanelPriceSourcesByIdKeyResponses[keyof PutPanelPriceSourcesByIdKeyResponses];
+
+export type GetPanelPricingCoverageData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/pricing/coverage';
+};
+
+export type GetPanelPricingCoverageErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelPricingCoverageError =
+  GetPanelPricingCoverageErrors[keyof GetPanelPricingCoverageErrors];
+
+export type GetPanelPricingCoverageResponses = {
+  /**
+   * Per-token coverage
+   */
+  200: Envelope & {
+    data?: Array<TokenCoverageResponse>;
+  };
+};
+
+export type GetPanelPricingCoverageResponse =
+  GetPanelPricingCoverageResponses[keyof GetPanelPricingCoverageResponses];
+
+export type GetPanelPricingFeedMappingsData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Token catalog entry ID (UUID)
+     */
+    catalog_entry_id: string;
+  };
+  url: '/panel/pricing/feed-mappings';
+};
+
+export type GetPanelPricingFeedMappingsErrors = {
+  /**
+   * Missing or invalid catalog entry ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Catalog entry not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelPricingFeedMappingsError =
+  GetPanelPricingFeedMappingsErrors[keyof GetPanelPricingFeedMappingsErrors];
+
+export type GetPanelPricingFeedMappingsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<PricingFeedMappingResponse>;
+  };
+};
+
+export type GetPanelPricingFeedMappingsResponse =
+  GetPanelPricingFeedMappingsResponses[keyof GetPanelPricingFeedMappingsResponses];
+
+export type DeletePanelPricingFeedMappingsByCatalogEntryIdData = {
+  body?: never;
+  path: {
+    /**
+     * Token catalog entry ID (UUID)
+     */
+    catalogEntryId: string;
+  };
+  query?: never;
+  url: '/panel/pricing/feed-mappings/{catalogEntryId}';
+};
+
+export type DeletePanelPricingFeedMappingsByCatalogEntryIdErrors = {
+  /**
+   * Invalid catalog entry ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Catalog entry not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type DeletePanelPricingFeedMappingsByCatalogEntryIdError =
+  DeletePanelPricingFeedMappingsByCatalogEntryIdErrors[keyof DeletePanelPricingFeedMappingsByCatalogEntryIdErrors];
+
+export type DeletePanelPricingFeedMappingsByCatalogEntryIdResponses = {
+  /**
+   * Recomputed token coverage
+   */
+  200: Envelope & {
+    data?: TokenCoverageResponse;
+  };
+};
+
+export type DeletePanelPricingFeedMappingsByCatalogEntryIdResponse =
+  DeletePanelPricingFeedMappingsByCatalogEntryIdResponses[keyof DeletePanelPricingFeedMappingsByCatalogEntryIdResponses];
+
+export type PutPanelPricingFeedMappingsByCatalogEntryIdData = {
+  /**
+   * Feed rows, one per price source
+   */
+  body: SetFeedMappingsRequest;
+  path: {
+    /**
+     * Token catalog entry ID (UUID)
+     */
+    catalogEntryId: string;
+  };
+  query?: never;
+  url: '/panel/pricing/feed-mappings/{catalogEntryId}';
+};
+
+export type PutPanelPricingFeedMappingsByCatalogEntryIdErrors = {
+  /**
+   * Invalid catalog entry ID or request body, an unknown source, or a feed_kind the source does not accept
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Catalog entry not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelPricingFeedMappingsByCatalogEntryIdError =
+  PutPanelPricingFeedMappingsByCatalogEntryIdErrors[keyof PutPanelPricingFeedMappingsByCatalogEntryIdErrors];
+
+export type PutPanelPricingFeedMappingsByCatalogEntryIdResponses = {
+  /**
+   * Recomputed token coverage
+   */
+  200: TokenCoverageResponse;
+};
+
+export type PutPanelPricingFeedMappingsByCatalogEntryIdResponse =
+  PutPanelPricingFeedMappingsByCatalogEntryIdResponses[keyof PutPanelPricingFeedMappingsByCatalogEntryIdResponses];
+
+export type PostPanelPricingPlanTestData = {
+  /**
+   * Catalog entry and instant
+   */
+  body: PlanTestRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/pricing/plan-test';
+};
+
+export type PostPanelPricingPlanTestErrors = {
+  /**
+   * Malformed body, missing catalog entry or as_of in the future
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Catalog entry not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelPricingPlanTestError =
+  PostPanelPricingPlanTestErrors[keyof PostPanelPricingPlanTestErrors];
+
+export type PostPanelPricingPlanTestResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PlanTestResponse;
+  };
+};
+
+export type PostPanelPricingPlanTestResponse =
+  PostPanelPricingPlanTestResponses[keyof PostPanelPricingPlanTestResponses];
+
+export type GetPanelPricingPolicyData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/pricing/policy';
+};
+
+export type GetPanelPricingPolicyErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Policy not seeded
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelPricingPolicyError =
+  GetPanelPricingPolicyErrors[keyof GetPanelPricingPolicyErrors];
+
+export type GetPanelPricingPolicyResponses = {
+  /**
+   * Pricing policy
+   */
+  200: Envelope & {
+    data?: PricingPolicyResponse;
+  };
+};
+
+export type GetPanelPricingPolicyResponse =
+  GetPanelPricingPolicyResponses[keyof GetPanelPricingPolicyResponses];
+
+export type PutPanelPricingPolicyData = {
+  /**
+   * Fields to change (others left as they are)
+   */
+  body: PolicyPatchRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/pricing/policy';
+};
+
+export type PutPanelPricingPolicyErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Policy not seeded
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * The policy changed since expected_version was read
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Validation error (out-of-bounds)
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelPricingPolicyError =
+  PutPanelPricingPolicyErrors[keyof PutPanelPricingPolicyErrors];
+
+export type PutPanelPricingPolicyResponses = {
+  /**
+   * Updated pricing policy
+   */
+  200: Envelope & {
+    data?: PricingPolicyResponse;
+  };
+};
+
+export type PutPanelPricingPolicyResponse =
+  PutPanelPricingPolicyResponses[keyof PutPanelPricingPolicyResponses];
+
+export type DeletePanelPricingPolicyOverridesByCatalogEntryIdData = {
+  body?: never;
+  path: {
+    /**
+     * Token catalog entry ID (UUID)
+     */
+    catalogEntryId: string;
+  };
+  query: {
+    /**
+     * Policy version the editor read (positive integer)
+     */
+    expected_version: number;
+  };
+  url: '/panel/pricing/policy/overrides/{catalogEntryId}';
+};
+
+export type DeletePanelPricingPolicyOverridesByCatalogEntryIdErrors = {
+  /**
+   * Invalid catalog entry ID or missing expected_version
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Override not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * The policy changed since expected_version was read
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type DeletePanelPricingPolicyOverridesByCatalogEntryIdError =
+  DeletePanelPricingPolicyOverridesByCatalogEntryIdErrors[keyof DeletePanelPricingPolicyOverridesByCatalogEntryIdErrors];
+
+export type DeletePanelPricingPolicyOverridesByCatalogEntryIdResponses = {
+  /**
+   * Effective policy for the entry
+   */
+  200: Envelope & {
+    data?: ResolvedPolicyResponse;
+  };
+};
+
+export type DeletePanelPricingPolicyOverridesByCatalogEntryIdResponse =
+  DeletePanelPricingPolicyOverridesByCatalogEntryIdResponses[keyof DeletePanelPricingPolicyOverridesByCatalogEntryIdResponses];
+
+export type PutPanelPricingPolicyOverridesByCatalogEntryIdData = {
+  /**
+   * Fields to override
+   */
+  body: PolicyPatchRequest;
+  path: {
+    /**
+     * Token catalog entry ID (UUID)
+     */
+    catalogEntryId: string;
+  };
+  query?: never;
+  url: '/panel/pricing/policy/overrides/{catalogEntryId}';
+};
+
+export type PutPanelPricingPolicyOverridesByCatalogEntryIdErrors = {
+  /**
+   * Invalid catalog entry ID or request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Catalog entry not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * The policy changed since expected_version was read
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Validation error
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelPricingPolicyOverridesByCatalogEntryIdError =
+  PutPanelPricingPolicyOverridesByCatalogEntryIdErrors[keyof PutPanelPricingPolicyOverridesByCatalogEntryIdErrors];
+
+export type PutPanelPricingPolicyOverridesByCatalogEntryIdResponses = {
+  /**
+   * Effective policy for the entry
+   */
+  200: Envelope & {
+    data?: ResolvedPolicyResponse;
+  };
+};
+
+export type PutPanelPricingPolicyOverridesByCatalogEntryIdResponse =
+  PutPanelPricingPolicyOverridesByCatalogEntryIdResponses[keyof PutPanelPricingPolicyOverridesByCatalogEntryIdResponses];
+
+export type GetPanelPricingPolicyResolvedData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Token catalog entry ID (UUID)
+     */
+    catalog_entry_id: string;
+  };
+  url: '/panel/pricing/policy/resolved';
+};
+
+export type GetPanelPricingPolicyResolvedErrors = {
+  /**
+   * Invalid catalog_entry_id
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Policy not seeded
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelPricingPolicyResolvedError =
+  GetPanelPricingPolicyResolvedErrors[keyof GetPanelPricingPolicyResolvedErrors];
+
+export type GetPanelPricingPolicyResolvedResponses = {
+  /**
+   * Effective policy for the entry
+   */
+  200: Envelope & {
+    data?: ResolvedPolicyResponse;
+  };
+};
+
+export type GetPanelPricingPolicyResolvedResponse =
+  GetPanelPricingPolicyResolvedResponses[keyof GetPanelPricingPolicyResolvedResponses];
+
+export type GetPanelPricingValuationsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Organization ID (UUID), or platform
+     */
+    organization_id?: string;
+    /**
+     * proof or ambient
+     */
+    kind?: string;
+    /**
+     * Page size (default 50, max 200)
+     */
+    limit?: number;
+    /**
+     * Cursor from the previous page's meta.next_cursor
+     */
+    cursor?: string;
+  };
+  url: '/panel/pricing/valuations';
+};
+
+export type GetPanelPricingValuationsErrors = {
+  /**
+   * Invalid filter, limit or cursor
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelPricingValuationsError =
+  GetPanelPricingValuationsErrors[keyof GetPanelPricingValuationsErrors];
+
+export type GetPanelPricingValuationsResponses = {
+  /**
+   * OK
+   */
+  200: ListEnvelope & {
+    data?: Array<PanelValuationSummaryResponse>;
+  };
+};
+
+export type GetPanelPricingValuationsResponse =
+  GetPanelPricingValuationsResponses[keyof GetPanelPricingValuationsResponses];
+
+export type GetPanelPricingValuationsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Valuation ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/pricing/valuations/{id}';
+};
+
+export type GetPanelPricingValuationsByIdErrors = {
+  /**
+   * Invalid valuation ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Valuation not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelPricingValuationsByIdError =
+  GetPanelPricingValuationsByIdErrors[keyof GetPanelPricingValuationsByIdErrors];
+
+export type GetPanelPricingValuationsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PanelValuationResponse;
+  };
+};
+
+export type GetPanelPricingValuationsByIdResponse =
+  GetPanelPricingValuationsByIdResponses[keyof GetPanelPricingValuationsByIdResponses];
+
+export type PostPanelProvidersData = {
+  /**
+   * Provider creation parameters
+   */
+  body: CreateProviderRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/providers';
+};
+
+export type PostPanelProvidersErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Referenced chain not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Provider with same name already exists
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Validation error
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelProvidersError = PostPanelProvidersErrors[keyof PostPanelProvidersErrors];
+
+export type PostPanelProvidersResponses = {
+  /**
+   * Created provider
+   */
+  201: ProviderResponse;
+};
+
+export type PostPanelProvidersResponse =
+  PostPanelProvidersResponses[keyof PostPanelProvidersResponses];
+
+export type PostPanelProvidersTestConnectionData = {
+  /**
+   * Candidate endpoint and config
+   */
+  body: TestProviderConnectionRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/providers/test-connection';
+};
+
+export type PostPanelProvidersTestConnectionErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Referenced chain not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Invalid url or config
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelProvidersTestConnectionError =
+  PostPanelProvidersTestConnectionErrors[keyof PostPanelProvidersTestConnectionErrors];
+
+export type PostPanelProvidersTestConnectionResponses = {
+  /**
+   * Per-check dry-run result
+   */
+  200: Envelope & {
+    data?: TestProviderConnectionResponse;
+  };
+};
+
+export type PostPanelProvidersTestConnectionResponse =
+  PostPanelProvidersTestConnectionResponses[keyof PostPanelProvidersTestConnectionResponses];
+
+export type DeletePanelProvidersByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Provider ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/providers/{id}';
+};
+
+export type DeletePanelProvidersByIdErrors = {
+  /**
+   * Invalid provider ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Provider not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type DeletePanelProvidersByIdError =
+  DeletePanelProvidersByIdErrors[keyof DeletePanelProvidersByIdErrors];
+
+export type DeletePanelProvidersByIdResponses = {
+  /**
+   * Deleted provider
+   */
+  200: ProviderResponse;
+};
+
+export type DeletePanelProvidersByIdResponse =
+  DeletePanelProvidersByIdResponses[keyof DeletePanelProvidersByIdResponses];
+
+export type GetPanelProvidersByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Provider ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/providers/{id}';
+};
+
+export type GetPanelProvidersByIdErrors = {
+  /**
+   * Invalid provider ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Provider not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelProvidersByIdError =
+  GetPanelProvidersByIdErrors[keyof GetPanelProvidersByIdErrors];
+
+export type GetPanelProvidersByIdResponses = {
+  /**
+   * Provider details
+   */
+  200: ProviderResponse;
+};
+
+export type GetPanelProvidersByIdResponse =
+  GetPanelProvidersByIdResponses[keyof GetPanelProvidersByIdResponses];
+
+export type PutPanelProvidersByIdData = {
+  /**
+   * Provider update parameters
+   */
+  body: UpdateProviderRequest;
+  path: {
+    /**
+     * Provider ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/providers/{id}';
+};
+
+export type PutPanelProvidersByIdErrors = {
+  /**
+   * Invalid provider ID or request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Provider not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelProvidersByIdError =
+  PutPanelProvidersByIdErrors[keyof PutPanelProvidersByIdErrors];
+
+export type PutPanelProvidersByIdResponses = {
+  /**
+   * Updated provider
+   */
+  200: ProviderResponse;
+};
+
+export type PutPanelProvidersByIdResponse =
+  PutPanelProvidersByIdResponses[keyof PutPanelProvidersByIdResponses];
+
+export type GetPanelProvidersByIdHealthData = {
+  body?: never;
+  path: {
+    /**
+     * Provider ID (UUID)
+     */
+    id: string;
+  };
+  query?: {
+    /**
+     * Number of health events to return
+     */
+    limit?: number;
+  };
+  url: '/panel/providers/{id}/health';
+};
+
+export type GetPanelProvidersByIdHealthErrors = {
+  /**
+   * Invalid provider ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Provider not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelProvidersByIdHealthError =
+  GetPanelProvidersByIdHealthErrors[keyof GetPanelProvidersByIdHealthErrors];
+
+export type GetPanelProvidersByIdHealthResponses = {
+  /**
+   * Provider health events
+   */
+  200: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
+  };
+};
+
+export type GetPanelProvidersByIdHealthResponse =
+  GetPanelProvidersByIdHealthResponses[keyof GetPanelProvidersByIdHealthResponses];
+
+export type GetPanelPublicationsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Organization ID (UUID)
+     */
+    organization_id?: string;
+    /**
+     * Status
+     */
+    status?: 'pending' | 'published' | 'superseded' | 'withdrawn' | 'cancelled';
+    /**
+     * Page number (default 1)
+     */
+    page?: number;
+    /**
+     * Items per page (default 50, max 100)
+     */
+    per_page?: number;
+  };
+  url: '/panel/publications';
+};
+
+export type GetPanelPublicationsErrors = {
+  /**
+   * Invalid organization ID or status
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelPublicationsError =
+  GetPanelPublicationsErrors[keyof GetPanelPublicationsErrors];
+
+export type GetPanelPublicationsResponses = {
+  /**
+   * OK
+   */
+  200: ListEnvelope & {
+    data?: Array<PublicationsPublicationResponse>;
+  };
+};
+
+export type GetPanelPublicationsResponse =
+  GetPanelPublicationsResponses[keyof GetPanelPublicationsResponses];
+
+export type GetPanelPublicationsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Publication ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/publications/{id}';
+};
+
+export type GetPanelPublicationsByIdErrors = {
+  /**
+   * Invalid publication ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Publication not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelPublicationsByIdError =
+  GetPanelPublicationsByIdErrors[keyof GetPanelPublicationsByIdErrors];
+
+export type GetPanelPublicationsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PublicationsPublicationResponse;
+  };
+};
+
+export type GetPanelPublicationsByIdResponse =
+  GetPanelPublicationsByIdResponses[keyof GetPanelPublicationsByIdResponses];
+
+export type PostPanelPublicationsByIdWithdrawData = {
+  /**
+   * Public reason
+   */
+  body: WithdrawRequest;
+  path: {
+    /**
+     * Publication ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/publications/{id}/withdraw';
+};
+
+export type PostPanelPublicationsByIdWithdrawErrors = {
+  /**
+   * Validation error
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Publication not found
+   */
+  404: AppError;
+  /**
+   * The publication cannot be withdrawn (in the envelope's data)
+   */
+  409: Envelope & {
+    data?: PublicationRefusedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+  /**
+   * Workflow engine temporarily unavailable
+   */
+  503: AppError;
+};
+
+export type PostPanelPublicationsByIdWithdrawError =
+  PostPanelPublicationsByIdWithdrawErrors[keyof PostPanelPublicationsByIdWithdrawErrors];
+
+export type PostPanelPublicationsByIdWithdrawResponses = {
+  /**
+   * Accepted
+   */
+  202: Envelope & {
+    data?: JobAccepted;
+  };
+};
+
+export type PostPanelPublicationsByIdWithdrawResponse =
+  PostPanelPublicationsByIdWithdrawResponses[keyof PostPanelPublicationsByIdWithdrawResponses];
+
+export type GetPanelReportsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Organization ID (UUID)
+     */
+    organization_id?: string;
+    /**
+     * Status
+     */
+    status?: 'pending' | 'generating' | 'completed' | 'failed';
+    /**
+     * Page number (default 1)
+     */
+    page?: number;
+    /**
+     * Items per page (default 50, max 100)
+     */
+    per_page?: number;
+  };
+  url: '/panel/reports';
+};
+
+export type GetPanelReportsErrors = {
+  /**
+   * Invalid organization ID or status
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelReportsError = GetPanelReportsErrors[keyof GetPanelReportsErrors];
+
+export type GetPanelReportsResponses = {
+  /**
+   * OK
+   */
+  200: ListEnvelope & {
+    data?: Array<PanelReportResponse>;
+  };
+};
+
+export type GetPanelReportsResponse = GetPanelReportsResponses[keyof GetPanelReportsResponses];
+
+export type GetPanelReportsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Report ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/reports/{id}';
+};
+
+export type GetPanelReportsByIdErrors = {
+  /**
+   * Invalid report ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Report not found
+   */
+  404: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelReportsByIdError = GetPanelReportsByIdErrors[keyof GetPanelReportsByIdErrors];
+
+export type GetPanelReportsByIdResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: PanelReportResponse;
+  };
+};
+
+export type GetPanelReportsByIdResponse =
+  GetPanelReportsByIdResponses[keyof GetPanelReportsByIdResponses];
+
+export type GetPanelReportsByIdDownloadData = {
+  body?: never;
+  path: {
+    /**
+     * Report ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/reports/{id}/download';
+};
+
+export type GetPanelReportsByIdDownloadErrors = {
+  /**
+   * Invalid report ID
+   */
+  400: AppError;
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Report not found
+   */
+  404: AppError;
+  /**
+   * The download is refused (in the envelope's data): report_not_ready
+   */
+  409: Envelope & {
+    data?: ReportRefusedResponse;
+  };
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelReportsByIdDownloadError =
+  GetPanelReportsByIdDownloadErrors[keyof GetPanelReportsByIdDownloadErrors];
+
+export type GetPanelReportsByIdDownloadResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: DownloadReportUrlResponse;
+  };
+};
+
+export type GetPanelReportsByIdDownloadResponse =
+  GetPanelReportsByIdDownloadResponses[keyof GetPanelReportsByIdDownloadResponses];
+
+export type GetPanelScanRunsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Filter by derived status (complete|warnings|incomplete)
+     */
+    status?: string;
+    /**
+     * Filter by org name substring or run id prefix
+     */
+    q?: string;
+  };
+  url: '/panel/scan-runs';
+};
+
+export type GetPanelScanRunsErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelScanRunsError = GetPanelScanRunsErrors[keyof GetPanelScanRunsErrors];
+
+export type GetPanelScanRunsResponses = {
+  /**
+   * Scan runs with metrics
+   */
+  200: Envelope & {
+    data?: ScanRunListResponse;
+  };
+};
+
+export type GetPanelScanRunsResponse = GetPanelScanRunsResponses[keyof GetPanelScanRunsResponses];
+
+export type GetPanelScanRunsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Proof of funds run ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/scan-runs/{id}';
+};
+
+export type GetPanelScanRunsByIdErrors = {
+  /**
+   * Invalid run ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Platform access required
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Run not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelScanRunsByIdError =
+  GetPanelScanRunsByIdErrors[keyof GetPanelScanRunsByIdErrors];
+
+export type GetPanelScanRunsByIdResponses = {
+  /**
+   * Run drill-down
+   */
+  200: Envelope & {
+    data?: RunDetailResponse;
+  };
+};
+
+export type GetPanelScanRunsByIdResponse =
+  GetPanelScanRunsByIdResponses[keyof GetPanelScanRunsByIdResponses];
+
+export type GetPanelSpecialRequestsData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Items per page
+     */
+    per_page?: number;
+    /**
+     * Filter by status
+     */
+    status?: string;
+    /**
+     * Filter by request type, for example token_catalog
+     */
+    request_type?: string;
+    /**
+     * Filter by organization (UUID)
+     */
+    organization_id?: string;
+  };
+  url: '/panel/special-requests';
+};
+
+export type GetPanelSpecialRequestsErrors = {
+  /**
+   * Invalid organization_id
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelSpecialRequestsError =
+  GetPanelSpecialRequestsErrors[keyof GetPanelSpecialRequestsErrors];
+
+export type GetPanelSpecialRequestsResponses = {
+  /**
+   * Paginated list of special requests
+   */
+  200: ListEnvelope & {
+    data?: Array<SpecialRequestResponse>;
+  };
+};
+
+export type GetPanelSpecialRequestsResponse =
+  GetPanelSpecialRequestsResponses[keyof GetPanelSpecialRequestsResponses];
+
+export type GetPanelSpecialRequestsByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Special request ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/special-requests/{id}';
+};
+
+export type GetPanelSpecialRequestsByIdErrors = {
+  /**
+   * Invalid request ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Special request not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelSpecialRequestsByIdError =
+  GetPanelSpecialRequestsByIdErrors[keyof GetPanelSpecialRequestsByIdErrors];
+
+export type GetPanelSpecialRequestsByIdResponses = {
+  /**
+   * Special request with comments
+   */
+  200: Envelope & {
+    data?: SpecialRequestResponse;
+  };
+};
+
+export type GetPanelSpecialRequestsByIdResponse =
+  GetPanelSpecialRequestsByIdResponses[keyof GetPanelSpecialRequestsByIdResponses];
+
+export type PutPanelSpecialRequestsByIdEstimateData = {
+  /**
+   * Estimate parameters
+   */
+  body: UpdateSpecialRequestEstimateRequest;
+  path: {
+    /**
+     * Special request ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/special-requests/{id}/estimate';
+};
+
+export type PutPanelSpecialRequestsByIdEstimateErrors = {
+  /**
+   * Invalid request ID or body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelSpecialRequestsByIdEstimateError =
+  PutPanelSpecialRequestsByIdEstimateErrors[keyof PutPanelSpecialRequestsByIdEstimateErrors];
+
+export type PutPanelSpecialRequestsByIdEstimateResponses = {
+  /**
+   * Estimate updated confirmation
+   */
+  200: Envelope & {
+    data?: {
+      [key: string]: string;
+    };
+  };
+};
+
+export type PutPanelSpecialRequestsByIdEstimateResponse =
+  PutPanelSpecialRequestsByIdEstimateResponses[keyof PutPanelSpecialRequestsByIdEstimateResponses];
+
+export type PutPanelSpecialRequestsByIdStatusData = {
+  /**
+   * Status update parameters
+   */
+  body: UpdateSpecialRequestStatusRequest;
+  path: {
+    /**
+     * Special request ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/special-requests/{id}/status';
+};
+
+export type PutPanelSpecialRequestsByIdStatusErrors = {
+  /**
+   * Invalid request ID or body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Special request not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelSpecialRequestsByIdStatusError =
+  PutPanelSpecialRequestsByIdStatusErrors[keyof PutPanelSpecialRequestsByIdStatusErrors];
+
+export type PutPanelSpecialRequestsByIdStatusResponses = {
+  /**
+   * Status updated confirmation
+   */
+  200: Envelope & {
+    data?: {
+      [key: string]: string;
+    };
+  };
+};
+
+export type PutPanelSpecialRequestsByIdStatusResponse =
+  PutPanelSpecialRequestsByIdStatusResponses[keyof PutPanelSpecialRequestsByIdStatusResponses];
+
+export type GetPanelSubscriptionsPlansData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/subscriptions/plans';
+};
+
+export type GetPanelSubscriptionsPlansErrors = {
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelSubscriptionsPlansError =
+  GetPanelSubscriptionsPlansErrors[keyof GetPanelSubscriptionsPlansErrors];
+
+export type GetPanelSubscriptionsPlansResponses = {
+  /**
+   * List of subscription plans
+   */
+  200: Envelope & {
+    data?: {
+      [key: string]: unknown;
+    };
+  };
+};
+
+export type GetPanelSubscriptionsPlansResponse =
+  GetPanelSubscriptionsPlansResponses[keyof GetPanelSubscriptionsPlansResponses];
+
+export type GetPanelTenantsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/panel/tenants';
+};
+
+export type GetPanelTenantsErrors = {
+  /**
+   * Authentication required
+   */
+  401: AppError;
+  /**
+   * Platform access required
+   */
+  403: AppError;
+  /**
+   * Internal server error
+   */
+  500: AppError;
+};
+
+export type GetPanelTenantsError = GetPanelTenantsErrors[keyof GetPanelTenantsErrors];
+
+export type GetPanelTenantsResponses = {
+  /**
+   * OK
+   */
+  200: Envelope & {
+    data?: Array<TenantSummaryResponse>;
+  };
+};
+
+export type GetPanelTenantsResponse = GetPanelTenantsResponses[keyof GetPanelTenantsResponses];
+
+export type GetPanelTokenCatalogData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Filter by chain ID (UUID)
+     */
+    chain_id?: string;
+  };
+  url: '/panel/token-catalog';
+};
+
+export type GetPanelTokenCatalogErrors = {
+  /**
+   * Invalid chain_id
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelTokenCatalogError =
+  GetPanelTokenCatalogErrors[keyof GetPanelTokenCatalogErrors];
+
+export type GetPanelTokenCatalogResponses = {
+  /**
+   * List of catalog entries
+   */
+  200: Array<CatalogEntryResponse>;
+};
+
+export type GetPanelTokenCatalogResponse =
+  GetPanelTokenCatalogResponses[keyof GetPanelTokenCatalogResponses];
+
+export type PostPanelTokenCatalogData = {
+  /**
+   * Catalog entry creation parameters
+   */
+  body: CreateCatalogRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/token-catalog';
+};
+
+export type PostPanelTokenCatalogErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Catalog entry already exists for this contract
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Contract verification failed
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelTokenCatalogError =
+  PostPanelTokenCatalogErrors[keyof PostPanelTokenCatalogErrors];
+
+export type PostPanelTokenCatalogResponses = {
+  /**
+   * Created catalog entry
+   */
+  201: CatalogEntryResponse;
+};
+
+export type PostPanelTokenCatalogResponse =
+  PostPanelTokenCatalogResponses[keyof PostPanelTokenCatalogResponses];
+
+export type PostPanelTokenCatalogValidateData = {
+  /**
+   * Candidate catalog entry
+   */
+  body: ValidateCatalogEntryRequest;
+  path?: never;
+  query?: never;
+  url: '/panel/token-catalog/validate';
+};
+
+export type PostPanelTokenCatalogValidateErrors = {
+  /**
+   * Invalid request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Referenced chain not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Invalid contract address or token type
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPanelTokenCatalogValidateError =
+  PostPanelTokenCatalogValidateErrors[keyof PostPanelTokenCatalogValidateErrors];
+
+export type PostPanelTokenCatalogValidateResponses = {
+  /**
+   * Per-check dry-run result
+   */
+  200: ValidateCatalogEntryResponse;
+};
+
+export type PostPanelTokenCatalogValidateResponse =
+  PostPanelTokenCatalogValidateResponses[keyof PostPanelTokenCatalogValidateResponses];
+
+export type DeletePanelTokenCatalogByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Catalog entry ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/token-catalog/{id}';
+};
+
+export type DeletePanelTokenCatalogByIdErrors = {
+  /**
+   * Invalid catalog entry ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Catalog entry not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Organization tokens or other records reference this entry
+   */
+  409: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type DeletePanelTokenCatalogByIdError =
+  DeletePanelTokenCatalogByIdErrors[keyof DeletePanelTokenCatalogByIdErrors];
+
+export type DeletePanelTokenCatalogByIdResponses = {
+  /**
+   * Deleted catalog entry
+   */
+  200: CatalogEntryResponse;
+};
+
+export type DeletePanelTokenCatalogByIdResponse =
+  DeletePanelTokenCatalogByIdResponses[keyof DeletePanelTokenCatalogByIdResponses];
+
+export type GetPanelTokenCatalogByIdData = {
+  body?: never;
+  path: {
+    /**
+     * Catalog entry ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/token-catalog/{id}';
+};
+
+export type GetPanelTokenCatalogByIdErrors = {
+  /**
+   * Invalid catalog entry ID
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Catalog entry not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPanelTokenCatalogByIdError =
+  GetPanelTokenCatalogByIdErrors[keyof GetPanelTokenCatalogByIdErrors];
+
+export type GetPanelTokenCatalogByIdResponses = {
+  /**
+   * Catalog entry details
+   */
+  200: CatalogEntryResponse;
+};
+
+export type GetPanelTokenCatalogByIdResponse =
+  GetPanelTokenCatalogByIdResponses[keyof GetPanelTokenCatalogByIdResponses];
+
+export type PutPanelTokenCatalogByIdData = {
+  /**
+   * Catalog entry update parameters
+   */
+  body: UpdateCatalogRequest;
+  path: {
+    /**
+     * Catalog entry ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/token-catalog/{id}';
+};
+
+export type PutPanelTokenCatalogByIdErrors = {
+  /**
+   * Invalid catalog entry ID or request body
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Authentication required
+   */
+  401: {
+    [key: string]: unknown;
+  };
+  /**
+   * Insufficient permissions
+   */
+  403: {
+    [key: string]: unknown;
+  };
+  /**
+   * Catalog entry or its chain not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Decimals disagree with the chain, or could not be checked against it
+   */
+  422: {
+    [key: string]: unknown;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: unknown;
+  };
+};
+
+export type PutPanelTokenCatalogByIdError =
+  PutPanelTokenCatalogByIdErrors[keyof PutPanelTokenCatalogByIdErrors];
+
+export type PutPanelTokenCatalogByIdResponses = {
+  /**
+   * Updated catalog entry
+   */
+  200: CatalogEntryResponse;
+};
+
+export type PutPanelTokenCatalogByIdResponse =
+  PutPanelTokenCatalogByIdResponses[keyof PutPanelTokenCatalogByIdResponses];
+
+export type PostPanelUsersByIdDisableData = {
+  /**
+   * Disable reason (required, 1-500 chars, audit-mandatory)
+   */
+  body: DisableUserRequest;
+  path: {
+    /**
+     * Target user ID (UUID)
+     */
+    id: string;
+  };
+  query?: never;
+  url: '/panel/users/{id}/disable';
+};
+
+export type PostPanelUsersByIdDisableErrors = {
+  /**
+   * Invalid user ID or request body
+   */
+  400: {
+    [key: string]: string;
+  };
+  /**
+   * Insufficient permissions or cross-org disable attempt
+   */
+  403: {
+    [key: string]: string;
+  };
+  /**
+   * Target user not found
+   */
+  404: {
+    [key: string]: string;
+  };
+  /**
+   * Internal server error
+   */
+  500: {
+    [key: string]: string;
+  };
+};
+
+export type PostPanelUsersByIdDisableError =
+  PostPanelUsersByIdDisableErrors[keyof PostPanelUsersByIdDisableErrors];
+
+export type PostPanelUsersByIdDisableResponses = {
+  /**
+   * No Content
+   */
+  204: void;
+};
+
+export type PostPanelUsersByIdDisableResponse =
+  PostPanelUsersByIdDisableResponses[keyof PostPanelUsersByIdDisableResponses];
+
+export type GetPublicV1FeedsByFileData = {
+  body?: never;
+  path: {
+    /**
+     * Feed file name, the public slug with a.json suffix
+     */
+    file: string;
+  };
+  query?: never;
+  url: '/public/v1/feeds/{file}';
+};
+
+export type GetPublicV1FeedsByFileErrors = {
+  /**
+   * Not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Rate limited
+   */
+  429: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPublicV1FeedsByFileError =
+  GetPublicV1FeedsByFileErrors[keyof GetPublicV1FeedsByFileErrors];
+
+export type GetPublicV1NetworkData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/public/v1/network';
+};
+
+export type GetPublicV1NetworkErrors = {
+  /**
+   * Rate limited
+   */
+  429: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPublicV1NetworkError = GetPublicV1NetworkErrors[keyof GetPublicV1NetworkErrors];
+
+export type GetPublicV1NetworkResponses = {
+  /**
+   * OK
+   */
+  200: NetworkResponse;
+};
+
+export type GetPublicV1NetworkResponse =
+  GetPublicV1NetworkResponses[keyof GetPublicV1NetworkResponses];
+
+export type GetPublicV1OrgsBySlugData = {
+  body?: never;
+  path: {
+    /**
+     * Public slug
+     */
+    slug: string;
+  };
+  query?: never;
+  url: '/public/v1/orgs/{slug}';
+};
+
+export type GetPublicV1OrgsBySlugErrors = {
+  /**
+   * Not found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Rate limited
+   */
+  429: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPublicV1OrgsBySlugError =
+  GetPublicV1OrgsBySlugErrors[keyof GetPublicV1OrgsBySlugErrors];
+
+export type GetPublicV1OrgsBySlugResponses = {
+  /**
+   * OK
+   */
+  200: PublicProfile;
+};
+
+export type GetPublicV1OrgsBySlugResponse =
+  GetPublicV1OrgsBySlugResponses[keyof GetPublicV1OrgsBySlugResponses];
+
+export type GetPublicV1PowChallengeData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/public/v1/pow/challenge';
+};
+
+export type GetPublicV1PowChallengeErrors = {
+  /**
+   * Rate limited
+   */
+  429: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPublicV1PowChallengeError =
+  GetPublicV1PowChallengeErrors[keyof GetPublicV1PowChallengeErrors];
+
+export type GetPublicV1PowChallengeResponses = {
+  /**
+   * Altcha challenge
+   */
+  200: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPublicV1PowChallengeResponse =
+  GetPublicV1PowChallengeResponses[keyof GetPublicV1PowChallengeResponses];
+
+export type GetPublicV1PublicationsByCodeData = {
+  body?: never;
+  path: {
+    /**
+     * Publication code
+     */
+    code: string;
+  };
+  query?: never;
+  url: '/public/v1/publications/{code}';
+};
+
+export type GetPublicV1PublicationsByCodeErrors = {
+  /**
+   * Not Found
+   */
+  404: PublicPublicationResponse;
+  /**
+   * Rate limited
+   */
+  429: {
+    [key: string]: unknown;
+  };
+};
+
+export type GetPublicV1PublicationsByCodeError =
+  GetPublicV1PublicationsByCodeErrors[keyof GetPublicV1PublicationsByCodeErrors];
+
+export type GetPublicV1PublicationsByCodeResponses = {
+  /**
+   * OK
+   */
+  200: PublicPublicationResponse;
+};
+
+export type GetPublicV1PublicationsByCodeResponse =
+  GetPublicV1PublicationsByCodeResponses[keyof GetPublicV1PublicationsByCodeResponses];
+
+export type PostPublicV1PublicationsByCodeBalanceData = {
+  /**
+   * Nonce
+   */
+  body: BalanceRequest;
+  headers: {
+    /**
+     * Altcha solution
+     */
+    'X-Altcha-Payload': string;
+  };
+  path: {
+    /**
+     * Publication code
+     */
+    code: string;
+  };
+  query?: never;
+  url: '/public/v1/publications/{code}/balance';
+};
+
+export type PostPublicV1PublicationsByCodeBalanceErrors = {
+  /**
+   * Bad Request
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Not Found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Conflict
+   */
+  409: BalanceFailedResponse;
+  /**
+   * Too Many Requests
+   */
+  429: {
+    [key: string]: unknown;
+  };
+  /**
+   * Service Unavailable
+   */
+  503: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPublicV1PublicationsByCodeBalanceError =
+  PostPublicV1PublicationsByCodeBalanceErrors[keyof PostPublicV1PublicationsByCodeBalanceErrors];
+
+export type PostPublicV1PublicationsByCodeBalanceResponses = {
+  /**
+   * OK
+   */
+  200: BalanceResponse;
+  /**
+   * Accepted
+   */
+  202: BalanceResponse;
+};
+
+export type PostPublicV1PublicationsByCodeBalanceResponse =
+  PostPublicV1PublicationsByCodeBalanceResponses[keyof PostPublicV1PublicationsByCodeBalanceResponses];
+
+export type PostPublicV1PublicationsByCodeBalanceCheckData = {
+  /**
+   * Bundles
+   */
+  body: BalanceCheckRequest;
+  path: {
+    /**
+     * Publication code
+     */
+    code: string;
+  };
+  query?: never;
+  url: '/public/v1/publications/{code}/balance/check';
+};
+
+export type PostPublicV1PublicationsByCodeBalanceCheckErrors = {
+  /**
+   * Bad Request
+   */
+  400: {
+    [key: string]: unknown;
+  };
+  /**
+   * Not Found
+   */
+  404: {
+    [key: string]: unknown;
+  };
+  /**
+   * Service Unavailable
+   */
+  503: {
+    [key: string]: unknown;
+  };
+};
+
+export type PostPublicV1PublicationsByCodeBalanceCheckError =
+  PostPublicV1PublicationsByCodeBalanceCheckErrors[keyof PostPublicV1PublicationsByCodeBalanceCheckErrors];
+
+export type PostPublicV1PublicationsByCodeBalanceCheckResponses = {
+  /**
+   * OK
+   */
+  200: BalanceCheckResponse;
+};
+
+export type PostPublicV1PublicationsByCodeBalanceCheckResponse =
+  PostPublicV1PublicationsByCodeBalanceCheckResponses[keyof PostPublicV1PublicationsByCodeBalanceCheckResponses];
+
+export type GetVerifyCommitmentsByManifestHashData = {
+  body?: never;
+  path: {
+    /**
+     * Manifest hash (hex)
+     */
+    manifest_hash: string;
+  };
+  query?: never;
+  url: '/verify/commitments/{manifest_hash}';
+};
+
+export type GetVerifyCommitmentsByManifestHashErrors = {
+  /**
+   * Not Found
+   */
+  404: InclusionMissResponse;
+};
+
+export type GetVerifyCommitmentsByManifestHashError =
+  GetVerifyCommitmentsByManifestHashErrors[keyof GetVerifyCommitmentsByManifestHashErrors];
+
+export type GetVerifyCommitmentsByManifestHashResponses = {
+  /**
+   * OK
+   */
+  200: PublicCommitmentResponse;
+};
+
+export type GetVerifyCommitmentsByManifestHashResponse =
+  GetVerifyCommitmentsByManifestHashResponses[keyof GetVerifyCommitmentsByManifestHashResponses];
+
+export type PostVerifyCommitmentsByManifestHashCheckData = {
+  /**
+   * Bundles
+   */
+  body: CheckRequest;
+  path: {
+    /**
+     * Manifest hash (hex)
+     */
+    manifest_hash: string;
+  };
+  query?: never;
+  url: '/verify/commitments/{manifest_hash}/check';
+};
+
+export type PostVerifyCommitmentsByManifestHashCheckErrors = {
+  /**
+   * Bad Request
+   */
+  400: VersionedErrorResponse;
+  /**
+   * Not Found
+   */
+  404: InclusionMissResponse;
+  /**
+   * Service Unavailable
+   */
+  503: VersionedErrorResponse;
+};
+
+export type PostVerifyCommitmentsByManifestHashCheckError =
+  PostVerifyCommitmentsByManifestHashCheckErrors[keyof PostVerifyCommitmentsByManifestHashCheckErrors];
+
+export type PostVerifyCommitmentsByManifestHashCheckResponses = {
+  /**
+   * OK
+   */
+  200: CheckResponse;
+};
+
+export type PostVerifyCommitmentsByManifestHashCheckResponse =
+  PostVerifyCommitmentsByManifestHashCheckResponses[keyof PostVerifyCommitmentsByManifestHashCheckResponses];
+
+export type PostVerifyCommitmentsByManifestHashInclusionData = {
+  /**
+   * Nonce, and retry to restart failed proofs
+   */
+  body: InclusionRequest;
+  headers?: {
+    /**
+     * Solved proof-of-work challenge (required outside development)
+     */
+    'X-Altcha-Payload'?: string;
+  };
+  path: {
+    /**
+     * Manifest hash (hex)
+     */
+    manifest_hash: string;
+  };
+  query?: never;
+  url: '/verify/commitments/{manifest_hash}/inclusion';
+};
+
+export type PostVerifyCommitmentsByManifestHashInclusionErrors = {
+  /**
+   * Bad Request
+   */
+  400: VersionedErrorResponse;
+  /**
+   * Not Found
+   */
+  404: InclusionMissResponse;
+  /**
+   * Conflict
+   */
+  409: InclusionFailedResponse;
+  /**
+   * Too Many Requests
+   */
+  429: VersionedErrorResponse;
+  /**
+   * Internal Server Error
+   */
+  500: AppError;
+  /**
+   * Service Unavailable
+   */
+  503: VersionedErrorResponse;
+};
+
+export type PostVerifyCommitmentsByManifestHashInclusionError =
+  PostVerifyCommitmentsByManifestHashInclusionErrors[keyof PostVerifyCommitmentsByManifestHashInclusionErrors];
+
+export type PostVerifyCommitmentsByManifestHashInclusionResponses = {
+  /**
+   * OK
+   */
+  200: InclusionResponse;
+  /**
+   * Accepted
+   */
+  202: InclusionPendingResponse;
+};
+
+export type PostVerifyCommitmentsByManifestHashInclusionResponse =
+  PostVerifyCommitmentsByManifestHashInclusionResponses[keyof PostVerifyCommitmentsByManifestHashInclusionResponses];
+
+export type GetVerifySrsBySrsIdData = {
+  body?: never;
+  path: {
+    /**
+     * SRS id (SHA-256)
+     */
+    srs_id: string;
+  };
+  query?: never;
+  url: '/verify/srs/{srs_id}';
+};
+
+export type GetVerifySrsBySrsIdErrors = {
+  /**
+   * Not Found
+   */
+  404: VersionedErrorResponse;
+  /**
+   * Service Unavailable
+   */
+  503: VersionedErrorResponse;
+};
+
+export type GetVerifySrsBySrsIdError = GetVerifySrsBySrsIdErrors[keyof GetVerifySrsBySrsIdErrors];
+
+export type GetVerifySrsBySrsIdResponses = {
+  /**
+   * OK
+   */
+  200: unknown;
+};
+
+export type GetVerifyVkData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Circuit version (default 1)
+     */
+    version?: number;
+  };
+  url: '/verify/vk';
+};
+
+export type GetVerifyVkErrors = {
+  /**
+   * Not Found
+   */
+  404: VersionedErrorResponse;
+  /**
+   * Service Unavailable
+   */
+  503: VersionedErrorResponse;
+};
+
+export type GetVerifyVkError = GetVerifyVkErrors[keyof GetVerifyVkErrors];
+
+export type GetVerifyVkResponses = {
+  /**
+   * OK
+   */
+  200: VerifyingKeyResponse;
+};
+
+export type GetVerifyVkResponse = GetVerifyVkResponses[keyof GetVerifyVkResponses];
